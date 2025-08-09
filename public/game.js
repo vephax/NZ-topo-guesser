@@ -324,7 +324,7 @@ window.onload = () => {
   setInterval(loadRecentSeeds, 30000);
   
   // Get and create the overall leaderboard panel
-  updateOverallLeaderboard(leaderboardData);
+  updateOverallLeaderboard();
 };
 
 async function sendScoreForOverallLeaderboardToServer(scoreToAdd){
