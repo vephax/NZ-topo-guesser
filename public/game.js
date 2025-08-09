@@ -1,4 +1,3 @@
-
 // === REGION DATA ===
 let seedObj = { value: 12345 };
 let answerLat = 0, answerLng = 0, guessLat = null, guessLng = null;
