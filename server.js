@@ -83,40 +83,45 @@ app.get('/overallLeaderboard', async (req, res) => {
   res.json({ success: true, entries: data });
 });
 
-//Update the overall leaderboard
+// Update the overall leaderboard
 app.post('/overallLeaderboard', async (req, res) => {
-  const { user, totalScore, gamesPlayed } = req.body;
+  const { user, scoreToAdd } = req.body;
 
-  const { data, error, status, statusText } = await supabase
+  if (!user || typeof scoreToAdd !== 'number') {
+    return res.status(400).json({ success: false, message: 'Invalid request body' });
+  }
+
+  // 1. Fetch existing user data
+  const { data: existing, error: fetchError } = await supabase
     .from('overallLeaderboard')
-    .upsert([{ user, totalScore, gamesPlayed }]);
+    .select('totalScore, gamesPlayed')
+    .eq('user', user)
+    .single();
 
-  // Return detailed info for debugging
-  if (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Supabase error',
-      error: error.message,
-      status,
-      statusText,
-      data,
-    });
+  if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 = no rows found
+    return res.status(500).json({ success: false, message: 'Error fetching leaderboard' });
   }
 
-  // If no rows inserted or updated, data will be empty array
-  if (!data || data.length === 0) {
-    return res.status(200).json({
-      success: false,
-      message: 'No rows inserted or updated. Check constraints and policies.',
-      data,
-    });
+  // 2. Calculate new totals
+  let newTotalScore = scoreToAdd;
+  let newGamesPlayed = 1;
+
+  if (existing) {
+    newTotalScore = existing.totalScore + scoreToAdd;
+    newGamesPlayed = existing.gamesPlayed + 1;
   }
 
-  return res.status(200).json({
-    success: true,
-    message: 'Overall Leaderboard updated successfully.',
-    data,
-  });
+  // 3. Upsert the new data
+  const { error: upsertError } = await supabase
+    .from('overallLeaderboard')
+    .upsert([{ user, totalScore: newTotalScore, gamesPlayed: newGamesPlayed }], { onConflict: 'user' });
+
+  if (upsertError) {
+    return res.status(500).json({ success: false, message: 'Error updating leaderboard' });
+  }
+
+  // 4. Success response
+  res.json({ success: true, totalScore: newTotalScore, gamesPlayed: newGamesPlayed });
 });
 
 

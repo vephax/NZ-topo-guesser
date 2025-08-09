@@ -1,3 +1,4 @@
+
 // === REGION DATA ===
 let seedObj = { value: 12345 };
 let answerLat = 0, answerLng = 0, guessLat = null, guessLng = null;
@@ -231,6 +232,15 @@ function submitGuess() {
   if (roundsPlayed >= totalRounds) {
     document.getElementById('replayBtn').disabled = false;
 
+    const timerMode = document.getElementById('timerMode').value;
+    const beachMode = document.getElementById('beachMode').checked;
+    const zoom = +document.getElementById('zoom').value;
+
+    // Are we in normal mode?
+    if (timerMode === "30" && beachMode === false && zoom === 14) {
+      sendScoreForOverallLeaderboardToServer(scoreTotal);
+    }
+    
     sendSeedLeaderboardToServer({
       seed: parseInt(document.getElementById('seed').value),
       user: currentUser,
@@ -239,8 +249,6 @@ function submitGuess() {
     });
     
     setTimeout(showSeedLeaderboard, 1000);
-
-    sendScoreForOverallLeaderboardToServer(scoreTotal)
   }
 
   if (dist < 100) playRandomSound(goodSounds);
@@ -327,41 +335,20 @@ window.onload = () => {
   updateOverallLeaderboard(leaderboardData);
 };
 
-async function sendScoreForOverallLeaderboardToServer(scoreToAdd){
-  // Get current score from Supabase
-  const { data: existing, error: fetchError } = await supabase
-    .from('overallLeaderboard')
-    .select('totalScore, gamesPlayed')
-    .eq('user', currentUser)
-    .single();
-
-  if (fetchError && fetchError.code !== 'PGRST116') {
-    console.error("Error fetching leaderboard:", fetchError);
-    return;
-  }
-
-  // Add to existing score (or start fresh)
-  let newTotalScore = scoreToAdd;
-  let newGamesPlayed = gamesPlayedToAdd;
-
-  if (existing) {
-    newTotalScore = existing.totalScore + scoreToAdd;
-    newGamesPlayed = existing.gamesPlayed + 1;
-  }
-
-  // Send updated totals to your server
+async function sendScoreForOverallLeaderboardToServer(user, scoreToAdd) {
   const res = await fetch('/overallLeaderboard', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      user,
-      totalScore: newTotalScore,
-      gamesPlayed: newGamesPlayed
-    })
+    body: JSON.stringify({ user, scoreToAdd }),
   });
 
   const result = await res.json();
-  console.log("Update result:", result);
+
+  if (result.success) {
+    console.log(`Leaderboard updated! Total score: ${result.totalScore}, Games played: ${result.gamesPlayed}`);
+  } else {
+    console.error('Failed to update leaderboard');
+  }
 }
 
 function sendGuessToServer(lat, lng, distance) {
