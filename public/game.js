@@ -154,6 +154,7 @@ async function startGame() {
   document.getElementById('result').textContent = '';
 
   document.getElementById('leafletMap').style.pointerEvents = 'none';
+  document.getElementById('mapFrame').style.pointerEvents = 'none';
 
   // The first round so setup game
   if (roundsPlayed === 0) {
@@ -334,11 +335,12 @@ window.onload = () => {
   updateOverallLeaderboard();
 };
 
-async function sendScoreForOverallLeaderboardToServer(scoreToAdd) {
-  const res = await fetch('/overallleaderboard', {
+async function sendScoreForOverallLeaderboardToServer(scoreValue) {
+  console.log(scoreValue);
+  const res = await fetch('/overallLeaderboard', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ currentUser, scoreToAdd }),
+    body: JSON.stringify({ user: currentUser, scoreToAdd: scoreValue }),
   });
 
   const result = await res.json();
