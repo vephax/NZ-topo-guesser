@@ -290,7 +290,7 @@ function initMap() {
 }
 
 // On game open
-window.onload = () => {
+window.onload = async () => {
   initMap();
 
   const savedGuest = localStorage.getItem("topoguesser_player");
@@ -299,7 +299,7 @@ window.onload = () => {
     document.getElementById('userInfo').textContent = `🎮 Player: ${savedGuest}`;
     document.getElementById('startBtn').disabled = false;
   } else {
-    enterNewUsername();
+    await enterNewUsername();
   }
 
   showChangelogs();
