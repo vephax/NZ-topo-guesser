@@ -300,7 +300,7 @@ window.onload = async () => {
     document.getElementById('userInfo').textContent = `🎮 Player: ${savedGuest}`;
     document.getElementById('startBtn').disabled = false;
   } else {
-    await enterNewUsername();
+    enterNewUsername();
   }
 
   showChangelogs();
@@ -356,7 +356,7 @@ function sendGuessToServer(lat, lng, distance) {
   })
 }
 
-function enterNewUsername(){
+async function enterNewUsername(){
     const name = prompt("Enter your username:", "e.g. James") || "Player";
     currentUser = name;
     localStorage.setItem("topoguesser_player", name);
