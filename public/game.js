@@ -4,11 +4,12 @@ let answerLat = 0, answerLng = 0, guessLat = null, guessLng = null;
 let hasGuessed = false, timerInt = null, roundsPlayed = 0, totalRounds = 0, scoreTotal = 0;
 let map, guessMarker;
 let currentUser = null;
-const currentVersion = "9.3";
+const currentVersion = "9.3.1";
 
 const versions = [
   { version: "9.2", changelog: "8/8/2025 \n The server works now. It only took 6 hours. No more AI slop is here. Leaderboards and seed analysis now work due to an actual game data system. A server. Not what was here before, aka a link." },
-  { version: "9.3", changelog: "9/8/2025 \n This is update does not add much, still just a lot of fixes from AI slops. A few new features but most new features will come out on Sunday. \n \n - Added an overall leaderboard system (took way too long) \n - Moved recent seeds panel to a more convenient location \n - The current player system now works and is objectively better. (google sign in is gone, due to Arya's request) \n Brought back audio (lost due to AI Slop). No new audio clips yet (coming soon) \n - Removed urban mode temporarily due to being broken. Will be back working on Sunday and much better and faster. \n - Added a version control system (this) \n - Added a dev mode \n - Numerous bug fixes related to AI slops or being able to submit a guess before a game starts resulting in (0, 0) \n - Banned Max from doing brain rot AI slops \n \n For more information regarding the development, leaving feedback and answering a few poles, etc, please see the google doc. \n - Menno" }
+  { version: "9.3", changelog: "9/8/2025 \n This is update does not add much, still just a lot of fixes from AI slops. A few new features but most new features will come out on Sunday. \n \n - Added an overall leaderboard system (took way too long) \n - Moved recent seeds panel to a more convenient location \n - The current player system now works and is objectively better. (google sign in is gone, due to Arya's request) \n Brought back audio (lost due to AI Slop). No new audio clips yet (coming soon) \n - Removed urban mode temporarily due to being broken. Will be back working on Sunday and much better and faster. \n - Added a version control system (this) \n - Added a dev mode \n - Numerous bug fixes related to AI slops or being able to submit a guess before a game starts resulting in (0, 0) \n - Banned Max from doing brain rot AI slops \n \n For more information regarding the development, leaving feedback and answering a few poles, etc, please see the google doc. \n - Menno" },
+  { version: "9.3.1", changelog: "10/9/2025 \n - Fixes a bug where new players would not see version prompts and recents/leaderboard panels would not load."}
 ];
 
 const REGIONS = [
