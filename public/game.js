@@ -335,7 +335,7 @@ window.onload = () => {
 };
 
 async function sendScoreForOverallLeaderboardToServer(scoreToAdd) {
-  const res = await fetch('/overallLeaderboard', {
+  const res = await fetch('/overallleaderboard', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ currentUser, scoreToAdd }),
@@ -517,11 +517,11 @@ function showSeedLeaderboard() {
 
 async function updateOverallLeaderboard() {
   // Get the container
-  const container = document.getElementById('overallLeaderboard');
+  const container = document.getElementById('overallleaderboard');
   if (!container) return;
 
   // Get the leaderboard data from the server
-  const res = await fetch('/overallLeaderboard');
+  const res = await fetch('/overallleaderboard');
   const result = await res.json();
   if (!result.success) {
     container.innerHTML = "<p>Failed to load leaderboard</p>";

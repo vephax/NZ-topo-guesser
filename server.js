@@ -70,9 +70,9 @@ app.get('/guesses', async (req, res) => {
 });
 
 // GET route for overall leaderboard
-app.get('/overallLeaderboard', async (req, res) => {
+app.get('/overallleaderboard', async (req, res) => {
   const { data, error } = await supabase
-    .from('overallLeaderboard')
+    .from('overallleaderboard')
     .select('user, totalScore, gamesPlayed')
     .order('totalScore', { ascending: false });
 
@@ -84,7 +84,7 @@ app.get('/overallLeaderboard', async (req, res) => {
 });
 
 // Update the overall leaderboard
-app.post('/overallLeaderboard', async (req, res) => {
+app.post('/overallleaderboard', async (req, res) => {
   const { user, scoreToAdd } = req.body;
 
   if (!user || typeof scoreToAdd !== 'number') {
@@ -93,7 +93,7 @@ app.post('/overallLeaderboard', async (req, res) => {
 
   // 1. Fetch existing user data
   const { data: existing, error: fetchError } = await supabase
-    .from('overallLeaderboard')
+    .from('overallleaderboard')
     .select('totalScore, gamesPlayed')
     .eq('user', user)
     .single();
@@ -113,7 +113,7 @@ app.post('/overallLeaderboard', async (req, res) => {
 
   // 3. Upsert the new data
   const { error: upsertError } = await supabase
-    .from('overallLeaderboard')
+    .from('overallleaderboard')
     .upsert([{ user, totalScore: newTotalScore, gamesPlayed: newGamesPlayed }], { onConflict: 'user' });
 
   if (upsertError) {
