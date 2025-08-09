@@ -323,6 +323,9 @@ window.onload = () => {
     document.getElementById("analysisPanel").style.display = 'none';
   };
 
+  // Get and create the overall leaderboard panel
+  updateOverallLeaderboard();
+
   // Do not allow guesses to be submit when there is no game loaded
   document.getElementById('submitBtn').disabled = true;
   document.getElementById('leafletMap').style.pointerEvents = 'none';
@@ -330,26 +333,14 @@ window.onload = () => {
   // Get and setup the recent seed panel
   loadRecentSeeds();
   setInterval(loadRecentSeeds, 30000);
-  
-  // Get and create the overall leaderboard panel
-  updateOverallLeaderboard();
 };
 
 async function sendScoreForOverallLeaderboardToServer(scoreValue) {
-  console.log(scoreValue);
   const res = await fetch('/overallLeaderboard', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ user: currentUser, scoreToAdd: scoreValue }),
   });
-
-  const result = await res.json();
-
-  if (result.success) {
-    console.log(`Leaderboard updated! Total score: ${result.totalScore}, Games played: ${result.gamesPlayed}`);
-  } else {
-    console.error('Failed to update leaderboard');
-  }
 }
 
 function sendGuessToServer(lat, lng, distance) {
@@ -529,6 +520,7 @@ async function updateOverallLeaderboard() {
     container.innerHTML = "<p>Failed to load leaderboard</p>";
     return;
   }
+  console.warn(result);
 
   let entries = result.entries.map(e => ({
     player: e.user,
