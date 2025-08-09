@@ -8,7 +8,7 @@ const currentVersion = "9.3";
 
 const versions = [
   { version: "9.2", changelog: "8/8/2025 \n The server works now. It only took 6 hours. No more AI slop is here. Leaderboards and seed analysis now work due to an actual game data system. A server. Not what was here before, aka a link." },
-  { version: "9.3", changelog: "9/8/2025 \n - Added an overall leaderboard system \n - Moved recent seeds panel to a more convenient location \n - The current player system now works and is objectively better. (google sign in is gone, maybe it will be back later, idk) \n Brought back audio (lost due to AI Slop) no new audio clips yet (coming soon) \n - Removed urban mode temporarily due to being broken. Will be back on Sunday. \n - Added a version control system (this) \n - Added a dev mode \n - Numerous bug fixes related to AI slops or being able to submit a guess before a game starts resulting in (0, 0) \n - Banned Max from doing brain rot AI slops \n \n For more information regarding the development, leaving feedback and answering a few poles, etc, please see the google doc. \n - Menno" }
+  { version: "9.3", changelog: "9/8/2025 \n This is update does not add much, still just a lot of fixes from AI slops. A few new features but most new features will come out on Sunday. \n \n - Added an overall leaderboard system (took way too long) \n - Moved recent seeds panel to a more convenient location \n - The current player system now works and is objectively better. (google sign in is gone, due to Arya's request) \n Brought back audio (lost due to AI Slop). No new audio clips yet (coming soon) \n - Removed urban mode temporarily due to being broken. Will be back working on Sunday and much better and faster. \n - Added a version control system (this) \n - Added a dev mode \n - Numerous bug fixes related to AI slops or being able to submit a guess before a game starts resulting in (0, 0) \n - Banned Max from doing brain rot AI slops \n \n For more information regarding the development, leaving feedback and answering a few poles, etc, please see the google doc. \n - Menno" }
 ];
 
 const REGIONS = [
@@ -510,7 +510,7 @@ function showSeedLeaderboard() {
 
 async function updateOverallLeaderboard() {
   // Get the container
-  const container = document.getElementById('overallleaderboard');
+  const container = document.getElementById('overallLeaderboard');
   if (!container) return;
 
   // Get the leaderboard data from the server
@@ -520,7 +520,6 @@ async function updateOverallLeaderboard() {
     container.innerHTML = "<p>Failed to load leaderboard</p>";
     return;
   }
-  console.warn(result);
 
   let entries = result.entries.map(e => ({
     player: e.user,
