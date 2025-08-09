@@ -334,11 +334,11 @@ window.onload = () => {
   updateOverallLeaderboard();
 };
 
-async function sendScoreForOverallLeaderboardToServer(user, scoreToAdd) {
+async function sendScoreForOverallLeaderboardToServer(scoreToAdd) {
   const res = await fetch('/overallLeaderboard', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ user, scoreToAdd }),
+    body: JSON.stringify({ currentUser, scoreToAdd }),
   });
 
   const result = await res.json();
