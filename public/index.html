@@ -20,16 +20,18 @@
   </div>
 
   <!-- Title -->
-  <h1>NZ Topo Guesser V9.3.1 - Sponsored by Water</h1>
+  <h1>NZ Topo Guesser V9.4 - Sponsored by Water</h1>
 
 
   <div id="topPanels">
     <!-- Recents seeds -->
     <div id="recentSeedsPanel">
-      <h3>Recent Seeds</h3>
+      <div id="recentSeedsHeader">
+        <h3>Recent Seeds</h3>
+        <button id="showAllGuessesBtn">Show All Guesses</button>
+        <button id="analyzeSeedBtn">Analyze Seed</button>
+      </div>
       <div id="recentSeedsList">Loading...</div>
-      <button id="showAllGuessesBtn">Show All Guesses</button>
-      <button id="analyzeSeedBtn">Analyze Seed</button>
     </div>
 
     <!-- Leaderboard -->
@@ -78,8 +80,14 @@
         <option value="none">No Timer</option>
       </select>
     </label>
-    <label><input type="checkbox" id="beachMode" /> Beach Mode</label>
-    <!--<label><input type="checkbox" id="urbanMode" /> Urban Mode</label> -->
+    <label>Game Type:
+      <select id="gameType">
+        <option value="Everywhere">Everywhere</option>
+        <option value="Beach">Beach</option>
+        <option value="Urban">Urban</option>
+        <option value="Highway">State Highway</option>
+      </select>
+    </label>
     <br/>
     <button id="startBtn" disabled>Start Game</button>
     <button id="submitBtn" disabled>Submit Guess</button>
