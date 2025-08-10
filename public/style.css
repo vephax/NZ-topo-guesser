@@ -137,6 +137,20 @@ h1 {
   position: static;
 }
 
+#recentSeedsHeader {
+  flex-shrink: 0; /* don’t shrink */
+  background: white;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 5px;
+}
+
+#recentSeedsList {
+  overflow-y: auto; /* scroll only the list */
+}
+
+
 #overallLeaderboard p{
   font-size: 0.75rem;
   font-weight: 400;
