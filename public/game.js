@@ -479,7 +479,7 @@ window.onload = async () => {
   document.getElementById("changePlayerBtn").onclick = () => {
     enterNewUsername();
   };
-  document.getElementById("gameTitle").value = currentVersion
+  document.getElementById("gameTitle").textContent = "NZ Topo Guesser V" + currentVersion " - Sponsored by Water";
 
   document.getElementById("showAllGuessesBtn").onclick = () => {
     const seed = parseInt(document.getElementById("seed").value);
