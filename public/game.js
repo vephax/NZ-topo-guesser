@@ -3,7 +3,7 @@ let answerLat = 0, answerLng = 0, guessLat = null, guessLng = null;
 let hasGuessed = false, timerInt = null, roundsPlayed = 0, totalRounds = 0, scoreTotal = 0;
 let map, guessMarker;
 let currentUser = null;
-const currentVersion = "9.4";
+const currentVersion = "9.4.1";
 
 const versions = [
   { version: "9.2", changelog: "8/8/2025 \n The server works now. It only took 6 hours. No more AI slop is here. Leaderboards and seed analysis now work due to an actual game data system. A server. Not what was here before, aka a link." },
