@@ -19,9 +19,13 @@
     <button id="closeAnalysisBtn" style="margin-top:10px;">Close</button>
   </div>
 
-  <!-- Title -->
-  <h1>NZ Topo Guesser V9.4 - Sponsored by Water</h1>
+<h1 id="gameTitle">NZ Topo Guesser V ! - Sponsored by Water</h1>
 
+<script>
+  const version = "1.2.3"; // or wherever your version comes from
+  document.getElementById("gameTitle").textContent =
+    `NZ Topo Guesser V ${version}! - Sponsored by Water`;
+</script>
 
   <div id="topPanels">
     <!-- Recents seeds -->
