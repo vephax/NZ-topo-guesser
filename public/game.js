@@ -13,7 +13,8 @@ const versions = [
   { version: "9.4.1", changelog: "11/8/2025 \n\n - Changed scoring system to now have a better function.\n if you get anywhere on the screen you will get maximum points \n 😁"},
   { version: "9.4.2", changelog: "11/8/2025 \n\n - now rounds score, for average etc \n 😁"},
   { version: "9.4.3", changelog: "11/8/2025 \n\n - rainbow buttons \n 😁"},
-  { version: "9.4.4", changelog: "11/8/2025 \n\n - boxes next to eachother \n 😁"}
+  { version: "9.4.4", changelog: "11/8/2025 \n\n - boxes next to eachother \n 😁"},
+  { version: "9.4.5", changelog: "11/8/2025 \n\n - lowered chathams chance \n 😁"}
 ];
 
 // === REGION DATA ===
@@ -35,7 +36,6 @@ const NZ_REGIONS = [
   {latMin: -46.241388, latMax: -43.932577, lngMin: 166.346191, lngMax: 169.283935},
   {latMin: -46.679334, latMax: -46.236597, lngMin: 167.673340, lngMax: 170.002441},
   {latMin: -46.250672, latMax: -43.824558, lngMin: 167.985352, lngMax: 172.335938},
-  {latMin: -44.363558, latMax: -44.213195, lngMin: 183.635788, lngMax: 184.015503}
 ];
 
 // === URBAN DATA ===
