@@ -12,7 +12,8 @@ const versions = [
   { version: "9.4", changelog: "11/9/2025 \n\n - Changed the beach mode system so that you know choose a game type. Defaults to everywhere. \n\n - Brought back urban mode which is now a gametype and much much faster especially on good internet connections. The relative probabilities are not perfect (e.g. Dunedin) so if you notice any urban locations that are too common or too uncommon, let me know.\n\n - Made recent seeds panel have the header and buttons fixed at the top instead of scrolling with the menu. \n\n - Added average to overall leaderboard \n\n - Added state highway mode which places you somewhere on the stateway system. \n\n - Mennod"},
   { version: "9.4.1", changelog: "11/8/2025 \n\n - Changed scoring system to now have a better function.\n if you get anywhere on the screen you will get maximum points \n 😁"},
   { version: "9.4.2", changelog: "11/8/2025 \n\n - now rounds score, for average etc \n 😁"},
-  { version: "9.4.3", changelog: "11/8/2025 \n\n - rainbow buttons \n 😁"}
+  { version: "9.4.3", changelog: "11/8/2025 \n\n - rainbow buttons \n 😁"},
+  { version: "9.4.4", changelog: "11/8/2025 \n\n - boxes next to eachother \n 😁"}
 ];
 
 // === REGION DATA ===
