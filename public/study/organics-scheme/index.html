@@ -363,7 +363,10 @@
     </footer>
   </div>
 
-  <script>
+<script>
+  // === SAFETY: Wait for DOM to be fully loaded ===
+  document.addEventListener("DOMContentLoaded", () => {
+    try {
   // === SAFETY: Wait for DOM to be fully loaded ===
   // === DATABASE (charges/subscripts fixed, spectators removed) ===
   const reactions = [
