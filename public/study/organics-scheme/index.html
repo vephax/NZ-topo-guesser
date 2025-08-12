@@ -389,7 +389,7 @@
 
   // === DATABASE (charges/subscripts fixed, spectators removed) ===
   const reactions = [
-    { from: "Alkene", to: "Alkane", reagents: ["H₂ + Ni", "H₂ + Pd"], conditions: ["catalyst", "heat"], type: ["Addition"], fact: "Hydrogenation: adds H₂ across double bond. Requires metal catalyst." },
+    { from: "Alkene", to: "Alkane", reagents: ["H₂ + Ni"], conditions: ["catalyst", "heat"], type: ["Addition"], fact: "Hydrogenation: adds H₂ across double bond. Requires metal catalyst." },
     { from: "Alkene", to: "Addition Polymer", reagents: ["none"], conditions: ["catalyst", "heat", "pressure"], type: ["Addition"], fact: "Polymerisation where a polymer is polymerised (=." },
     { from: "Alkene", to: "Haloalkane", reagents: ["Br₂", "Cl₂"], conditions: [], type: ["Addition"], fact: "Electrophilic addition. Br₂ decolorizes from red-brown to colorless." },
     { from: "Alkene", to: "Diol", reagents: ["MnO₄⁻ / H⁺"], conditions: [], type: ["Oxidation"], fact: "Syn dihydroxylation. Cold, dilute oxidizers give 1,2-diols." },
@@ -405,7 +405,7 @@
     { from: "Aldehyde", to: "Alcohol (1°)", reagents: ["NaBH₄", "LiAlH₄"], conditions: [], type: ["Reduction"], fact: "Hydride reagents reduce aldehydes to primary alcohols." },
     { from: "Ketone", to: "Alcohol (2°)", reagents: ["NaBH₄", "LiAlH₄"], conditions: [], type: ["Reduction"], fact: "Hydride reduction gives secondary alcohols." },
     { from: "Carboxylic Acid", to: "Acid Chloride", reagents: ["SOCl₂", "PCl₃", "PCl₅", "HBr", "HI"], conditions: [], type: ["Substitution"], fact: "SOCl₂, PCl₃, PCl₅, HBr, and HI convert acids to acyl halides; SOCl₂ is preferred for easy purification." },
-    { from: "Acid Chloride", to: "Ester", reagents: ["ROH"], conditions: [], type: ["Substitution"], fact: "Fast, exothermic reaction with alcohols." },
+    { from: "Acid Chloride", to: "Ester", reagents: ["ROH"], conditions: [], type: ["Condensation"], fact: "Fast, exothermic reaction with alcohols." },
     { from: "Acid Chloride", to: "Amide", reagents: ["NH₃"], conditions: [], type: ["Substitution"], fact: "Forms amides. HCl gas produced — neutralize with base." },
     { from: "Acid Chloride", to: "Carboxylic Acid", reagents: ["H₂O"], conditions: [], type: ["Hydrolysis", "Substitution"], fact: "Hydrolysis of acid chlorides is rapid and exothermic." },
     { from: "Carboxylic Acid", to: "Amide", reagents: ["NH₃"], conditions: ["heat"], type: ["Condensation", "Substitution"], fact: "Amide formation is a condensation reaction with water as a byproduct." },
