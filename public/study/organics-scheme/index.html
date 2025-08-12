@@ -329,7 +329,7 @@
 
         <div class="control-label">Difficulty</div>
         <div>
-		  <button id="diff-baby" class="diff-btn">Baby (2)</button>
+          <button id="diff-baby" class="diff-btn">Baby (2)</button>
           <button id="diff-easy" class="diff-btn active">Easy (6)</button>
           <button id="diff-med" class="diff-btn">Medium (12)</button>
           <button id="diff-hard" class="diff-btn">Hard (20)</button>
@@ -363,12 +363,11 @@
     </footer>
   </div>
 
-<script>
-  // === SAFETY: Wait for DOM to be fully loaded ===
-  document.addEventListener("DOMContentLoaded", () => {
-    try {
-  // === SAFETY: Wait for DOM to be fully loaded ===
-  // === DATABASE (charges/subscripts fixed, spectators removed) ===
+  <script>
+    // Wait for DOM to load
+    document.addEventListener("DOMContentLoaded", () => {
+      try {
+        // === REACTION DATABASE ===
   const reactions = [
     { from: "Alkene", to: "Alkane", reagents: ["H₂"], conditions: ["catalyst", "heat"], type: ["Addition"], fact: "Hydrogenation: adds H₂ across double bond. Requires metal catalyst." },
     { from: "Alkene", to: "Addition Polymer", reagents: ["R-C=C-R"], conditions: ["catalyst", "heat", "pressure"], type: ["Addition", "Condensation"], fact: "Polymerisation where a polymer is polymerised (=." },
@@ -403,290 +402,265 @@
 	{ from: "Carboxylate Ion", to: "Carboxylic Acid", reagents: ["H₂O"], conditions: ["acidic"], type: ["Acid-Base"], fact: "Adding acid reprotonates the carboxylate." }
 	];
 
-      // === STATE ===
-      let mode = "transform";
-      let difficulty = 6;
-      let current = null;
-      let score = { correct: 0, total: 0 };
-      let hasSubmitted = false;
 
-      // === DOM HELPERS ===
-      const $ = id => document.getElementById(id);
-      const optionsEl = $("options");
-      const conditionsEl = $("conditions");
-      const typesEl = $("reaction-types");
-      const feedbackEl = $("feedback");
-      const factEl = $("fact");
 
-      // === THEME TOGGLE ===
-      let isDark = true;
-      $("theme-toggle").addEventListener("click", () => {
-        isDark = !isDark;
-        document.body.setAttribute("data-theme", isDark ? "dark" : "light");
-        $("theme-toggle").textContent = isDark ? "☀️" : "🌙";
-      });
+        // === STATE ===
+        let mode = "transform";
+        let difficulty = 6;
+        let current = null;
+        let score = { correct: 0, total: 0 };
+        let hasSubmitted = false;
 
-      // === DIFFICULTY BUTTONS ===
-      function setDiffActive(btn) {
-        document.querySelectorAll(".diff-btn").forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-      }
-	  $("diff-baby").addEventListener("click", () => { difficulty = 2; setDiffActive($("diff-baby")); newQuestion(); });
-      $("diff-easy").addEventListener("click", () => { difficulty = 6; setDiffActive($("diff-easy")); newQuestion(); });
-      $("diff-med").addEventListener("click", () => { difficulty = 12; setDiffActive($("diff-med")); newQuestion(); });
-      $("diff-hard").addEventListener("click", () => { difficulty = 20; setDiffActive($("diff-hard")); newQuestion(); });
+        // === DOM HELPERS ===
+        const $ = id => document.getElementById(id);
+        const optionsEl = $("options");
+        const conditionsEl = $("conditions");
+        const typesEl = $("reaction-types");
+        const feedbackEl = $("feedback");
+        const factEl = $("fact");
 
-      // === RENDER CONDITIONS ===
-      function renderConditions() {
-        conditionsEl.innerHTML = "";
-        const enabled = Array.from(document.querySelectorAll(".side-panel input:checked")).map(cb => cb.value);
-        enabled.forEach(cond => {
-          const btn = document.createElement("button");
-          btn.className = "cond-btn";
-          btn.textContent = capitalize(cond);
-          btn.dataset.cond = cond;
+        // === THEME TOGGLE ===
+        let isDark = true;
+        $("theme-toggle").addEventListener("click", () => {
+          isDark = !isDark;
+          document.body.setAttribute("data-theme", isDark ? "dark" : "light");
+          $("theme-toggle").textContent = isDark ? "☀️" : "🌙";
+        });
+
+        // === DIFFICULTY BUTTONS ===
+        function setDiffActive(btn) {
+          document.querySelectorAll(".diff-btn").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+        }
+        $("diff-baby").addEventListener("click", () => { difficulty = 2; setDiffActive($("diff-baby")); newQuestion(); });
+        $("diff-easy").addEventListener("click", () => { difficulty = 6; setDiffActive($("diff-easy")); newQuestion(); });
+        $("diff-med").addEventListener("click", () => { difficulty = 12; setDiffActive($("diff-med")); newQuestion(); });
+        $("diff-hard").addEventListener("click", () => { difficulty = 20; setDiffActive($("diff-hard")); newQuestion(); });
+
+        // === RENDER CONDITIONS FROM CHECKBOXES ===
+        function renderConditions() {
+          conditionsEl.innerHTML = "";
+          const enabled = Array.from(document.querySelectorAll(".side-panel input:checked")).map(cb => cb.value);
+          enabled.forEach(cond => {
+            const btn = document.createElement("button");
+            btn.className = "cond-btn";
+            btn.textContent = capitalize(cond);
+            btn.dataset.cond = cond;
+            btn.addEventListener("click", () => btn.classList.toggle("on"));
+            conditionsEl.appendChild(btn);
+          });
+        }
+
+        function capitalize(str) {
+          return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        // === GET SELECTED VALUES ===
+        function getSelectedOptions() {
+          return Array.from(optionsEl.querySelectorAll(".selected")).map(el => el.textContent);
+        }
+        function getSelectedConditions() {
+          return Array.from(conditionsEl.querySelectorAll(".on")).map(btn => btn.dataset.cond);
+        }
+        function getSelectedTypes() {
+          return Array.from(typesEl.querySelectorAll(".type-btn.on")).map(btn => btn.textContent);
+        }
+
+        // === SHOW FACT ===
+        function showFact(text) {
+          if (!hasSubmitted) return;
+          let msg = `Info: ${text}`;
+          for (const r of reactions) {
+            if (r.from === text || r.to === text || `${r.from} → ${r.to}` === text) {
+              msg = `${r.from} → ${r.to}\nReagents: ${r.reagents.join(", ")}\n${r.fact}`;
+              break;
+            }
+            if (r.reagents.includes(text)) {
+              msg = `Reagent: ${text}\nUsed in: ${r.from} → ${r.to}\n${r.fact}`;
+              break;
+            }
+          }
+          factEl.style.display = "block";
+          factEl.textContent = msg;
+        }
+
+        // === SETUP TYPE BUTTONS ===
+        document.querySelectorAll(".type-btn").forEach(btn => {
           btn.addEventListener("click", () => btn.classList.toggle("on"));
-          conditionsEl.appendChild(btn);
         });
-      }
 
-      function capitalize(str) {
-        return str.charAt(0).toUpperCase() + str.slice(1);
-      }
+        // === GENERATE NEW QUESTION ===
+        function newQuestion() {
+          const r = reactions[Math.floor(Math.random() * reactions.length)];
+          current = r;
+          hasSubmitted = false;
+          optionsEl.innerHTML = "";
+          feedbackEl.style.display = "none";
+          factEl.style.display = "none";
 
-      // === GET SELECTED VALUES ===
-      function getSelectedOptions() {
-        return Array.from(optionsEl.querySelectorAll(".selected")).map(el => el.textContent);
-      }
-      function getSelectedConditions() {
-        return Array.from(conditionsEl.querySelectorAll(".on")).map(btn => btn.dataset.cond);
-      }
-      function getSelectedTypes() {
-        return Array.from(typesEl.querySelectorAll(".type-btn.on")).map(btn => btn.textContent);
-      }
+          // Reset buttons
+          document.querySelectorAll(".type-btn").forEach(btn => btn.classList.remove("on"));
+          document.querySelectorAll(".cond-btn").forEach(btn => btn.classList.remove("on"));
 
+          if (mode === "transform") {
+            $("left-box").textContent = r.from;
+            $("right-box").textContent = r.to;
 
-      // === SHOW FACT (after submission only) ===
-      function showFact(text) {
-        if (!hasSubmitted) return;
-        let msg = `Info: ${text}`;
-        for (const r of reactions) {
-          if (r.from === text || r.to === text || `${r.from} → ${r.to}` === text) {
-            msg = `${r.from} → ${r.to}\nReagents: ${r.reagents.join(", ")}\n${r.fact}`;
-            break;
-          }
-          const siblings = addReagentSiblings(r.reagents);
-          if (siblings.includes(text)) {
-            msg = `Reagent: ${text}\nUsed in: ${r.from} → ${r.to}\n${r.fact}`;
-            break;
-          }
-        }
-        factEl.style.display = "block";
-        factEl.textContent = msg;
-      }
-
-      // === SETUP TYPE BUTTON LISTENERS (ONE TIME SETUP) ===
-      function setupTypeButtonListeners() {
-        const typeButtons = document.querySelectorAll(".type-btn");
-        typeButtons.forEach(btn => {
-          btn.addEventListener("click", function() {
-            this.classList.toggle("on");
-          });
-        });
-      }
-
-      // === GENERATE NEW QUESTION ===
-      function newQuestion() {
-        const r = reactions[Math.floor(Math.random() * reactions.length)];
-        current = r;
-        hasSubmitted = false;
-        optionsEl.innerHTML = "";
-        feedbackEl.style.display = "none";
-        factEl.style.display = "none";
-
-        // Reset UI states only - don't mess with event listeners
-        document.querySelectorAll(".type-btn").forEach(btn => btn.classList.remove("on"));
-        document.querySelectorAll(".cond-btn").forEach(btn => btn.classList.remove("on"));
-
-        if (mode === "transform") {
-          $("left-box").textContent = r.from;
-          $("right-box").textContent = r.to;
-
-          const pool = new Set(addReagentSiblings(r.reagents));
-          while (pool.size < difficulty) {
-            const rxn = reactions[Math.floor(Math.random() * reactions.length)];
-            addReagentSiblings(rxn.reagents).forEach(r => pool.add(r));
-          }
-          shuffle([...pool]).slice(0, difficulty).forEach(text => {
-            const el = document.createElement("div");
-            el.className = "option";
-            el.textContent = text;
-            el.addEventListener("click", () => el.classList.toggle("selected"));
-            el.addEventListener("dblclick", () => showFact(text));
-            el.addEventListener("contextmenu", e => { e.preventDefault(); showFact(text); });
-            optionsEl.appendChild(el);
-          });
-        } else {
-          const reagent = r.reagents[0];
-          $("left-box").textContent = reagent;
-          $("right-box").textContent = "?";
-
-          const pool = new Set([`${r.from} → ${r.to}`]);
-          while (pool.size < difficulty) {
-            const rxn = reactions[Math.floor(Math.random() * reactions.length)];
-            pool.add(`${rxn.from} → ${rxn.to}`);
-          }
-          shuffle([...pool]).slice(0, difficulty).forEach(text => {
-            const el = document.createElement("div");
-            el.className = "option";
-            el.textContent = text;
-            el.addEventListener("click", () => {
-              document.querySelectorAll(".option").forEach(e => e.classList.remove("selected"));
-              el.classList.add("selected");
+            // Create reagent pool
+            const pool = new Set(r.reagents);
+            while (pool.size < difficulty) {
+              const rxn = reactions[Math.floor(Math.random() * reactions.length)];
+              rxn.reagents.forEach(reag => pool.add(reag));
+            }
+            shuffle([...pool]).forEach(text => {
+              const el = document.createElement("div");
+              el.className = "option";
+              el.textContent = text;
+              el.addEventListener("click", () => el.classList.toggle("selected"));
+              el.addEventListener("dblclick", () => showFact(text));
+              el.addEventListener("contextmenu", e => { e.preventDefault(); showFact(text); });
+              optionsEl.appendChild(el);
             });
-            el.addEventListener("dblclick", () => showFact(text));
-            el.addEventListener("contextmenu", e => { e.preventDefault(); showFact(text); });
-            optionsEl.appendChild(el);
-          });
+          } else {
+            $("left-box").textContent = r.reagents[0];
+            $("right-box").textContent = "?";
+
+            const pool = new Set([`${r.from} → ${r.to}`]);
+            while (pool.size < difficulty) {
+              const rxn = reactions[Math.floor(Math.random() * reactions.length)];
+              pool.add(`${rxn.from} → ${rxn.to}`);
+            }
+            shuffle([...pool]).forEach(text => {
+              const el = document.createElement("div");
+              el.className = "option";
+              el.textContent = text;
+              el.addEventListener("click", () => {
+                document.querySelectorAll(".option").forEach(e => e.classList.remove("selected"));
+                el.classList.add("selected");
+              });
+              el.addEventListener("dblclick", () => showFact(text));
+              el.addEventListener("contextmenu", e => { e.preventDefault(); showFact(text); });
+              optionsEl.appendChild(el);
+            });
+          }
+
+          renderConditions();
         }
 
+        // === SUBMIT ANSWER ===
+        function submit() {
+          if (!current) return;
+          hasSubmitted = true;
+          const selectedReagents = getSelectedOptions();
+          const selectedConds = getSelectedConditions();
+          const selectedTypes = getSelectedTypes();
+
+          feedbackEl.style.display = "block";
+
+          if (mode === "transform") {
+            const selectedSet = new Set(selectedReagents);
+            const hasAllRequired = current.reagents.every(r => selectedSet.has(r));
+            const noExtraReagents = [...selectedSet].every(r => current.reagents.includes(r));
+            const reagentsCorrect = hasAllRequired && noExtraReagents;
+
+            const condsCorrect =
+              current.conditions.every(c => selectedConds.includes(c)) &&
+              selectedConds.every(c => current.conditions.includes(c));
+
+            const typesCorrect = current.type.some(t => selectedTypes.includes(t));
+
+            if (reagentsCorrect && condsCorrect && typesCorrect) {
+              feedbackEl.className = "feedback ok";
+              feedbackEl.textContent = "✅ Correct!";
+              score.correct++;
+            } else {
+              const expectedReagents = current.reagents.join(", ");
+              const expectedConds = current.conditions.map(capitalize).join(", ") || "none";
+              const expectedTypes = current.type.join(" or ");
+              feedbackEl.className = "feedback bad";
+              feedbackEl.textContent = `❌ Incorrect.\nReagents: ${expectedReagents}\nConditions: ${expectedConds}\nType: ${expectedTypes}`;
+            }
+          } else {
+            const correct = `${current.from} → ${current.to}`;
+            if (selectedReagents[0] === correct) {
+              feedbackEl.className = "feedback ok";
+              feedbackEl.textContent = "✅ Correct!";
+              score.correct++;
+            } else {
+              feedbackEl.className = "feedback bad";
+              feedbackEl.textContent = `❌ Incorrect. Correct: ${correct}`;
+            }
+          }
+
+          score.total++;
+          $("score").textContent = `${score.correct} / ${score.total}`;
+
+          // Change button to "Next Question"
+          $("submit").textContent = "Next Question";
+          $("submit").onclick = () => {
+            $("submit").textContent = "Submit";
+            $("submit").onclick = submit;
+            newQuestion();
+          };
+        }
+
+        // === MODE SWITCHING ===
+        $("mode-transform").addEventListener("click", () => {
+          mode = "transform";
+          $("mode-transform").classList.add("active");
+          $("mode-reagent").classList.remove("active");
+          newQuestion();
+        });
+        $("mode-reagent").addEventListener("click", () => {
+          mode = "reagent";
+          $("mode-reagent").classList.add("active");
+          $("mode-transform").classList.remove("active");
+          newQuestion();
+        });
+
+        // === SHUFFLE UTILITY ===
+        function shuffle(arr) {
+          const a = [...arr];
+          for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+          }
+          return a;
+        }
+
+        // === INITIALIZE ===
+        setDiffActive($("diff-easy"));
         renderConditions();
-      }
+        newQuestion();
 
-      // === SUBMIT ANSWER ===
-      function submit() {
-        if (!current) return;
-        hasSubmitted = true;
-
-        const selectedReagents = getSelectedOptions();
-        const selectedConds = getSelectedConditions();
-        const selectedTypes = getSelectedTypes();
-
-        feedbackEl.style.display = "block";
-
-if (mode === "transform") {
-  // === NEW: Strict reagent checking ===
-  const expectedRawReagents = current.reagents; // e.g., ["Cr₂O₇²⁻ / H⁺"]
-  const expectedReagentsSet = new Set(addReagentSiblings(expectedRawReagents)); // expands family
-
-  const selectedSet = new Set(selectedReagents);
-
-  // Check: every selected reagent must be in expected set (no extras)
-  const noExtraReagents = [...selectedSet].every(r => expectedReagentsSet.has(r));
-
-  // Check: every expected reagent has at least one representative selected
-  const hasAllRequired = [...expectedReagentsSet].some(expected => selectedSet.has(expected));
-
-  const reagentsCorrect = noExtraReagents && hasAllRequired;
-
-  // But wait — sometimes multiple reagents are needed (e.g. "conc. H₂SO₄" AND "R-OH")
-  // So let's refine: if the original reaction has multiple distinct reagents,
-  // we expect all of them (or their equivalents) to be covered.
-
-  // Better: For each required reagent group, at least one equivalent must be selected
-  const requiredGroups = expectedRawReagents.map(r =>
-    addReagentSiblings([r])
-  );
-
-  const hasEachRequiredGroup = requiredGroups.every(group =>
-    group.some(alt => selectedSet.has(alt))
-  );
-
-  // Final reagent correctness: all required groups covered AND no invalid reagents
-  const reagentsCorrect = hasEachRequiredGroup && noExtraReagents;
-
-  // === Conditions: must match exactly (order doesn't matter) ===
-  const condsCorrect =
-    current.conditions.every(c => selectedConds.includes(c)) &&
-    selectedConds.every(c => current.conditions.includes(c));
-
-  // === Reaction Type: at least one correct type selected ===
-  const typesCorrect = current.type.some(t => selectedTypes.includes(t));
-
-  if (reagentsCorrect && condsCorrect && typesCorrect) {
-    feedbackEl.className = "feedback ok";
-    feedbackEl.textContent = "✅ Correct!";
-    score.correct++;
-  } else {
-    feedbackEl.className = "feedback bad";
-    const expectedConds = current.conditions.map(capitalize).join(", ") || "none";
-    const expectedTypes = current.type.join(" or ");
-    const expectedReagentsMsg = expectedRawReagents.join(", ");
-    feedbackEl.textContent = `❌ Incorrect.\nReagents: ${expectedReagentsMsg}\nConditions: ${expectedConds}\nType: ${expectedTypes}`;
-  }
-}
-
-        score.total++;
-        $("score").textContent = `${score.correct} / ${score.total}`;
-
-        // Change Submit → Next Question
-        $("submit").textContent = "Next Question";
-        $("submit").onclick = () => {
+        // === EVENT BINDINGS ===
+        $("submit").onclick = submit;
+        $("skip").onclick = () => {
           $("submit").textContent = "Submit";
           $("submit").onclick = submit;
           newQuestion();
         };
+        $("show-answer").onclick = () => {
+          if (!current) return;
+          const r = current;
+          const answer = mode === "transform"
+            ? `Answer:\nReagents: ${r.reagents.join(", ")}\nConditions: ${r.conditions.map(capitalize).join(", ") || "none"}\nType: ${r.type.join(" or ")}`
+            : `Answer: ${r.from} → ${r.to}`;
+          factEl.style.display = "block";
+          factEl.textContent = answer + "\n\n" + r.fact;
+          hasSubmitted = true;
+        };
+
+        // Update conditions when checkboxes change
+        document.querySelectorAll('.side-panel input[type="checkbox"]').forEach(cb => {
+          cb.addEventListener('change', renderConditions);
+        });
+
+      } catch (err) {
+        console.error("Quiz Error:", err);
+        alert("An error occurred. Open console (F12) for details.");
       }
-
-      // === MODE SWITCHING ===
-      $("mode-transform").addEventListener("click", () => {
-        mode = "transform";
-        $("mode-transform").classList.add("active");
-        $("mode-reagent").classList.remove("active");
-        newQuestion();
-      });
-
-      $("mode-reagent").addEventListener("click", () => {
-        mode = "reagent";
-        $("mode-reagent").classList.add("active");
-        $("mode-transform").classList.remove("active");
-        newQuestion();
-      });
-
-      // === SHUFFLE UTIL ===
-      function shuffle(arr) {
-        const a = [...arr];
-        for (let i = a.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [a[i], a[j]] = [a[j], a[i]];
-        }
-        return a;
-      }
-
-      // === INITIALIZE ===
-      setDiffActive($("diff-easy"));
-      renderConditions();
-      setupTypeButtonListeners(); // Set up listeners once at initialization
-      newQuestion();
-
-      // Final event bindings
-      $("submit").onclick = submit;
-      $("skip").onclick = () => {
-        $("submit").textContent = "Submit";
-        $("submit").onclick = submit;
-        newQuestion();
-      };
-      $("show-answer").onclick = () => {
-        if (!current) return;
-        const r = current;
-        const answer = mode === "transform"
-          ? `Answer:\nReagents: ${r.reagents.join(", ")}\nConditions: ${r.conditions.map(capitalize).join(", ") || "none"}\nType: ${r.type.join(" or ")}`
-          : `Answer: ${r.from} → ${r.to}`;
-        factEl.style.display = "block";
-        factEl.textContent = answer + "\n\n" + r.fact;
-        hasSubmitted = true;
-      };
-
-      // Update condition checkboxes to refresh conditions when changed
-      document.querySelectorAll('.side-panel input[type="checkbox"]').forEach(checkbox => {
-        checkbox.addEventListener('change', renderConditions);
-      });
-
-    } catch (err) {
-      console.error("JavaScript Error:", err);
-      alert("An error occurred. Open browser console (F12) to see details.");
-    }
-  });
-</script>
+    });
+  </script>
 </body>
 </html>
