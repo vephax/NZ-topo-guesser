@@ -333,7 +333,6 @@
           <button id="diff-easy" class="diff-btn active">Easy (6)</button>
           <button id="diff-med" class="diff-btn">Medium (12)</button>
           <button id="diff-hard" class="diff-btn">Hard (20)</button>
-		  <button id="diff-expert" class="diff-btn">Expert (25)</button>
         </div>
 
         <div class="control-label" style="margin-top:15px;">Condition Toggles</div>
@@ -449,7 +448,6 @@
       $("diff-easy").addEventListener("click", () => { difficulty = 6; setDiffActive($("diff-easy")); newQuestion(); });
       $("diff-med").addEventListener("click", () => { difficulty = 12; setDiffActive($("diff-med")); newQuestion(); });
       $("diff-hard").addEventListener("click", () => { difficulty = 20; setDiffActive($("diff-hard")); newQuestion(); });
-	  $("diff-expert").addEventListener("click", () => { difficulty = 25; setDiffActive($("diff-expert")); newQuestion(); });
 
       // === RENDER CONDITIONS ===
       function renderConditions() {
