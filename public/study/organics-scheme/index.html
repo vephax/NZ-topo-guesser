@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Max's Reaction Scheme AI SLOP study practice</title>
+  <style>
+    :root {
+      --bg-primary: #f0f4f8;
+      --bg-secondary: white;
+      --bg-tertiary: #f9fbff;
+      --text-primary: #1a1a2e;
+      --text-secondary: #2c3e50;
+      --text-muted: #555;
+      --border-color: #e0e0e0;
+      --border-light: #e0e0f0;
+      --accent-primary: #007bff;
+      --accent-hover: #a0d8ff;
+      --option-bg: white;
+      --option-hover: #f0f8ff;
+      --option-selected: #d0ebff;
+      --condition-active: #fff3cd;
+      --condition-border: #ffeaa7;
+      --condition-text: #856404;
+      --success-bg: #d4edda;
+      --success-text: #155724;
+      --success-border: #c3e6cb;
+      --error-bg: #f8d7da;
+      --error-text: #721c24;
+      --error-border: #f5c6cb;
+      --fact-bg: #fffbe6;
+      --fact-border: #ffeaa7;
+    }
+
+    [data-theme="dark"] {
+      --bg-primary: #1a1a2e;
+      --bg-secondary: #16213e;
+      --bg-tertiary: #0f1419;
+      --text-primary: #e2e8f0;
+      --text-secondary: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+      --border-light: #475569;
+      --accent-primary: #3b82f6;
+      --accent-hover: #1e40af;
+      --option-bg: #1e293b;
+      --option-hover: #334155;
+      --option-selected: #1e40af;
+      --condition-active: #451a03;
+      --condition-border: #92400e;
+      --condition-text: #fbbf24;
+      --success-bg: #064e3b;
+      --success-text: #6ee7b7;
+      --success-border: #047857;
+      --error-bg: #7f1d1d;
+      --error-text: #fca5a5;
+      --error-border: #dc2626;
+      --fact-bg: #451a03;
+      --fact-border: #92400e;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 20px;
+      transition: all 0.3s ease;
+    }
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      background: var(--bg-secondary);
+      border-radius: 14px;
+      box-shadow: 0 6px 25px rgba(0,0,0,0.1);
+      padding: 25px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 1.5em;
+      color: var(--text-secondary);
+    }
+    .header-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .theme-toggle {
+      padding: 8px 12px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-tertiary);
+      cursor: pointer;
+      border-radius: 6px;
+      font-size: 0.8em;
+    }
+    .mode-btn, .diff-btn {
+      padding: 10px 14px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-tertiary);
+      cursor: pointer;
+      border-radius: 8px;
+      font-size: 0.9em;
+      color: var(--text-primary);
+    }
+    .mode-btn.active, .diff-btn.active {
+      background: var(--accent-primary);
+      color: white;
+      border-color: var(--accent-primary);
+    }
+    .quiz-area {
+      display: flex;
+      gap: 25px;
+      flex-wrap: wrap;
+    }
+    .main-panel {
+      flex: 1;
+      min-width: 300px;
+    }
+    .side-panel {
+      width: 320px;
+      background: var(--bg-tertiary);
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid var(--border-light);
+    }
+    .reaction {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin: 25px 0;
+      font-weight: bold;
+      font-size: 1.3em;
+    }
+    .box {
+      padding: 14px 18px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      min-width: 140px;
+      text-align: center;
+      font-size: 1.1em;
+    }
+    .arrow {
+      font-size: 1.5em;
+      color: var(--text-muted);
+    }
+    .options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 15px 0;
+    }
+    .option {
+      padding: 10px 14px;
+      background: var(--option-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      cursor: pointer;
+      min-width: 150px;
+      text-align: center;
+      font-size: 0.95em;
+      color: var(--text-primary);
+    }
+    .option:hover {
+      background: var(--option-hover);
+      border-color: var(--accent-hover);
+    }
+    .option.selected {
+      background: var(--option-selected);
+      border-color: var(--accent-primary);
+      outline: 2px solid var(--accent-primary);
+      font-weight: bold;
+    }
+    .section {
+      margin: 18px 0;
+    }
+    .control-label {
+      font-weight: bold;
+      margin-bottom: 8px;
+      font-size: 0.95em;
+      color: var(--text-secondary);
+    }
+    .conditions, .reaction-types {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .cond-btn, .type-btn {
+      padding: 7px 11px;
+      margin: 4px;
+      border: 1px solid var(--border-color);
+      background: var(--option-bg);
+      cursor: pointer;
+      border-radius: 6px;
+      font-size: 0.85em;
+      color: var(--text-primary);
+    }
+    .cond-btn.on, .type-btn.on {
+      background: var(--condition-active);
+      border-color: var(--condition-border);
+      color: var(--condition-text);
+    }
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    button.primary {
+      background: var(--accent-primary);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button.secondary {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .feedback {
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 0.95em;
+      display: none;
+      white-space: pre-line;
+    }
+    .feedback.ok {
+      background: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid var(--success-border);
+    }
+    .feedback.bad {
+      background: var(--error-bg);
+      color: var(--error-text);
+      border: 1px solid var(--error-border);
+    }
+    .fact-box {
+      margin-top: 16px;
+      padding: 14px;
+      background: var(--fact-bg);
+      border: 1px dashed var(--fact-border);
+      border-radius: 8px;
+      font-size: 0.9em;
+      white-space: pre-line;
+      display: none;
+    }
+    footer {
+      margin-top: 30px;
+      text-align: center;
+      font-size: 0.85em;
+      color: var(--text-muted);
+    }
+    .side-panel label {
+      color: var(--text-primary);
+    }
+  </style>
+</head>
+<body data-theme="dark">
+  <div class="container">
+    <header>
+      <h1>Max's Reaction Scheme AI SLOP study practice</h1>
+      <div class="header-controls">
+        <button id="theme-toggle" class="theme-toggle">☀️</button>
+        <button id="mode-transform" class="mode-btn active">Transform Mode</button>
+        <button id="mode-reagent" class="mode-btn">Reagent Mode</button>
+      </div>
+    </header>
+
+    <div class="quiz-area">
+      <div class="main-panel">
+        <div class="reaction">
+          <div id="left-box" class="box">?</div>
+          <div class="arrow">→</div>
+          <div id="right-box" class="box">?</div>
+        </div>
+
+        <p style="text-align:center; color:var(--text-muted); font-size:0.9em;">
+          Select reagents, conditions, and reaction type.
+        </p>
+
+        <div id="options" class="options"></div>
+
+        <div class="section">
+          <div class="control-label">Conditions</div>
+          <div id="conditions" class="conditions"></div>
+        </div>
+
+        <div class="section">
+          <div class="control-label">Reaction Type</div>
+          <div id="reaction-types" class="reaction-types">
+            <button class="type-btn">Addition</button>
+            <button class="type-btn">Substitution</button>
+            <button class="type-btn">Elimination</button>
+            <button class="type-btn">Oxidation</button>
+            <button class="type-btn">Reduction</button>
+            <button class="type-btn">Hydrolysis</button>
+            <button class="type-btn">Condensation</button>
+            <button class="type-btn">Acid-Base</button>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button id="submit" class="primary">Submit</button>
+          <button id="skip" class="secondary">Skip</button>
+          <button id="show-answer" class="secondary">Show Answer</button>
+        </div>
+
+        <div id="feedback" class="feedback"></div>
+        <div id="fact" class="fact-box"></div>
+      </div>
+
+      <div class="side-panel">
+        <h3>Study Controls</h3>
+
+        <div class="control-label">Difficulty</div>
+        <div>
+		  <button id="diff-baby" class="diff-btn">Baby (2)</button>
+          <button id="diff-easy" class="diff-btn active">Easy (6)</button>
+          <button id="diff-med" class="diff-btn">Medium (12)</button>
+          <button id="diff-hard" class="diff-btn">Hard (20)</button>
+		  <button id="diff-expert" class="diff-btn">Expert (25)</button>
+        </div>
+
+        <div class="control-label" style="margin-top:15px;">Condition Toggles</div>
+        <div>
+          <label><input type="checkbox" checked value="heat"> Heat</label><br>
+          <label><input type="checkbox" checked value="reflux"> Reflux</label><br>
+          <label><input type="checkbox" checked value="uv"> UV Light</label><br>
+          <label><input type="checkbox" checked value="catalyst"> Catalyst</label><br>
+          <label><input type="checkbox" checked value="distil"> Distillation</label><br>
+          <label><input type="checkbox" checked value="pressure"> Pressure</label><br>
+          <label><input type="checkbox" checked value="acidic"> Acidic</label><br>
+          <label><input type="checkbox" checked value="basic"> Basic</label>
+        </div>
+
+        <div style="margin-top:20px;">
+          <div class="control-label">Score</div>
+          <div id="score">0 / 0</div>
+        </div>
+
+        <div style="margin-top:20px; font-size:0.9em; color:var(--text-muted);">
+          💡 Tip: Facts are shown after submitting answers.
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      Level 3 Organic Chemistry Quiz • Not Culpable for any mistakes • Works offline • Made with AI slop
+    </footer>
+  </div>
+
+  <script>
+  // === SAFETY: Wait for DOM to be fully loaded ===
+  document.addEventListener("DOMContentLoaded", () => {
+	try {
+  // === REAGENT FAMILIES (spectator ions removed, formatted with sub/superscripts) ===
+  const reagentFamilies = {
+    "PCl₃": ["PCl₃", "PCl₅", "SOCl₂", "HBr", "HI"],
+    "PCl₅": ["PCl₃", "PCl₅", "SOCl₂", "HBr", "HI"],
+    "SOCl₂": ["PCl₃", "PCl₅", "SOCl₂", "HBr", "HI"],
+    "HBr": ["PCl₃", "PCl₅", "SOCl₂", "HBr", "HI"],
+    "HI": ["PCl₃", "PCl₅", "SOCl₂", "HBr", "HI"],
+
+    "MnO₄⁻": ["Cr₂O₇²⁻ / H⁺", "MnO₄⁻ / H⁺"],
+    "Cr₂O₇²⁻": ["Cr₂O₇²⁻ / H⁺", "MnO₄⁻ / H⁺"],
+
+    "LiAlH₄": ["LiAlH₄", "NaBH₄"],
+    "NaBH₄": ["LiAlH₄", "NaBH₄"],
+
+    "H₂ + Ni": ["H₂ + Ni", "H₂ + Pd", "H₂ + Pt"],
+    "H₂ + Pd": ["H₂ + Ni", "H₂ + Pd", "H₂ + Pt"],
+    "H₂ + Pt": ["H₂ + Ni", "H₂ + Pd", "H₂ + Pt"]
+  };
+
+  // === DATABASE (charges/subscripts fixed, spectators removed) ===
+  const reactions = [
+    { from: "Alkene", to: "Alkane", reagents: ["H₂ + Ni", "H₂ + Pd"], conditions: ["catalyst", "heat"], type: ["Addition"], fact: "Hydrogenation: adds H₂ across double bond. Requires metal catalyst." },
+    { from: "Alkene", to: "Addition Polymer", reagents: ["none"], conditions: ["catalyst", "heat", "pressure"], type: ["Addition"], fact: "Polymerisation where a polymer is polymerised (=." },
+    { from: "Alkene", to: "Haloalkane", reagents: ["Br₂", "Cl₂"], conditions: [], type: ["Addition"], fact: "Electrophilic addition. Br₂ decolorizes from red-brown to colorless." },
+    { from: "Alkene", to: "Diol", reagents: ["MnO₄⁻ / H⁺"], conditions: [], type: ["Oxidation"], fact: "Syn dihydroxylation. Cold, dilute oxidizers give 1,2-diols." },
+    { from: "Alkene", to: "Alcohol", reagents: ["H₂O + H₂SO₄"], conditions: ["heat"], type: ["Addition"], fact: "Acid-catalyzed hydration follows Markovnikov's rule." },
+    { from: "Alkane", to: "Haloalkane", reagents: ["Cl₂", "Br₂"], conditions: ["uv"], type: ["Substitution"], fact: "UV light initiates radical chain reaction. Mixture of products possible." },
+    { from: "Haloalkane", to: "Alcohol", reagents: ["OH⁻(aq)"], conditions: ["reflux"], type: ["Substitution"], fact: "OH⁻ replaces halogen. SN2 for 1°, SN1 for 3°." },
+    { from: "Haloalkane", to: "Amine", reagents: ["NH₃ (excess)"], conditions: ["heat"], type: ["Substitution"], fact: "Forms primary amine. Excess NH₃ prevents further substitution." },
+    { from: "Alcohol (1°)", to: "Aldehyde", reagents: ["Cr₂O₇²⁻ / H⁺"], conditions: ["distil"], type: ["Oxidation"], fact: "Oxidation under distillation stops at aldehyde. Removes it before over-oxidation." },
+    { from: "Alcohol (1°)", to: "Carboxylic Acid", reagents: ["Cr₂O₇²⁻ / H⁺"], conditions: ["reflux", "heat"], type: ["Oxidation"], fact: "Strong oxidizers fully oxidize 1° alcohols to carboxylic acids." },
+    { from: "Alcohol (2°)", to: "Ketone", reagents: ["Cr₂O₇²⁻ / H⁺", "MnO₄⁻ / H⁺"], conditions: ["heat"], type: ["Oxidation"], fact: "Ketones resist further oxidation." },
+    { from: "Alcohol", to: "Alkene", reagents: ["conc. H₂SO₄"], conditions: ["heat"], type: ["Elimination"], fact: "Dehydration removes water. Zaitsev's rule applies." },
+    { from: "Aldehyde", to: "Carboxylic Acid", reagents: ["Cr₂O₇²⁻ / H⁺", "MnO₄⁻ / H⁺"], conditions: ["heat"], type: ["Oxidation"], fact: "Aldehydes are easily oxidized; ketones are not." },
+    { from: "Aldehyde", to: "Alcohol (1°)", reagents: ["NaBH₄", "LiAlH₄"], conditions: [], type: ["Reduction"], fact: "Hydride reagents reduce aldehydes to primary alcohols." },
+    { from: "Ketone", to: "Alcohol (2°)", reagents: ["NaBH₄", "LiAlH₄"], conditions: [], type: ["Reduction"], fact: "Hydride reduction gives secondary alcohols." },
+    { from: "Carboxylic Acid", to: "Acid Chloride", reagents: ["SOCl₂", "PCl₃", "PCl₅", "HBr", "HI"], conditions: [], type: ["Substitution"], fact: "SOCl₂, PCl₃, PCl₅, HBr, and HI convert acids to acyl halides; SOCl₂ is preferred for easy purification." },
+    { from: "Acid Chloride", to: "Ester", reagents: ["ROH"], conditions: [], type: ["Substitution"], fact: "Fast, exothermic reaction with alcohols." },
+    { from: "Acid Chloride", to: "Amide", reagents: ["NH₃"], conditions: [], type: ["Substitution"], fact: "Forms amides. HCl gas produced — neutralize with base." },
+    { from: "Acid Chloride", to: "Carboxylic Acid", reagents: ["H₂O"], conditions: [], type: ["Hydrolysis", "Substitution"], fact: "Hydrolysis of acid chlorides is rapid and exothermic." },
+    { from: "Carboxylic Acid", to: "Amide", reagents: ["NH₃"], conditions: ["heat"], type: ["Condensation", "Substitution"], fact: "Amide formation is a condensation reaction with water as a byproduct." },
+    { from: "Ester", to: "Carboxylic Acid", reagents: ["H₂O"], conditions: ["acidic", "reflux"], type: ["Hydrolysis"], fact: "Acidic hydrolysis is reversible." },
+    { from: "Ester", to: "Carboxylate", reagents: ["OH⁻(aq)"], conditions: ["basic", "reflux"], type: ["Hydrolysis"], fact: "Base hydrolysis produces carboxylate salt — how soap is made." },
+    { from: "Amide", to: "Carboxylic Acid", reagents: ["HCl(aq)"], conditions: ["reflux"], type: ["Hydrolysis"], fact: "Harsh conditions needed. Amide bond is stable." },
+    { from: "Amide", to: "Amine", reagents: ["LiAlH₄"], conditions: [], type: ["Reduction"], fact: "LiAlH₄ reduces amides to amines. NaBH₄ is too weak for this reaction." },
+    { from: "Amine", to: "Ammonium Salt", reagents: ["HCl"], conditions: [], type: ["Acid-Base"], fact: "Amines are basic. Forms water-soluble ammonium salts." },
+    { from: "Carboxylate Ion", to: "Carboxylic Acid", reagents: ["H⁺"], conditions: [], type: ["Acid-Base"], fact: "Adding acid reprotonates the carboxylate." }
+	];
+
+      // === STATE ===
+      let mode = "transform";
+      let difficulty = 6;
+      let current = null;
+      let score = { correct: 0, total: 0 };
+      let hasSubmitted = false;
+
+      // === DOM HELPERS ===
+      const $ = id => document.getElementById(id);
+      const optionsEl = $("options");
+      const conditionsEl = $("conditions");
+      const typesEl = $("reaction-types");
+      const feedbackEl = $("feedback");
+      const factEl = $("fact");
+
+      // === THEME TOGGLE ===
+      let isDark = true;
+      $("theme-toggle").addEventListener("click", () => {
+        isDark = !isDark;
+        document.body.setAttribute("data-theme", isDark ? "dark" : "light");
+        $("theme-toggle").textContent = isDark ? "☀️" : "🌙";
+      });
+
+      // === DIFFICULTY BUTTONS ===
+      function setDiffActive(btn) {
+        document.querySelectorAll(".diff-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+      }
+	  $("diff-baby").addEventListener("click", () => { difficulty = 2; setDiffActive($("diff-baby")); newQuestion(); });
+      $("diff-easy").addEventListener("click", () => { difficulty = 6; setDiffActive($("diff-easy")); newQuestion(); });
+      $("diff-med").addEventListener("click", () => { difficulty = 12; setDiffActive($("diff-med")); newQuestion(); });
+      $("diff-hard").addEventListener("click", () => { difficulty = 20; setDiffActive($("diff-hard")); newQuestion(); });
+	  $("diff-expert").addEventListener("click", () => { difficulty = 25; setDiffActive($("diff-expert")); newQuestion(); });
+
+      // === RENDER CONDITIONS ===
+      function renderConditions() {
+        conditionsEl.innerHTML = "";
+        const enabled = Array.from(document.querySelectorAll(".side-panel input:checked")).map(cb => cb.value);
+        enabled.forEach(cond => {
+          const btn = document.createElement("button");
+          btn.className = "cond-btn";
+          btn.textContent = capitalize(cond);
+          btn.dataset.cond = cond;
+          btn.addEventListener("click", () => btn.classList.toggle("on"));
+          conditionsEl.appendChild(btn);
+        });
+      }
+
+      function capitalize(str) {
+        return str.charAt(0).toUpperCase() + str.slice(1);
+      }
+
+      // === GET SELECTED VALUES ===
+      function getSelectedOptions() {
+        return Array.from(optionsEl.querySelectorAll(".selected")).map(el => el.textContent);
+      }
+      function getSelectedConditions() {
+        return Array.from(conditionsEl.querySelectorAll(".on")).map(btn => btn.dataset.cond);
+      }
+      function getSelectedTypes() {
+        return Array.from(typesEl.querySelectorAll(".type-btn.on")).map(btn => btn.textContent);
+      }
+
+      // === ADD REAGENT SIBLINGS ===
+      function addReagentSiblings(reagents) {
+        const expanded = new Set();
+        reagents.forEach(r => {
+          let matched = false;
+          for (const [key, siblings] of Object.entries(reagentFamilies)) {
+            if (r.includes(key) || key.includes(r)) {
+              siblings.forEach(s => expanded.add(s));
+              matched = true;
+            }
+          }
+          if (!matched) expanded.add(r);
+        });
+        return [...expanded];
+      }
+
+      // === SHOW FACT (after submission only) ===
+      function showFact(text) {
+        if (!hasSubmitted) return;
+        let msg = `Info: ${text}`;
+        for (const r of reactions) {
+          if (r.from === text || r.to === text || `${r.from} → ${r.to}` === text) {
+            msg = `${r.from} → ${r.to}\nReagents: ${r.reagents.join(", ")}\n${r.fact}`;
+            break;
+          }
+          const siblings = addReagentSiblings(r.reagents);
+          if (siblings.includes(text)) {
+            msg = `Reagent: ${text}\nUsed in: ${r.from} → ${r.to}\n${r.fact}`;
+            break;
+          }
+        }
+        factEl.style.display = "block";
+        factEl.textContent = msg;
+      }
+
+      // === SETUP TYPE BUTTON LISTENERS (ONE TIME SETUP) ===
+      function setupTypeButtonListeners() {
+        const typeButtons = document.querySelectorAll(".type-btn");
+        typeButtons.forEach(btn => {
+          btn.addEventListener("click", function() {
+            this.classList.toggle("on");
+          });
+        });
+      }
+
+      // === GENERATE NEW QUESTION ===
+      function newQuestion() {
+        const r = reactions[Math.floor(Math.random() * reactions.length)];
+        current = r;
+        hasSubmitted = false;
+        optionsEl.innerHTML = "";
+        feedbackEl.style.display = "none";
+        factEl.style.display = "none";
+
+        // Reset UI states only - don't mess with event listeners
+        document.querySelectorAll(".type-btn").forEach(btn => btn.classList.remove("on"));
+        document.querySelectorAll(".cond-btn").forEach(btn => btn.classList.remove("on"));
+
+        if (mode === "transform") {
+          $("left-box").textContent = r.from;
+          $("right-box").textContent = r.to;
+
+          const pool = new Set(addReagentSiblings(r.reagents));
+          while (pool.size < difficulty) {
+            const rxn = reactions[Math.floor(Math.random() * reactions.length)];
+            addReagentSiblings(rxn.reagents).forEach(r => pool.add(r));
+          }
+          shuffle([...pool]).slice(0, difficulty).forEach(text => {
+            const el = document.createElement("div");
+            el.className = "option";
+            el.textContent = text;
+            el.addEventListener("click", () => el.classList.toggle("selected"));
+            el.addEventListener("dblclick", () => showFact(text));
+            el.addEventListener("contextmenu", e => { e.preventDefault(); showFact(text); });
+            optionsEl.appendChild(el);
+          });
+        } else {
+          const reagent = r.reagents[0];
+          $("left-box").textContent = reagent;
+          $("right-box").textContent = "?";
+
+          const pool = new Set([`${r.from} → ${r.to}`]);
+          while (pool.size < difficulty) {
+            const rxn = reactions[Math.floor(Math.random() * reactions.length)];
+            pool.add(`${rxn.from} → ${rxn.to}`);
+          }
+          shuffle([...pool]).slice(0, difficulty).forEach(text => {
+            const el = document.createElement("div");
+            el.className = "option";
+            el.textContent = text;
+            el.addEventListener("click", () => {
+              document.querySelectorAll(".option").forEach(e => e.classList.remove("selected"));
+              el.classList.add("selected");
+            });
+            el.addEventListener("dblclick", () => showFact(text));
+            el.addEventListener("contextmenu", e => { e.preventDefault(); showFact(text); });
+            optionsEl.appendChild(el);
+          });
+        }
+
+        renderConditions();
+      }
+
+      // === SUBMIT ANSWER ===
+      function submit() {
+        if (!current) return;
+        hasSubmitted = true;
+
+        const selectedReagents = getSelectedOptions();
+        const selectedConds = getSelectedConditions();
+        const selectedTypes = getSelectedTypes();
+
+        feedbackEl.style.display = "block";
+
+        if (mode === "transform") {
+          const reagentsCorrect = addReagentSiblings(current.reagents).some(r => selectedReagents.includes(r));
+          const condsCorrect = current.conditions.every(c => selectedConds.includes(c)) && selectedConds.every(c => current.conditions.includes(c));
+          const typesCorrect = current.type.some(t => selectedTypes.includes(t));
+
+          if (reagentsCorrect && condsCorrect && typesCorrect) {
+            feedbackEl.className = "feedback ok";
+            feedbackEl.textContent = "✅ Correct!";
+            score.correct++;
+          } else {
+            feedbackEl.className = "feedback bad";
+            const expectedConds = current.conditions.map(capitalize).join(", ") || "none";
+            const expectedTypes = current.type.join(" or ");
+            feedbackEl.textContent = `❌ Incorrect.\nReagents: ${current.reagents.join(", ")}\nConditions: ${expectedConds}\nType: ${expectedTypes}`;
+          }
+        } else {
+          const correct = `${current.from} → ${current.to}`;
+          if (selectedReagents[0] === correct) {
+            feedbackEl.className = "feedback ok";
+            feedbackEl.textContent = "✅ Correct!";
+            score.correct++;
+          } else {
+            feedbackEl.className = "feedback bad";
+            feedbackEl.textContent = `❌ Incorrect. Correct: ${correct}`;
+          }
+        }
+
+        score.total++;
+        $("score").textContent = `${score.correct} / ${score.total}`;
+
+        // Change Submit → Next Question
+        $("submit").textContent = "Next Question";
+        $("submit").onclick = () => {
+          $("submit").textContent = "Submit";
+          $("submit").onclick = submit;
+          newQuestion();
+        };
+      }
+
+      // === MODE SWITCHING ===
+      $("mode-transform").addEventListener("click", () => {
+        mode = "transform";
+        $("mode-transform").classList.add("active");
+        $("mode-reagent").classList.remove("active");
+        newQuestion();
+      });
+
+      $("mode-reagent").addEventListener("click", () => {
+        mode = "reagent";
+        $("mode-reagent").classList.add("active");
+        $("mode-transform").classList.remove("active");
+        newQuestion();
+      });
+
+      // === SHUFFLE UTIL ===
+      function shuffle(arr) {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+
+      // === INITIALIZE ===
+      setDiffActive($("diff-easy"));
+      renderConditions();
+      setupTypeButtonListeners(); // Set up listeners once at initialization
+      newQuestion();
+
+      // Final event bindings
+      $("submit").onclick = submit;
+      $("skip").onclick = () => {
+        $("submit").textContent = "Submit";
+        $("submit").onclick = submit;
+        newQuestion();
+      };
+      $("show-answer").onclick = () => {
+        if (!current) return;
+        const r = current;
+        const answer = mode === "transform"
+          ? `Answer:\nReagents: ${r.reagents.join(", ")}\nConditions: ${r.conditions.map(capitalize).join(", ") || "none"}\nType: ${r.type.join(" or ")}`
+          : `Answer: ${r.from} → ${r.to}`;
+        factEl.style.display = "block";
+        factEl.textContent = answer + "\n\n" + r.fact;
+        hasSubmitted = true;
+      };
+
+      // Update condition checkboxes to refresh conditions when changed
+      document.querySelectorAll('.side-panel input[type="checkbox"]').forEach(checkbox => {
+        checkbox.addEventListener('change', renderConditions);
+      });
+
+    } catch (err) {
+      console.error("JavaScript Error:", err);
+      alert("An error occurred. Open browser console (F12) to see details.");
+    }
+  });
+</script>
+</body>
+</html>
