@@ -365,23 +365,6 @@
 
   <script>
   // === SAFETY: Wait for DOM to be fully loaded ===
-  document.addEventListener("DOMContentLoaded", () => {
-	try {
-  // === REAGENT FAMILIES (spectator ions removed, formatted with sub/superscripts) ===
-  const reagentFamilies = {
-    "PCl₃": ["PCl₃", "PCl₅", "SOCl₂", "HBr", "HI"],
-    "PCl₅": ["PCl₃", "PCl₅", "SOCl₂", "HBr", "HI"],
-    "SOCl₂": ["PCl₃", "PCl₅", "SOCl₂", "HBr", "HI"],
-    "HBr": ["PCl₃", "PCl₅", "SOCl₂", "HBr", "HI"],
-    "HI": ["PCl₃", "PCl₅", "SOCl₂", "HBr", "HI"],
-
-    "MnO₄⁻": ["Cr₂O₇²⁻ / H⁺", "MnO₄⁻ / H⁺"],
-    "Cr₂O₇²⁻": ["Cr₂O₇²⁻ / H⁺", "MnO₄⁻ / H⁺"],
-
-    "LiAlH₄": ["LiAlH₄", "NaBH₄"],
-    "NaBH₄": ["LiAlH₄", "NaBH₄"],
-  };
-
   // === DATABASE (charges/subscripts fixed, spectators removed) ===
   const reactions = [
     { from: "Alkene", to: "Alkane", reagents: ["H₂"], conditions: ["catalyst", "heat"], type: ["Addition"], fact: "Hydrogenation: adds H₂ across double bond. Requires metal catalyst." },
@@ -390,6 +373,7 @@
     { from: "Alkene", to: "Diol", reagents: ["MnO₄⁻ / H⁺"], conditions: [], type: ["Oxidation"], fact: "Syn dihydroxylation. Cold, dilute oxidizers give 1,2-diols." },
     { from: "Alkene", to: "Alcohol", reagents: ["dil. H₂SO₄"], conditions: ["heat"], type: ["Addition"], fact: "Acid-catalyzed hydration follows Markovnikov's rule." },
     { from: "Alkane", to: "Haloalkane", reagents: ["Cl₂", "Br₂"], conditions: ["uv"], type: ["Substitution"], fact: "UV light initiates radical chain reaction. Mixture of products possible." },
+	{ from: "Alcohol", to: "Haloalkane", reagents: ["PCl₃", "PCl₅", "SOCl₂", "HBr", "HI"], conditions: ["reflux"], type: ["Substitution"], fact: "OH⁻ replaces halogen. SN2 for 1°, SN1 for 3°." },
     { from: "Haloalkane", to: "Alcohol", reagents: ["conc. KOH", "conc. KOH"], conditions: ["reflux"], type: ["Substitution"], fact: "OH⁻ replaces halogen. SN2 for 1°, SN1 for 3°." },
     { from: "Haloalkane", to: "Amine", reagents: ["conc. NH₃"], conditions: ["heat"], type: ["Substitution"], fact: "Forms primary amine. Excess NH₃ prevents further substitution." },
     { from: "Alcohol (1°)", to: "Aldehyde", reagents: ["Cr₂O₇²⁻ / H⁺", "MnO₄⁻ / H⁺"], conditions: ["distil"], type: ["Oxidation"], fact: "Oxidation under distillation stops at aldehyde. Removes it before over-oxidation." },
@@ -399,7 +383,7 @@
     { from: "Aldehyde", to: "Carboxylic Acid", reagents: ["Cr₂O₇²⁻ / H⁺", "MnO₄⁻ / H⁺"], conditions: ["reflux"], type: ["Oxidation"], fact: "Aldehydes are easily oxidized; ketones are not." },
     { from: "Aldehyde", to: "Alcohol (1°)", reagents: ["NaBH₄", "LiAlH₄"], conditions: [], type: ["Reduction"], fact: "Hydride reagents reduce aldehydes to primary alcohols." },
     { from: "Ketone", to: "Alcohol (2°)", reagents: ["NaBH₄", "LiAlH₄"], conditions: [], type: ["Reduction"], fact: "Hydride reduction gives secondary alcohols." },
-    { from: "Carboxylic Acid", to: "Acid Chloride", reagents: ["SOCl₂", "PCl₃", "PCl₅", "HBr", "HI"], conditions: [], type: ["Substitution"], fact: "SOCl₂, PCl₃, PCl₅, HBr, and HI convert acids to acyl halides; SOCl₂ is preferred for easy purification." },
+    { from: "Carboxylic Acid", to: "Acid Chloride", reagents: ["PCl₃", "PCl₅", "SOCl₂", "HBr", "HI"], conditions: [], type: ["Substitution"], fact: "SOCl₂, PCl₃, PCl₅, HBr, and HI convert acids to acyl halides; SOCl₂ is preferred for easy purification." },
 	{ from: "Carboxylic Acid", to: "Ester", reagents: ["R-OH","conc. H₂SO₄"], conditions: ["reflux"], type: ["Condensation"], fact: "Fast, exothermic reaction with alcohols." },
 	{ from: "Alcohol", to: "Ester", reagents: ["R-COOH","conc. H₂SO₄"], conditions: ["reflux"], type: ["Condensation"], fact: "Fast, exothermic reaction with alcohols." },
     { from: "Acid Chloride", to: "Ester", reagents: ["R-OH"], conditions: [], type: ["Condensation"], fact: "Fast, exothermic reaction with alcohols." },
@@ -592,32 +576,57 @@
 
         feedbackEl.style.display = "block";
 
-        if (mode === "transform") {
-          const reagentsCorrect = addReagentSiblings(current.reagents).some(r => selectedReagents.includes(r));
-          const condsCorrect = current.conditions.every(c => selectedConds.includes(c)) && selectedConds.every(c => current.conditions.includes(c));
-          const typesCorrect = current.type.some(t => selectedTypes.includes(t));
+if (mode === "transform") {
+  // === NEW: Strict reagent checking ===
+  const expectedRawReagents = current.reagents; // e.g., ["Cr₂O₇²⁻ / H⁺"]
+  const expectedReagentsSet = new Set(addReagentSiblings(expectedRawReagents)); // expands family
 
-          if (reagentsCorrect && condsCorrect && typesCorrect) {
-            feedbackEl.className = "feedback ok";
-            feedbackEl.textContent = "✅ Correct!";
-            score.correct++;
-          } else {
-            feedbackEl.className = "feedback bad";
-            const expectedConds = current.conditions.map(capitalize).join(", ") || "none";
-            const expectedTypes = current.type.join(" or ");
-            feedbackEl.textContent = `❌ Incorrect.\nReagents: ${current.reagents.join(", ")}\nConditions: ${expectedConds}\nType: ${expectedTypes}`;
-          }
-        } else {
-          const correct = `${current.from} → ${current.to}`;
-          if (selectedReagents[0] === correct) {
-            feedbackEl.className = "feedback ok";
-            feedbackEl.textContent = "✅ Correct!";
-            score.correct++;
-          } else {
-            feedbackEl.className = "feedback bad";
-            feedbackEl.textContent = `❌ Incorrect. Correct: ${correct}`;
-          }
-        }
+  const selectedSet = new Set(selectedReagents);
+
+  // Check: every selected reagent must be in expected set (no extras)
+  const noExtraReagents = [...selectedSet].every(r => expectedReagentsSet.has(r));
+
+  // Check: every expected reagent has at least one representative selected
+  const hasAllRequired = [...expectedReagentsSet].some(expected => selectedSet.has(expected));
+
+  const reagentsCorrect = noExtraReagents && hasAllRequired;
+
+  // But wait — sometimes multiple reagents are needed (e.g. "conc. H₂SO₄" AND "R-OH")
+  // So let's refine: if the original reaction has multiple distinct reagents,
+  // we expect all of them (or their equivalents) to be covered.
+
+  // Better: For each required reagent group, at least one equivalent must be selected
+  const requiredGroups = expectedRawReagents.map(r =>
+    addReagentSiblings([r])
+  );
+
+  const hasEachRequiredGroup = requiredGroups.every(group =>
+    group.some(alt => selectedSet.has(alt))
+  );
+
+  // Final reagent correctness: all required groups covered AND no invalid reagents
+  const reagentsCorrect = hasEachRequiredGroup && noExtraReagents;
+
+  // === Conditions: must match exactly (order doesn't matter) ===
+  const condsCorrect =
+    current.conditions.every(c => selectedConds.includes(c)) &&
+    selectedConds.every(c => current.conditions.includes(c));
+
+  // === Reaction Type: at least one correct type selected ===
+  const typesCorrect = current.type.some(t => selectedTypes.includes(t));
+
+  if (reagentsCorrect && condsCorrect && typesCorrect) {
+    feedbackEl.className = "feedback ok";
+    feedbackEl.textContent = "✅ Correct!";
+    score.correct++;
+  } else {
+    feedbackEl.className = "feedback bad";
+    const expectedConds = current.conditions.map(capitalize).join(", ") || "none";
+    const expectedTypes = current.type.join(" or ");
+    const expectedReagentsMsg = expectedRawReagents.join(", ");
+    feedbackEl.textContent = `❌ Incorrect.\nReagents: ${expectedReagentsMsg}\nConditions: ${expectedConds}\nType: ${expectedTypes}`;
+  }
+}
 
         score.total++;
         $("score").textContent = `${score.correct} / ${score.total}`;
