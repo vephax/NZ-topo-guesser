@@ -194,7 +194,6 @@ async function loadStudyFiles() {
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<!-- "Go to Study" Button -->
 <div style="text-align: center; margin: 20px 0; padding: 10px; border-top: 1px solid #ccc;">
   <button id="studyBtn" style="font-size: 1.2em; padding: 10px 20px; background: #007cba; color: white; border: none; border-radius: 6px; cursor: pointer;">
     📚 Go to Study
@@ -207,12 +206,74 @@ async function loadStudyFiles() {
     <h2>📚 Study Tools</h2>
     <p>Select a study activity:</p>
     <ul id="studyList" style="list-style: none; padding: 0;">
-      <!-- Files will be loaded here -->
       <li>Loading study files...</li>
     </ul>
-    <button id="closeStudyModal" style="padding: 8px 16px; background: #555; color: white; border: none; border-radius: 6px; cursor: pointer;">Close</button>
+    <button id="closeStudyModal" style="padding: 8px 16px; background: #555; color: white; border: none; border-radius: 6px; cursor: pointer; margin-top: 10px;">Close</button>
   </div>
 </div>
+
+<!-- ✅ Fixed JavaScript: Runs after DOM loads -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const studyBtn = document.getElementById("studyBtn");
+  const studyModal = document.getElementById("studyModal");
+  const closeBtn = document.getElementById("closeStudyModal");
+  const studyList = document.getElementById("studyList");
+
+  // ✅ Open modal
+  studyBtn.addEventListener("click", () => {
+    studyModal.style.display = "flex";
+    loadStudyFiles();
+  });
+
+  // ✅ Close modal
+  closeBtn.addEventListener("click", () => {
+    studyModal.style.display = "none";
+  });
+
+  // ✅ Click outside modal to close
+  studyModal.addEventListener("click", (e) => {
+    if (e.target === studyModal) {
+      studyModal.style.display = "none";
+    }
+  });
+
+  // ✅ Load study files (manually defined list)
+  function loadStudyFiles() {
+    studyList.innerHTML = ""; // Clear loading message
+
+    const knownFiles = [
+      { name: "Organic Reaction Quiz", path: "study/organics-game/index.html" },
+      { name: "Functional Groups Trainer", path: "study/functional-groups.html" },
+      { name: "Mechanism Practice", path: "study/mechanisms.html" },
+      // Add more as you create them
+    ];
+
+    if (knownFiles.length === 0) {
+      studyList.innerHTML = "<li>No study tools found.</li>";
+      return;
+    }
+
+    knownFiles.forEach(file => {
+      const li = document.createElement("li");
+      const a = document.createElement("a");
+      a.href = file.path;
+      a.textContent = file.name;
+      a.style.padding = "12px";
+      a.style.display = "block";
+      a.style.margin = "6px 0";
+      a.style.backgroundColor = "#f0f8ff";
+      a.style.borderRadius = "6px";
+      a.style.color = "#007cba";
+      a.style.fontWeight = "500";
+      a.style.textDecoration = "none";
+      a.target = "_blank"; // Opens in new tab
+      li.appendChild(a);
+      studyList.appendChild(li);
+    });
+  }
+});
+</script>
   
 </body>
 </html>
