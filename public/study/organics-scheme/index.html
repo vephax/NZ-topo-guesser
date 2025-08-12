@@ -391,7 +391,7 @@
   const reactions = [
     { from: "Alkene", to: "Alkane", reagents: ["H₂ + Ni"], conditions: ["catalyst", "heat"], type: ["Addition"], fact: "Hydrogenation: adds H₂ across double bond. Requires metal catalyst." },
     { from: "Alkene", to: "Addition Polymer", reagents: ["none"], conditions: ["catalyst", "heat", "pressure"], type: ["Addition"], fact: "Polymerisation where a polymer is polymerised (=." },
-    { from: "Alkene", to: "Haloalkane", reagents: ["Br₂", "Cl₂"], conditions: [], type: ["Addition"], fact: "Electrophilic addition. Br₂ decolorizes from red-brown to colorless." },
+    { from: "Alkene", to: "Haloalkane", reagents: ["Br₂", "Cl₂", "HI₂", "HBr"], conditions: [], type: ["Addition"], fact: "Electrophilic addition. Br₂ decolorizes from red-brown to colorless." },
     { from: "Alkene", to: "Diol", reagents: ["MnO₄⁻ / H⁺"], conditions: [], type: ["Oxidation"], fact: "Syn dihydroxylation. Cold, dilute oxidizers give 1,2-diols." },
     { from: "Alkene", to: "Alcohol", reagents: ["dilute H₂SO₄"], conditions: ["heat"], type: ["Addition"], fact: "Acid-catalyzed hydration follows Markovnikov's rule." },
     { from: "Alkane", to: "Haloalkane", reagents: ["Cl₂", "Br₂"], conditions: ["uv"], type: ["Substitution"], fact: "UV light initiates radical chain reaction. Mixture of products possible." },
@@ -411,7 +411,7 @@
     { from: "Carboxylic Acid", to: "Amide", reagents: ["NH₃"], conditions: ["heat"], type: ["Condensation", "Substitution"], fact: "Amide formation is a condensation reaction with water as a byproduct." },
     { from: "Ester", to: "Carboxylic Acid", reagents: ["H₂O"], conditions: ["acidic", "reflux"], type: ["Hydrolysis"], fact: "Acidic hydrolysis is reversible." },
     { from: "Ester", to: "Carboxylate", reagents: ["OH⁻(aq)"], conditions: ["basic", "reflux"], type: ["Hydrolysis"], fact: "Base hydrolysis produces carboxylate salt — how soap is made." },
-    { from: "Amide", to: "Carboxylic Acid", reagents: ["HCl(aq)"], conditions: ["reflux"], type: ["Hydrolysis"], fact: "Harsh conditions needed. Amide bond is stable." },
+    { from: "Amide", to: "Carboxylic Acid", reagents: [" H₂SO₄"], conditions: ["reflux", "acidic"], type: ["Hydrolysis"], fact: "Harsh conditions needed. Amide bond is stable." },
     { from: "Amide", to: "Amine", reagents: ["LiAlH₄"], conditions: [], type: ["Reduction"], fact: "LiAlH₄ reduces amides to amines. NaBH₄ is too weak for this reaction." },
     { from: "Amine", to: "Ammonium Salt", reagents: ["HCl"], conditions: [], type: ["Acid-Base"], fact: "Amines are basic. Forms water-soluble ammonium salts." },
     { from: "Carboxylate Ion", to: "Carboxylic Acid", reagents: ["H⁺"], conditions: [], type: ["Acid-Base"], fact: "Adding acid reprotonates the carboxylate." }
