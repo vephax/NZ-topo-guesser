@@ -400,28 +400,45 @@
       const feedbackEl = $("feedback");
       const factEl = $("fact");
 
-      // === REACTION DATABASE ===
-      const reactions = [
-        { from: "Alkane", to: "Haloalkane", reagents: ["Cl₂", "Br₂"], conditions: ["uv"], fact: "UV light initiates radical substitution. Mixture of products possible." },
-        { from: "Haloalkane", to: "Alcohol", reagents: ["aq. KOH"], conditions: ["reflux"], fact: "Nucleophilic substitution: OH⁻ replaces halogen." },
-        { from: "Alcohol (1°)", to: "Aldehyde", reagents: ["Cr₂O₇²⁻/H⁺"], conditions: ["distil"], fact: "Distillation prevents over-oxidation to carboxylic acid." },
-        { from: "Alcohol (1°)", to: "Carboxylic Acid", reagents: ["Cr₂O₇²⁻/H⁺"], conditions: ["reflux"], fact: "Strong oxidation under reflux." },
-        { from: "Alcohol (2°)", to: "Ketone", reagents: ["Cr₂O₇²⁻/H⁺"], conditions: ["reflux"], fact: "Ketones resist further oxidation." },
-        { from: "Aldehyde", to: "Carboxylic Acid", reagents: ["Cr₂O₇²⁻/H⁺"], conditions: ["reflux"], fact: "Aldehydes are easily oxidized; ketones are not." },
-        { from: "Carboxylic Acid", to: "Acid Chloride", reagents: ["SOCl₂", "PCl₅"], conditions: [], fact: "SOCl₂ preferred: byproducts are gases." },
-        { from: "Alkene", to: "Haloalkane", reagents: ["HBr"], conditions: [], fact: "Electrophilic addition, follows Markovnikov's rule." },
-        { from: "Alkene", to: "Dihaloalkane", reagents: ["Br₂"], conditions: [], fact: "Decolorizes bromine water – test for unsaturation." },
-        { from: "Alkene", to: "Alcohol", reagents: ["dil. H₂SO₄"], conditions: ["heat"], fact: "Acid-catalyzed hydration." },
-        { from: "Alcohol", to: "Alkene", reagents: ["conc. H₂SO₄"], conditions: ["heat"], fact: "Dehydration follows Zaitsev's rule." },
-        { from: "Haloalkane", to: "Amine", reagents: ["NH₃ (conc.)"], conditions: ["heat"], fact: "Excess NH₃ minimizes polyalkylation." },
-        { from: "Acid Chloride", to: "Ester", reagents: ["ROH"], conditions: [], fact: "Fast, exothermic. No catalyst needed." },
-        { from: "Acid Chloride", to: "Amide", reagents: ["NH₃"], conditions: [], fact: "HCl gas produced – neutralize with base." },
-        { from: "Ester", to: "Carboxylic Acid", reagents: ["H₂O"], conditions: ["acidic", "reflux"], fact: "Reversible reaction." },
-        { from: "Ester", to: "Carboxylate", reagents: ["H₂O"], conditions: ["basic", "reflux"], fact: "Saponification – how soap is made." },
-      ];
+const reactions = [
+  { from: "Alkene", to: "Alkane", reagents: ["H₂"], conditions: ["catalyst", "heat"], type: ["Addition"], fact: "Hydrogenation: adds H₂ across double bond. Requires metal catalyst." },
+  { from: "Alkene", to: "Addition Polymer", reagents: ["R-C=C-R"], conditions: ["catalyst", "heat", "pressure"], type: ["Addition", "Condensation"], fact: "Polymerisation where a polymer is polymerised (=." },
+  { from: "Alkene", to: "Haloalkane", reagents: ["HI", "HBr", "HCl"], conditions: [], type: ["Addition"], fact: "Electrophilic addition. Br₂ decolorizes from red-brown to colorless." },
+  { from: "Alkene", to: "Dihaloalkane", reagents: ["I₂", "Cl₂", "Br₂"], conditions: [], type: ["Addition"], fact: "Electrophilic addition. Br₂ decolorizes from red-brown to colorless." },
+  { from: "Alkene", to: "Alcohol", reagents: ["dil. H₂SO₄"], conditions: ["heat"], type: ["Addition"], fact: "Acid-catalyzed hydration follows Markovnikov's rule." },
+  { from: "Alkene", to: "Diol", reagents: ["Cr₂O₇²⁻", "MnO₄⁻"], conditions: [""], type: ["Addition"], fact: "Oxidises alkenes to glycols (diols)." },
+  { from: "Alkane", to: "Haloalkane", reagents: ["Cl₂", "Br₂", "I₂"], conditions: ["uv"], type: ["Substitution"], fact: "UV light initiates radical chain reaction. Mixture of products possible." },
+  { from: "Alcohol", to: "Haloalkane", reagents: ["PCl₃", "PCl₅", "SOCl₂", "HBr", "HI"], conditions: ["reflux"], type: ["Substitution"], fact: "Converts OH to halide. SN2 for 1°, SN1 for 3°." },
+  { from: "Haloalkane", to: "Alcohol", reagents: ["aq. KOH"], conditions: ["reflux"], type: ["Substitution"], fact: "OH⁻ replaces halogen. SN2 for 1°, SN1 for 3°." },
+  { from: "Haloalkane", to: "Amine", reagents: ["conc. NH₃"], conditions: ["heat"], type: ["Substitution"], fact: "Forms primary amine. Excess NH₃ prevents further substitution." },
+  { from: "Alcohol (1°)", to: "Aldehyde", reagents: ["Cr₂O₇²⁻ / H⁺", "MnO₄⁻ / H⁺"], conditions: ["distil"], type: ["Oxidation"], fact: "Distillation stops at aldehyde before over-oxidation." },
+  { from: "Alcohol (1°)", to: "Carboxylic Acid", reagents: ["Cr₂O₇²⁻ / H⁺", "MnO₄⁻ / H⁺"], conditions: ["reflux"], type: ["Oxidation"], fact: "Fully oxidizes to carboxylic acid." },
+  { from: "Alcohol (2°)", to: "Ketone", reagents: ["Cr₂O₇²⁻ / H⁺", "MnO₄⁻ / H⁺"], conditions: ["reflux"], type: ["Oxidation"], fact: "Ketones resist further oxidation." },
+  { from: "Alcohol", to: "Alkene", reagents: ["conc. H₂SO₄"], conditions: ["heat"], type: ["Elimination"], fact: "Dehydration removes water. Zaitsev's rule applies." },
+  { from: "Aldehyde", to: "Carboxylic Acid", reagents: ["Cr₂O₇²⁻ / H⁺", "MnO₄⁻ / H⁺"], conditions: ["reflux"], type: ["Oxidation"], fact: "Aldehydes are easily oxidized; ketones are not." },
+  { from: "Aldehyde", to: "Alcohol (1°)", reagents: ["NaBH₄", "LiAlH₄"], conditions: [], type: ["Reduction"], fact: "Reduces to primary alcohols." },
+  { from: "Ketone", to: "Alcohol (2°)", reagents: ["NaBH₄", "LiAlH₄"], conditions: [], type: ["Reduction"], fact: "Reduces to secondary alcohols." },
+  { from: "Carboxylic Acid", to: "Acid Chloride", reagents: ["PCl₃", "PCl₅", "SOCl₂"], conditions: [], type: ["Substitution"], fact: "SOCl₂ preferred; byproducts are gases." },
+  { from: "Carboxylic Acid", to: "Ester", reagents: ["R-OH", "conc. H₂SO₄"], conditions: ["reflux"], type: ["Condensation"], fact: "Esterification with alcohols." },
+  { from: "Alcohol", to: "Ester", reagents: ["R-COOH", "conc. H₂SO₄"], conditions: ["reflux"], type: ["Condensation"], fact: "Esterification with carboxylic acids." },
+  { from: "Acid Chloride", to: "Ester", reagents: ["R-OH"], conditions: [], type: ["Condensation"], fact: "Fast, exothermic ester formation." },
+  { from: "Acid Chloride", to: "Amide (1°)", reagents: ["conc. NH₃", "alc. NH₃"], conditions: [], type: ["Substitution", "Condensation"], fact: "Forms primary amides; HCl gas produced." },
+  { from: "Acid Chloride", to: "Amide (2°)", reagents: ["R-NH₃"], conditions: ["reflux"], type: ["Substitution", "Condensation"], fact: "Forms secondary amides; HCl gas produced." },
+  { from: "Acid Chloride", to: "Carboxylic Acid", reagents: ["H₂O"], conditions: [], type: ["Hydrolysis", "Substitution"], fact: "Rapid hydrolysis to carboxylic acid." },
+  { from: "Carboxylic Acid", to: "Amide", reagents: ["conc. NH₃", "alc. NH₃"], conditions: ["heat"], type: ["Condensation", "Substitution"], fact: "Forms amides; water is a byproduct." },
+  { from: "Ester", to: "Carboxylic Acid", reagents: ["H₂O"], conditions: ["acidic", "reflux"], type: ["Hydrolysis"], fact: "Acidic hydrolysis is reversible." },
+  { from: "Ester", to: "Carboxylate", reagents: ["H₂O"], conditions: ["basic", "reflux"], type: ["Hydrolysis"], fact: "Saponification produces soap." },
+  { from: "Ester", to: "Amide", reagents: ["conc. NH₃", "alc. NH₃"], conditions: ["reflux"], type: ["Hydrolysis"], fact: "Ammonolysis forms amides." },
+  { from: "Amide", to: "Amine", reagents: ["NaBH₄", "LiAlH₄"], conditions: [], type: ["Reduction"], fact: "LiAlH₄ reduces amides to amines." },
+  { from: "Amine", to: "Ammonium Salt", reagents: ["H₂O"], conditions: ["acidic"], type: ["Acid-Base"], fact: "Amines react with acids to form salts." },
+  { from: "Ammonium Salt", to: "Amine", reagents: ["H₂O"], conditions: ["basic"], type: ["Acid-Base"], fact: "Base liberates free amine." },
+  { from: "Carboxylate Acid", to: "Carboxylic Ion", reagents: ["H₂O"], conditions: ["basic"], type: ["Acid-Base"], fact: "Base forms carboxylate ion." },
+  { from: "Carboxylate Ion", to: "Carboxylic Acid", reagents: ["H₂O"], conditions: ["acidic"], type: ["Acid-Base"], fact: "Acid reprotonates carboxylate." }
+];
 
-      const validStarters = ["Alkane", "Alkene", "Alcohol", "Alcohol (1°)", "Alcohol (2°)", "Aldehyde", "Carboxylic Acid", "Haloalkane"];
-      const validTargets = ["Acid Chloride", "Ester", "Alcohol", "Carboxylic Acid", "Ketone", "Amine", "Aldehyde"];
+// Generate valid starters and targets automatically from the list
+const validStarters = [...new Set(reactions.map(r => r.from))];
+const validTargets = [...new Set(reactions.map(r => r.to))];
 
       const difficultySteps = {
         baby: { min: 2, max: 2 },
