@@ -3,7 +3,7 @@ let answerLat = 0, answerLng = 0, guessLat = null, guessLng = null;
 let hasGuessed = false, timerInt = null, roundsPlayed = 0, totalRounds = 0, scoreTotal = 0;
 let map, guessMarker;
 let currentUser = null;
-const currentVersion = "9.5.1";
+const currentVersion = "9.6";
 
 const versions = [
   { version: "9.2", changelog: "8/8/2025 \n The server works now. It only took 6 hours. No more AI slop is here. Leaderboards and seed analysis now work due to an actual game data system. A server. Not what was here before, aka a link." },
@@ -13,7 +13,7 @@ const versions = [
   { version: "9.4.1", changelog: "11/8/2025 \n\n - Changed scoring system to now have a better function.\n if you get anywhere on the screen you will get maximum points \n\n - now rounds score, for average etc \n\n - rainbow buttons \n\n - boxes next to eachother \n\n - lowered chathams chance \n\n - Max 😁"},
   { version: "9.4.2", changelog: "12/8/2025 \n\n - Added better version history logs.🥰🥰🥰 "},
   { version: "9.5", changelog: "12/8/2025 \n\n - Holy Guacamole, we're diversifying, \n now able to play study and practice studying \n with great functionality for all involved \n just scroll to the bottom to see the diversification \n most are prettttty acurate \n not liable for any problems you may have. "},
-  { version: "9.5.1", changelog: "12/8/2025 \n\n - Fixed some broken reaction schemes🥰🥰🥰 "}
+  { version: "9.6", changelog: "14/8/2025 \n\n This one is for Arya \n \n - Added Bush Mode (experimental) :D \n\n - Edited and added new audio clips. There are now 13 good and 13 bad. \n\n - Menno"}
 ];
 
 // === REGION DATA ===
@@ -141,8 +141,8 @@ fetch("/ping")
     console.error("❌ Server is not reachable:", err);
   });
 
-const goodSounds = ['good1', 'good2', 'good3', 'good4', 'good5', 'good6', 'good7', 'good8', 'good9', 'good10', 'good11'];
-const badSounds = ['bad1', 'bad2', 'bad4', 'bad5', 'bad6', 'bad7', 'bad8', 'bad9', 'bad10', 'bad11', 'bad12', 'bad13'];
+const goodSounds = ['good1', 'good2', 'good3', 'good4', 'good5', 'good6', 'good7', 'good8', 'good9', 'good10', 'good11', 'good12', 'good13'];
+const badSounds = ['bad1', 'bad2', 'bad3', 'bad4', 'bad5', 'bad6', 'bad7', 'bad8', 'bad9', 'bad10', 'bad11', 'bad12', 'bad13'];
 
 function playRandomSound(soundList) {
   const id = soundList[Math.floor(Math.random() * soundList.length)];
@@ -176,6 +176,34 @@ async function tileHasLand(lat, lng) {
     }
   } catch { return false; }
   return false;
+}
+
+async function tileHasEnoughBush(lat, lng) {
+  const x = longitudeToTileX(lng), y = latitudeToTileY(lat);
+  const url = `https://basemaps.linz.govt.nz/v1/tiles/topo-raster/WebMercatorQuad/${zoom}/${x}/${y}.webp?api=c01k1w81j8nbj00y7gy7x4b17j6`;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return false;
+    const blob = await res.blob();
+    const bmp = await createImageBitmap(blob);
+    const canvas = new OffscreenCanvas(bmp.width, bmp.height);
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(bmp, 0, 0);
+    const data = ctx.getImageData(0, 0, bmp.width, bmp.height).data;
+    let contour = 0;
+    let bush = 0;
+    let road = 0;
+    for (let i = 0; i < data.length; i += 4) {
+      const [r, g, b] = [data[i], data[i+1], data[i+2]];
+      if (b > 72 && b < 120 && r > 170 && r < 190 && g > 140 && g < 160) { contour++; continue; }
+      if (r < 230 && r > 200 && g < 240 && g > 215 && b < 195 && b > 130) { bush++; continue; } 
+      if (r > 200 && r < 220 && g > 90 && g < 120 && b < 50) road++;
+      if (r > 200 && r < 240 && g > 150 && g < 165 && b < 50 && b > 10) road++;
+      if (road > 30) {console.log("Road Detected"); return false;}
+    }
+    
+    return (bush > 5000 ) || contour >= 800;
+  } catch { return false; }
 }
 
 async function tileHasEnoughWater(lat, lng) {
@@ -274,6 +302,7 @@ async function tileHasEnoughUrban(lat, lng) {
 async function tileHasEnoughHighway(lat, lng) {
   const x = longitudeToTileX(lng), y = latitudeToTileY(lat);
   const url = `https://basemaps.linz.govt.nz/v1/tiles/topo-raster/WebMercatorQuad/${zoom}/${x}/${y}.webp?api=c01k1w81j8nbj00y7gy7x4b17j6`;
+  console.log(x + ", " + y);
   try {
     const res = await fetch(url);
     if (!res.ok) return false;
@@ -307,6 +336,9 @@ async function getValidLocation() {
 
     } else if (gameType === "Highway") {
       if (await tileHasEnoughHighway(loc.lat, loc.lng)) return loc;
+      
+    } else if (gameType === "Bush") {
+      if (await tileHasEnoughBush(loc.lat, loc.lng)) return loc;
 
     } else { //Gametype is }Everywhere"
       if (await tileHasLand(loc.lat, loc.lng)) return loc;

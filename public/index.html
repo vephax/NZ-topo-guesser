@@ -9,65 +9,66 @@
 </head>
 
   <script>
-// 📚 Study Mode: Load list of HTML files from /study folder
-document.getElementById("studyBtn").addEventListener("click", () => {
-  document.getElementById("studyModal").style.display = "flex";
-  loadStudyFiles();
-});
+    // 📚 Study Mode: Load list of HTML files from /study folder
+  document.getElementById("studyBtn").addEventListener("click", () => {
+    document.getElementById("studyModal").style.display = "flex";
+    loadStudyFiles();
+  });
 
-document.getElementById("closeStudyModal").addEventListener("click", () => {
-  document.getElementById("studyModal").style.display = "none";
-});
-
-async function loadStudyFiles() {
-  const studyList = document.getElementById("studyList");
-  studyList.innerHTML = ""; // Clear loading message
-
-  try {
-    // We'll try to fetch a generated directory listing (only works if server allows it)
-    // But since you're using file://, we can't do that. So we use a fallback list or assume known structure.
-
-    // === OFFLINE-FRIENDLY: Manual list of known study files (you can update this) ===
-    const knownFiles = [
-      { name: "Organic Reaction Quiz", path: "study/organics-scheme/index.html" },
-    ];
-
-    if (knownFiles.length === 0) {
-      studyList.innerHTML = "<li>No study tools found. Add some in /study/</li>";
-      return;
-    }
-
-    knownFiles.forEach(file => {
-      const li = document.createElement("li");
-      li.style.margin = "8px 0";
-      const a = document.createElement("a");
-      a.href = file.path;
-      a.textContent = file.name;
-      a.style.padding = "10px";
-      a.style.display = "block";
-      a.style.backgroundColor = "#f0f8ff";
-      a.style.borderRadius = "6px";
-      a.style.color = "#007cba";
-      a.style.textDecoration = "none";
-      a.target = "_blank"; // Open in new tab
-      li.appendChild(a);
-      studyList.appendChild(li);
+  document.getElementById("closeStudyModal").addEventListener("click", () => {
+    document.getElementById("studyModal").style.display = "none";
     });
 
-    // Optional: Try to warn if /study/ folder doesn't exist
-    const test = new XMLHttpRequest();
-    test.open('HEAD', 'study/', false);
-    test.send();
-    if (test.status !== 200) {
-      studyList.innerHTML = "<li style='color: #721c24;'>⚠️ Study folder not found. Make sure /study/ exists with HTML files.</li>";
-    }
+  async function loadStudyFiles() {
+    const studyList = document.getElementById("studyList");
+    studyList.innerHTML = ""; // Clear loading message
 
-  } catch (e) {
-    studyList.innerHTML = "<li style='color: #721c24;'>Could not load study files. Check folder structure.</li>";
-    console.warn("Directory listing failed (expected in file://):", e);
+    try {
+      // We'll try to fetch a generated directory listing (only works if server allows it)
+      // But since you're using file://, we can't do that. So we use a fallback list or assume known structure.
+
+      // === OFFLINE-FRIENDLY: Manual list of known study files (you can update this) ===
+      const knownFiles = [
+        { name: "Organic Reaction Quiz", path: "study/organics-scheme/index.html" },
+      ];
+
+      if (knownFiles.length === 0) {
+        studyList.innerHTML = "<li>No study tools found. Add some in /study/</li>";
+        return;
+      }
+
+      knownFiles.forEach(file => {
+        const li = document.createElement("li");
+        li.style.margin = "8px 0";
+        const a = document.createElement("a");
+        a.href = file.path;
+        a.textContent = file.name;
+        a.style.padding = "10px";
+        a.style.display = "block";
+        a.style.backgroundColor = "#f0f8ff";
+        a.style.borderRadius = "6px";
+        a.style.color = "#007cba";
+        a.style.textDecoration = "none";
+        a.target = "_blank"; // Open in new tab
+        li.appendChild(a);
+        studyList.appendChild(li);
+      });
+
+      // Optional: Try to warn if /study/ folder doesn't exist
+      const test = new XMLHttpRequest();
+      test.open('HEAD', 'study/', false);
+      test.send();
+      if (test.status !== 200) {
+        studyList.innerHTML = "<li style='color: #721c24;'>⚠️ Study folder not found. Make sure /study/ exists with HTML files.</li>";
+      }
+
+    } catch (e) {
+      studyList.innerHTML = "<li style='color: #721c24;'>Could not load study files. Check folder structure.</li>";
+      console.warn("Directory listing failed (expected in file://):", e);
+    }
   }
-}
 </script>
+
 <body>
   <!-- Get other files -->
   <script src="game.js" defer></script>
@@ -147,6 +148,7 @@ async function loadStudyFiles() {
         <option value="Beach">Beach</option>
         <option value="Urban">Urban</option>
         <option value="Highway">State Highway</option>
+        <option value="Bush">Bush (experimental)</option>
       </select>
     </label>
     <br/>
@@ -177,9 +179,12 @@ async function loadStudyFiles() {
   <audio id="good9" src="SoundEffects/Good/make_me_proud.mp3" preload="auto"></audio>
   <audio id="good10" src="SoundEffects/Good/oh_yeah.mp3" preload="auto"></audio>
   <audio id="good11" src="SoundEffects/Good/perfect_keep_it_up.mp3" preload="auto"></audio>
+  <audio id="good12" src="SoundEffects/Good/absolutely_stunning.mp3" preload="auto"></audio>
+  <audio id="good13" src="SoundEffects/Good/damn_smashed.mp3" preload="auto"></audio>
+
   <audio id="bad1" src="SoundEffects/Bad/pathetic.mp3" preload="auto"></audio>
-  <!-- Bad 3 is missing temporarily -->
   <audio id="bad2" src="SoundEffects/Bad/oh_my_chathams.mp3" preload="auto"></audio>
+  <audio id="bad3" src="SoundEffects/Bad/trash_perfect.mp3" preload="auto"></audio>
   <audio id="bad4" src="SoundEffects/Bad/absolutely_worthless.mp3" preload="auto"></audio>
   <audio id="bad5" src="SoundEffects/Bad/toddler_done_better.mp3" preload="auto"></audio>
   <audio id="bad6" src="SoundEffects/Bad/try_the_naki.mp3" preload="auto"></audio>
