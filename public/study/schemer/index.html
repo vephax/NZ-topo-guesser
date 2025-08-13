@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Max's Organic Synthesis Ai sloppppifier</title>
+  <style>
+    :root {
+      --bg-primary: #f0f4f8;
+      --bg-secondary: white;
+      --bg-tertiary: #f9fbff;
+      --text-primary: #1a1a2e;
+      --text-secondary: #2c3e50;
+      --text-muted: #555;
+      --border-color: #e0e0e0;
+      --border-light: #e0e0f0;
+      --accent-primary: #007bff;
+      --accent-hover: #a0d8ff;
+      --step-bg: #e8f4fc;
+      --step-border: #bde0fd;
+      --drag-bg: #f0f8ff;
+      --drag-hover: #d0ebff;
+      --success-bg: #d4edda;
+      --success-text: #155724;
+      --success-border: #c3e6cb;
+      --error-bg: #f8d7da;
+      --error-text: #721c24;
+      --error-border: #f5c6cb;
+      --fact-bg: #fffbe6;
+      --fact-border: #ffeaa7;
+    }
+
+    [data-theme="dark"] {
+      --bg-primary: #1a1a2e;
+      --bg-secondary: #16213e;
+      --bg-tertiary: #0f1419;
+      --text-primary: #e2e8f0;
+      --text-secondary: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+      --border-light: #475569;
+      --accent-primary: #3b82f6;
+      --accent-hover: #1e40af;
+      --step-bg: #1e293b;
+      --step-border: #334155;
+      --drag-bg: #2c3a50;
+      --drag-hover: #475569;
+      --success-bg: #064e3b;
+      --success-text: #6ee7b7;
+      --success-border: #047857;
+      --error-bg: #7f1d1d;
+      --error-text: #fca5a5;
+      --error-border: #dc2626;
+      --fact-bg: #451a03;
+      --fact-border: #92400e;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 20px;
+      transition: all 0.3s ease;
+    }
+    .container {
+      max-width: 1200px;
+      margin: auto;
+      background: var(--bg-secondary);
+      border-radius: 14px;
+      box-shadow: 0 6px 25px rgba(0,0,0,0.1);
+      padding: 25px;
+      display: grid;
+      grid-template-columns: 200px 1fr 200px;
+      grid-template-rows: auto 1fr auto auto auto;
+      gap: 20px;
+    }
+
+    header {
+      grid-column: 1 / 4;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 1.5em;
+      color: var(--text-secondary);
+    }
+
+    .header-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .theme-toggle {
+      padding: 8px 12px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-tertiary);
+      cursor: pointer;
+      border-radius: 6px;
+      font-size: 0.8em;
+    }
+    .diff-btn {
+      padding: 10px 14px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-tertiary);
+      cursor: pointer;
+      border-radius: 8px;
+      font-size: 0.9em;
+      color: var(--text-primary);
+    }
+    .diff-btn.active {
+      background: var(--accent-primary);
+      color: white;
+      border-color: var(--accent-primary);
+    }
+
+    /* Sidebars */
+    .conditions-pool, .reagents-pool {
+      background: var(--bg-tertiary);
+      border: 1px dashed var(--border-light);
+      border-radius: 10px;
+      padding: 15px;
+      height: fit-content;
+    }
+    .conditions-pool h3, .reagents-pool h3 {
+      margin: 0 0 10px;
+      font-size: 0.95em;
+      color: var(--text-secondary);
+    }
+
+    /* Main: Synthesis Path */
+    .main-area {
+      grid-column: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .compound-box {
+      padding: 16px;
+      font-weight: bold;
+      font-size: 1.2em;
+      min-width: 160px;
+      text-align: center;
+      border-radius: 10px;
+      margin: 8px 0;
+    }
+    .compound-box.start {
+      background: #e3f2fd;
+      border: 2px solid #2196f3;
+    }
+    .compound-box.intermediate {
+      background: #fff3e0;
+      border: 2px solid #ff9800;
+    }
+    .compound-box.target {
+      background: #f0fff4;
+      border: 2px solid #4caf50;
+      color: #155724;
+    }
+
+    /* Step with arrow and conditions/reagents on sides */
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin: 15px 0;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .condition-drop {
+      min-width: 120px;
+      text-align: center;
+    }
+
+    .arrow-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .arrow {
+      font-size: 2em;
+      color: var(--text-muted);
+    }
+
+    .reagent-drop {
+      min-width: 120px;
+      text-align: center;
+    }
+
+    .drop-zone {
+      padding: 10px 14px;
+      min-height: 50px;
+      background: var(--drag-bg);
+      border: 2px dashed var(--border-light);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-style: italic;
+      color: var(--text-muted);
+      transition: all 0.2s;
+      font-size: 0.9em;
+    }
+    .drop-zone:hover {
+      border-color: var(--accent-primary);
+      background: var(--drag-hover);
+    }
+    .drop-zone.filled {
+      background: var(--step-bg);
+      border-color: var(--step-border);
+      color: var(--text-primary);
+      font-style: normal;
+    }
+    .drop-zone .tag {
+      background: var(--accent-primary);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.85em;
+    }
+
+    /* Product drop zones (for intermediates) */
+    .product-drop {
+      min-width: 160px;
+      text-align: center;
+      margin: 10px 0;
+    }
+
+    /* Bottom: Products Pool */
+    .products-pool {
+      grid-column: 1 / 4;
+      background: var(--bg-tertiary);
+      border: 1px dashed var(--border-light);
+      border-radius: 10px;
+      padding: 15px;
+      text-align: center;
+    }
+    .products-pool h3 {
+      margin: 0 0 10px;
+      font-size: 0.95em;
+      color: var(--text-secondary);
+    }
+
+    /* Controls */
+    .controls {
+      grid-column: 1 / 4;
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    button.primary {
+      background: var(--accent-primary);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button.secondary {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .feedback {
+      grid-column: 1 / 4;
+      margin: 10px 0;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 0.95em;
+      display: none;
+      white-space: pre-line;
+    }
+    .feedback.ok {
+      background: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid var(--success-border);
+    }
+    .feedback.bad {
+      background: var(--error-bg);
+      color: var(--error-text);
+      border: 1px solid var(--error-border);
+    }
+    .fact-box {
+      grid-column: 1 / 4;
+      margin: 10px 0;
+      padding: 14px;
+      background: var(--fact-bg);
+      border: 1px dashed var(--fact-border);
+      border-radius: 8px;
+      font-size: 0.9em;
+      white-space: pre-line;
+      display: none;
+    }
+    footer {
+      grid-column: 1 / 4;
+      margin-top: 20px;
+      text-align: center;
+      font-size: 0.85em;
+      color: var(--text-muted);
+    }
+
+    .draggable {
+      padding: 8px 12px;
+      background: var(--option-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      cursor: move;
+      font-size: 0.9em;
+      min-width: 90px;
+      text-align: center;
+      display: inline-block;
+      margin: 4px;
+    }
+    .draggable.condition { background: #e8f4fc; border-color: #2196f3; }
+    .draggable.reagent  { background: #f3e5f5; border-color: #9c27b0; }
+    .draggable.product  { background: #fff3e0; border-color: #ff9800; }
+  </style>
+</head>
+<body data-theme="light">
+  <div class="container">
+    <header>
+      <h1>Max's Organic Synthesis Tree</h1>
+      <div class="header-controls">
+        <button id="theme-toggle" class="theme-toggle">🌙 Dark</button>
+        <button id="diff-baby" class="diff-btn">Baby (2)</button>
+        <button id="diff-easy" class="diff-btn active">Easy (3)</button>
+        <button id="diff-med" class="diff-btn">Medium (4)</button>
+        <button id="diff-hard" class="diff-btn">Hard (5)</button>
+        <button id="diff-evil" class="diff-btn">Evil (10)</button>
+      </div>
+    </header>
+
+    <!-- Left: Conditions -->
+    <div class="conditions-pool">
+      <h3>Drag Condition (←)</h3>
+      <div id="conditions-pool"></div>
+    </div>
+
+    <!-- Main: Synthesis Path -->
+    <div class="main-area">
+      <div class="compound-box start" id="start">?</div>
+      <div id="steps-container"></div>
+      <div class="compound-box target" id="target">?</div>
+    </div>
+
+    <!-- Right: Reagents -->
+    <div class="reagents-pool">
+      <h3>Drag Reagent (→)</h3>
+      <div id="reagents-pool"></div>
+    </div>
+
+    <!-- Bottom: Products -->
+    <div class="products-pool">
+      <h3>Drag Intermediate (↓)</h3>
+      <div id="products-pool"></div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button id="submit" class="primary">Submit Pathway</button>
+      <button id="helpful-hint" class="secondary">Helpful Hint</button>
+      <button id="reset" class="secondary">Reset</button>
+      <button id="show-answer" class="secondary">Show Answer</button>
+    </div>
+
+    <div id="feedback" class="feedback"></div>
+    <div id="fact" class="fact-box"></div>
+
+    <footer>
+      Build a synthesis from start to target.<br>
+      Final product is known. Drag: condition (←), intermediate (↓), reagent (→). Made with AI slop.<br>
+      any questions idgaf this is AI slop at it's beauuuutiful finest.
+    </footer>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      let isDark = false;
+      let difficulty = "easy";
+      let correctPath = [];
+      let userSteps = [];
+      let start = "";
+      let target = "";
+
+      const $ = id => document.getElementById(id);
+      const feedbackEl = $("feedback");
+      const factEl = $("fact");
+
+      // === REACTION DATABASE ===
+      const reactions = [
+        { from: "Alkane", to: "Haloalkane", reagents: ["Cl₂", "Br₂"], conditions: ["uv"], fact: "UV light initiates radical substitution. Mixture of products possible." },
+        { from: "Haloalkane", to: "Alcohol", reagents: ["aq. KOH"], conditions: ["reflux"], fact: "Nucleophilic substitution: OH⁻ replaces halogen." },
+        { from: "Alcohol (1°)", to: "Aldehyde", reagents: ["Cr₂O₇²⁻/H⁺"], conditions: ["distil"], fact: "Distillation prevents over-oxidation to carboxylic acid." },
+        { from: "Alcohol (1°)", to: "Carboxylic Acid", reagents: ["Cr₂O₇²⁻/H⁺"], conditions: ["reflux"], fact: "Strong oxidation under reflux." },
+        { from: "Alcohol (2°)", to: "Ketone", reagents: ["Cr₂O₇²⁻/H⁺"], conditions: ["reflux"], fact: "Ketones resist further oxidation." },
+        { from: "Aldehyde", to: "Carboxylic Acid", reagents: ["Cr₂O₇²⁻/H⁺"], conditions: ["reflux"], fact: "Aldehydes are easily oxidized; ketones are not." },
+        { from: "Carboxylic Acid", to: "Acid Chloride", reagents: ["SOCl₂", "PCl₅"], conditions: [], fact: "SOCl₂ preferred: byproducts are gases." },
+        { from: "Alkene", to: "Haloalkane", reagents: ["HBr"], conditions: [], fact: "Electrophilic addition, follows Markovnikov's rule." },
+        { from: "Alkene", to: "Dihaloalkane", reagents: ["Br₂"], conditions: [], fact: "Decolorizes bromine water – test for unsaturation." },
+        { from: "Alkene", to: "Alcohol", reagents: ["dil. H₂SO₄"], conditions: ["heat"], fact: "Acid-catalyzed hydration." },
+        { from: "Alcohol", to: "Alkene", reagents: ["conc. H₂SO₄"], conditions: ["heat"], fact: "Dehydration follows Zaitsev's rule." },
+        { from: "Haloalkane", to: "Amine", reagents: ["NH₃ (conc.)"], conditions: ["heat"], fact: "Excess NH₃ minimizes polyalkylation." },
+        { from: "Acid Chloride", to: "Ester", reagents: ["ROH"], conditions: [], fact: "Fast, exothermic. No catalyst needed." },
+        { from: "Acid Chloride", to: "Amide", reagents: ["NH₃"], conditions: [], fact: "HCl gas produced – neutralize with base." },
+        { from: "Ester", to: "Carboxylic Acid", reagents: ["H₂O"], conditions: ["acidic", "reflux"], fact: "Reversible reaction." },
+        { from: "Ester", to: "Carboxylate", reagents: ["H₂O"], conditions: ["basic", "reflux"], fact: "Saponification – how soap is made." },
+      ];
+
+      const validStarters = ["Alkane", "Alkene", "Alcohol", "Alcohol (1°)", "Alcohol (2°)", "Aldehyde", "Carboxylic Acid", "Haloalkane"];
+      const validTargets = ["Acid Chloride", "Ester", "Alcohol", "Carboxylic Acid", "Ketone", "Amine", "Aldehyde"];
+
+      const difficultySteps = {
+        baby: { min: 2, max: 2 },
+        easy: { min: 2, max: 3 },
+        med: { min: 3, max: 4 },
+        hard: { min: 4, max: 5 },
+        evil: { min: 8, max: 10 }
+      };
+
+      // === Theme Toggle ===
+      $("theme-toggle").addEventListener("click", () => {
+        isDark = !isDark;
+        document.body.setAttribute("data-theme", isDark ? "dark" : "light");
+        $("theme-toggle").textContent = isDark ? "☀️ Light" : "🌙 Dark";
+      });
+
+      // === Difficulty Buttons ===
+      document.querySelectorAll(".diff-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".diff-btn").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          const newDifficulty = btn.id.replace("diff-", "");
+          if (newDifficulty !== difficulty) {
+            difficulty = newDifficulty;
+            reset();
+          }
+        });
+      });
+
+      // === Reset Game ===
+      function reset() {
+        correctPath = [];
+        userSteps = [];
+        feedbackEl.style.display = "none";
+        factEl.style.display = "none";
+        $("steps-container").innerHTML = "";
+        $("conditions-pool").innerHTML = "";
+        $("reagents-pool").innerHTML = "";
+        $("products-pool").innerHTML = "";
+        initGame();
+      }
+
+      // === Init Game ===
+      function initGame() {
+        start = validStarters[Math.floor(Math.random() * validStarters.length)];
+        target = validTargets[Math.floor(Math.random() * validTargets.length)];
+
+        $("start").textContent = start;
+        $("target").textContent = target;
+
+        const path = findPath(start, target, difficultySteps[difficulty]);
+        if (!path || path.length === 0) return setTimeout(initGame, 100);
+
+        correctPath = path;
+        userSteps = path.map(() => ({ condition: null, reagent: null, product: null }));
+
+        renderSteps();
+        generatePools();
+      }
+
+      // === BFS Pathfinding ===
+      function findPath(from, to, stepsRange) {
+        const queue = [[from]];
+        const visited = new Set();
+        const min = stepsRange.min;
+        const max = stepsRange.max;
+        
+        let attempts = 0;
+        const maxAttempts = 1000; // Prevent infinite loops
+
+        while (queue.length && attempts < maxAttempts) {
+          attempts++;
+          const path = queue.shift();
+          const last = path[path.length - 1];
+
+          if (path.length > max + 1) continue;
+          if (path.length >= min + 1 && last === to) return buildReactionPath(path);
+
+          const visitKey = `${last}-${path.length}`;
+          if (visited.has(visitKey)) continue;
+          visited.add(visitKey);
+
+          reactions.forEach(r => {
+            if (r.from === last) {
+              const next = [...path, r.to];
+              if (next.length <= max + 1) queue.push(next);
+            }
+          });
+        }
+        
+        // If no path found, try with relaxed constraints for evil mode
+        if (stepsRange === difficultySteps.evil) {
+          return findPath(from, to, { min: 3, max: 6 });
+        }
+        
+        return null;
+      }
+
+      function buildReactionPath(nodes) {
+        return nodes.slice(0, -1).map((from, i) => {
+          const to = nodes[i + 1];
+          return reactions.find(r => r.from === from && r.to === to) || null;
+        }).filter(Boolean);
+      }
+
+      // === Render Steps ===
+      function renderSteps() {
+        const container = $("steps-container");
+        container.innerHTML = "";
+
+        correctPath.forEach((step, i) => {
+          // Create step with condition on left, arrow in middle, reagent on right
+          const stepDiv = document.createElement("div");
+          stepDiv.className = "step";
+
+          // Left: Condition drop zone
+          const condDrop = document.createElement("div");
+          condDrop.className = "drop-zone";
+          condDrop.dataset.step = i;
+          condDrop.dataset.type = "condition";
+          condDrop.textContent = "Condition";
+          if (userSteps[i].condition !== null) {
+            condDrop.innerHTML = `<span class="tag">${userSteps[i].condition || "None"}</span>`;
+            condDrop.classList.add("filled");
+          }
+          condDrop.addEventListener("dragover", e => {
+            e.preventDefault();
+            e.stopPropagation();
+          });
+          condDrop.addEventListener("drop", handleDrop);
+          const condCol = document.createElement("div");
+          condCol.className = "condition-drop";
+          condCol.appendChild(condDrop);
+
+          // Middle: Arrow
+          const arrowCol = document.createElement("div");
+          arrowCol.className = "arrow-container";
+          const arrow = document.createElement("div");
+          arrow.className = "arrow";
+          arrow.textContent = "↓";
+          arrowCol.appendChild(arrow);
+
+          // Right: Reagent drop zone
+          const reagDrop = document.createElement("div");
+          reagDrop.className = "drop-zone";
+          reagDrop.dataset.step = i;
+          reagDrop.dataset.type = "reagent";
+          reagDrop.textContent = "Reagent";
+          if (userSteps[i].reagent) {
+            reagDrop.innerHTML = `<span class="tag">${userSteps[i].reagent}</span>`;
+            reagDrop.classList.add("filled");
+          }
+          reagDrop.addEventListener("dragover", e => {
+            e.preventDefault();
+            e.stopPropagation();
+          });
+          reagDrop.addEventListener("drop", handleDrop);
+          const reagCol = document.createElement("div");
+          reagCol.className = "reagent-drop";
+          reagCol.appendChild(reagDrop);
+
+          stepDiv.appendChild(condCol);
+          stepDiv.appendChild(arrowCol);
+          stepDiv.appendChild(reagCol);
+          container.appendChild(stepDiv);
+
+          // Add intermediate product drop zone (except for last step)
+          if (i < correctPath.length - 1) {
+            const prodDrop = document.createElement("div");
+            prodDrop.className = "drop-zone";
+            prodDrop.dataset.step = i;
+            prodDrop.dataset.type = "product";
+            prodDrop.textContent = "Intermediate Product";
+            if (userSteps[i].product) {
+              prodDrop.innerHTML = `<span class="tag">${userSteps[i].product}</span>`;
+              prodDrop.classList.add("filled");
+            }
+            prodDrop.addEventListener("dragover", e => {
+              e.preventDefault();
+              e.stopPropagation();
+            });
+            prodDrop.addEventListener("drop", handleDrop);
+            const prodCol = document.createElement("div");
+            prodCol.className = "product-drop";
+            prodCol.appendChild(prodDrop);
+            container.appendChild(prodCol);
+          } else {
+            // For the last step, set the product automatically
+            userSteps[i].product = step.to;
+          }
+        });
+      }
+
+      // === Generate Pools ===
+      function generatePools() {
+        const allReagents = new Set();
+        const allConditions = new Set(["None"]);
+        const allProducts = new Set();
+
+        reactions.forEach(r => {
+          r.reagents.forEach(rg => allReagents.add(rg));
+          if (r.conditions.length === 0) {
+            allConditions.add("None");
+          } else {
+            r.conditions.forEach(c => allConditions.add(c));
+          }
+          allProducts.add(r.to);
+        });
+
+        // Conditions (left)
+        Array.from(allConditions).sort().forEach(c => {
+          const el = createDraggable(c, "condition");
+          $("conditions-pool").appendChild(el);
+        });
+
+        // Reagents (right)
+        Array.from(allReagents).sort().forEach(r => {
+          const el = createDraggable(r, "reagent");
+          $("reagents-pool").appendChild(el);
+        });
+
+        // Products (bottom) – include ALL products including start and target
+        Array.from(allProducts).sort().forEach(p => {
+          const el = createDraggable(p, "product");
+          $("products-pool").appendChild(el);
+        });
+        
+        // Also add start compound to products pool for complex syntheses
+        if (!allProducts.has(start)) {
+          const startEl = createDraggable(start, "product");
+          $("products-pool").appendChild(startEl);
+        }
+      }
+
+      function createDraggable(text, kind) {
+        const el = document.createElement("div");
+        el.className = `draggable ${kind}`;
+        el.textContent = text;
+        el.draggable = true;
+        el.dataset.kind = kind;
+        el.addEventListener("dragstart", e => {
+          e.dataTransfer.setData("text/plain", e.target.textContent);
+          e.dataTransfer.effectAllowed = "move";
+        });
+        return el;
+      }
+
+      // === Handle Drop ===
+      function handleDrop(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const data = e.dataTransfer.getData("text/plain");
+        let dropZone = e.target;
+        
+        // Find the actual drop zone if we clicked on a child element
+        while (dropZone && !dropZone.classList.contains("drop-zone")) {
+          dropZone = dropZone.parentElement;
+        }
+        
+        if (!dropZone || !dropZone.dataset.step || !dropZone.dataset.type) {
+          return;
+        }
+        
+        const stepIndex = parseInt(dropZone.dataset.step);
+        const type = dropZone.dataset.type;
+
+        // Allow any drop - don't validate here, validate on submit instead
+        dropZone.innerHTML = `<span class="tag">${data === "None" ? "None" : data}</span>`;
+        dropZone.classList.add("filled");
+        userSteps[stepIndex][type] = data === "None" ? "" : data;
+      }
+
+      // === Helpful Hint ===
+      $("helpful-hint").addEventListener("click", () => {
+        // Find all empty drop zones
+        const emptyZones = [];
+        userSteps.forEach((step, i) => {
+          if (step.condition === null) emptyZones.push({stepIndex: i, type: 'condition'});
+          if (step.reagent === null) emptyZones.push({stepIndex: i, type: 'reagent'});
+          if (step.product === null && i < correctPath.length - 1) emptyZones.push({stepIndex: i, type: 'product'});
+        });
+        
+        if (emptyZones.length === 0) {
+          feedbackEl.style.display = "block";
+          feedbackEl.className = "feedback ok";
+          feedbackEl.textContent = "💡 All boxes are filled! Try submitting your pathway.";
+          return;
+        }
+        
+        // Pick a random empty zone
+        const randomZone = emptyZones[Math.floor(Math.random() * emptyZones.length)];
+        const stepIndex = randomZone.stepIndex;
+        const type = randomZone.type;
+        const step = correctPath[stepIndex];
+        
+        let correctValue = "";
+        if (type === "condition") {
+          correctValue = step.conditions.length === 0 ? "None" : step.conditions[0];
+        } else if (type === "reagent") {
+          correctValue = step.reagents[0];
+        } else if (type === "product") {
+          correctValue = step.to;
+        }
+        
+        // Find the drop zone element and fill it
+        const dropZones = document.querySelectorAll(`[data-step="${stepIndex}"][data-type="${type}"]`);
+        if (dropZones.length > 0) {
+          const dropZone = dropZones[0];
+          dropZone.innerHTML = `<span class="tag">${correctValue === "None" ? "None" : correctValue}</span>`;
+          dropZone.classList.add("filled");
+          userSteps[stepIndex][type] = correctValue === "None" ? "" : correctValue;
+          
+          feedbackEl.style.display = "block";
+          feedbackEl.className = "feedback ok";
+          feedbackEl.textContent = `💡 Hint: Added ${correctValue} to step ${stepIndex + 1}!`;
+        }
+      });
+
+      // === Submit ===
+      $("submit").addEventListener("click", () => {
+        const allFilled = userSteps.every((s, i) => {
+          // For the last step, product is automatically filled
+          if (i === correctPath.length - 1) {
+            return s.condition !== null && s.reagent !== null;
+          }
+          return s.condition !== null && s.reagent !== null && s.product !== null;
+        });
+
+        const allCorrect = userSteps.every((s, i) => {
+          const r = correctPath[i];
+          const condMatch = r.conditions.length === 0 ? s.condition === "" : r.conditions.includes(s.condition);
+          const reagMatch = r.reagents.includes(s.reagent);
+          const prodMatch = s.product === r.to; // This is automatically correct for last step
+          return r && condMatch && reagMatch && prodMatch;
+        });
+
+        feedbackEl.style.display = "block";
+        factEl.style.display = "none";
+
+        if (allFilled && allCorrect) {
+          feedbackEl.className = "feedback ok";
+          feedbackEl.textContent = `✅ Success! You reached ${target} in ${correctPath.length} steps.`;
+        } else if (!allFilled) {
+          feedbackEl.className = "feedback bad";
+          feedbackEl.textContent = "❌ Please complete all fields in each step.";
+        } else {
+          feedbackEl.className = "feedback bad";
+          feedbackEl.textContent = "❌ Some entries are incorrect. Check reagents, conditions, and products.";
+        }
+      });
+
+      // === Show Answer ===
+      $("show-answer").addEventListener("click", () => {
+        let ans = `Target: ${target}\nStart: ${start}\n\n`;
+        correctPath.forEach(s => {
+          ans += `${s.from} → ${s.to}\n`;
+          ans += `Reagent: ${s.reagents.join(" or ")}\n`;
+          ans += `Condition: ${s.conditions.length ? s.conditions.join(", ") : "None"}\n`;
+          ans += `${s.fact}\n\n`;
+        });
+        factEl.textContent = ans;
+        factEl.style.display = "block";
+      });
+
+      $("reset").addEventListener("click", reset);
+
+      // === Start Game ===
+      reset();
+    });
+  </script>
+</body>
+</html>
