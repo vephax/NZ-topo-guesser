@@ -13,7 +13,8 @@ const versions = [
   { version: "9.4.1", changelog: "11/8/2025 \n\n - Changed scoring system to now have a better function.\n if you get anywhere on the screen you will get maximum points \n\n - now rounds score, for average etc \n\n - rainbow buttons \n\n - boxes next to eachother \n\n - lowered chathams chance \n\n - Max 😁"},
   { version: "9.4.2", changelog: "12/8/2025 \n\n - Added better version history logs.🥰🥰🥰 "},
   { version: "9.5", changelog: "12/8/2025 \n\n - Holy Guacamole, we're diversifying, \n now able to play study and practice studying \n with great functionality for all involved \n just scroll to the bottom to see the diversification \n most are prettttty acurate \n not liable for any problems you may have. "},
-  { version: "9.6", changelog: "14/8/2025 \n\n This one is for Arya \n \n - Added Bush Mode (experimental) :D \n\n - Edited and added new audio clips. There are now 13 good and 13 bad. \n\n - Menno"}
+  { version: "9.6", changelog: "14/8/2025 \n\n This one is for Arya \n \n - Added Bush Mode (experimental) :D \n\n - Edited and added new audio clips. There are now 13 good and 13 bad. \n\n - Menno"},
+  { version: "9.6.1", changelog: "14/8/2025 \n\n Holy Guacamole, we're diversifying, \n reaction schemer now exists \n with great functionality for all involved \n 🥰🥰🥰"}
 ];
 
 // === REGION DATA ===
