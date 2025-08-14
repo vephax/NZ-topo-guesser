@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Max's Organic Synthesis Ai sloppppifier</title>
+  <title>Max's Organic Synthesis AI Sloppifier</title>
   <style>
     :root {
       --bg-primary: #f0f4f8;
@@ -63,8 +63,9 @@
       padding: 20px;
       transition: all 0.3s ease;
     }
+
     .container {
-      max-width: 1200px;
+      max-width: 1400px;
       margin: auto;
       background: var(--bg-secondary);
       border-radius: 14px;
@@ -72,8 +73,26 @@
       padding: 25px;
       display: grid;
       grid-template-columns: 200px 1fr 200px;
-      grid-template-rows: auto 1fr auto auto auto;
+      grid-template-rows: auto 1fr auto auto;
       gap: 20px;
+      position: relative;
+    }
+
+    /* STICKY MODE: side pools stick to screen */
+    .container.sticky-pools .conditions-pool,
+    .container.sticky-pools .reagents-pool {
+      position: sticky;
+      top: 20px;
+      height: calc(100vh - 40px);
+      overflow-y: auto;
+      z-index: 10;
+      padding: 15px;
+    }
+    .container.sticky-pools .conditions-pool {
+      left: 20px;
+    }
+    .container.sticky-pools .reagents-pool {
+      right: 20px;
     }
 
     header {
@@ -96,7 +115,7 @@
       gap: 10px;
       align-items: center;
     }
-    .theme-toggle {
+    .theme-toggle, .sticky-toggle {
       padding: 8px 12px;
       border: 1px solid var(--border-color);
       background: var(--bg-tertiary);
@@ -124,8 +143,7 @@
       background: var(--bg-tertiary);
       border: 1px dashed var(--border-light);
       border-radius: 10px;
-      padding: 15px;
-      height: fit-content;
+      min-height: 200px;
     }
     .conditions-pool h3, .reagents-pool h3 {
       margin: 0 0 10px;
@@ -136,9 +154,6 @@
     /* Main: Synthesis Path */
     .main-area {
       grid-column: 2;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
     }
 
     .compound-box {
@@ -164,12 +179,12 @@
       color: #155724;
     }
 
-    /* Step with arrow and conditions/reagents on sides */
+    /* Step layout */
     .step {
       display: flex;
-      align-items: center;
-      gap: 15px;
-      margin: 15px 0;
+      align-items: flex-start;
+      gap: 20px;
+      margin: 40px 0;
       width: 100%;
       justify-content: center;
     }
@@ -183,7 +198,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 5px;
+      gap: 10px;
     }
 
     .arrow {
@@ -196,43 +211,62 @@
       text-align: center;
     }
 
-    .drop-zone {
-      padding: 10px 14px;
-      min-height: 50px;
-      background: var(--drag-bg);
+    /* STICKY Intermediate Product Drop Zone */
+    .product-drop {
+      grid-column: 2;
+      text-align: center;
+      margin: 20px 0;
+      position: -webkit-sticky;
+      position: sticky;
+      top: 100px;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .product-drop > .drop-zone {
+      pointer-events: auto;
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 12px 16px;
+      min-height: 60px;
+      max-width: 180px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(6px);
       border: 2px dashed var(--border-light);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-style: italic;
+      border-radius: 10px;
       color: var(--text-muted);
-      transition: all 0.2s;
-      font-size: 0.9em;
+      font-style: italic;
+      transition: all 0.2s ease;
     }
-    .drop-zone:hover {
-      border-color: var(--accent-primary);
-      background: var(--drag-hover);
-    }
-    .drop-zone.filled {
+
+    .product-drop > .drop-zone.filled {
       background: var(--step-bg);
-      border-color: var(--step-border);
       color: var(--text-primary);
       font-style: normal;
+      border-color: var(--step-border);
     }
+
+    .product-drop > .drop-zone:hover {
+      border-color: var(--accent-primary);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+    }
+
     .drop-zone .tag {
       background: var(--accent-primary);
       color: white;
       padding: 4px 8px;
       border-radius: 4px;
       font-size: 0.85em;
+      cursor: pointer;
     }
-
-    /* Product drop zones (for intermediates) */
-    .product-drop {
-      min-width: 160px;
-      text-align: center;
-      margin: 10px 0;
+    .drop-zone .tag::after {
+      content: " ×";
+      font-weight: bold;
+    }
+    .drop-zone .tag:hover::after {
+      color: red;
     }
 
     /* Bottom: Products Pool */
@@ -336,6 +370,7 @@
       <h1>Max's Organic Synthesis Tree</h1>
       <div class="header-controls">
         <button id="theme-toggle" class="theme-toggle">🌙 Dark</button>
+        <button id="sticky-toggle" class="sticky-toggle">📌 Sticky Pools</button>
         <button id="diff-baby" class="diff-btn">Baby (2)</button>
         <button id="diff-easy" class="diff-btn active">Easy (3)</button>
         <button id="diff-med" class="diff-btn">Medium (4)</button>
@@ -382,433 +417,548 @@
 
     <footer>
       Build a synthesis from start to target.<br>
-      Final product is known. Drag: condition (←), intermediate (↓), reagent (→). Made with AI slop.<br>
-      any questions idgaf this is AI slop at it's beauuuutiful finest.
+      Drag: condition (←), intermediate (↓), reagent (→).<br>
+      Multiple items allowed. Click tags to remove.<br>
+      Side pools and intermediates are STICKY when enabled.<br>
+      Made with AI slop. any questions idgaf. This is beauty.
     </footer>
   </div>
 
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      let isDark = false;
-      let difficulty = "easy";
-      let correctPath = [];
-      let userSteps = [];
-      let start = "";
-      let target = "";
+  document.addEventListener("DOMContentLoaded", () => {
+    let isDark = false;
+    let isSticky = false;
+    let difficulty = "easy";
+    let correctPath = [];
+    let userSteps = [];
+    let start = "";
+    let target = "";
 
-      const $ = id => document.getElementById(id);
-      const feedbackEl = $("feedback");
-      const factEl = $("fact");
+    const $ = id => document.getElementById(id);
+    const feedbackEl = $("feedback");
+    const factEl = $("fact");
 
-const reactions = [
-  { from: "Alkene", to: "Alkane", reagents: ["H₂"], conditions: ["catalyst", "heat"], type: ["Addition"], fact: "Hydrogenation: adds H₂ across double bond. Requires metal catalyst." },
-  { from: "Alkene", to: "Addition Polymer", reagents: ["R-C=C-R"], conditions: ["catalyst", "heat", "pressure"], type: ["Addition", "Condensation"], fact: "Polymerisation where a polymer is polymerised (=." },
-  { from: "Alkene", to: "Haloalkane", reagents: ["HI", "HBr", "HCl"], conditions: [], type: ["Addition"], fact: "Electrophilic addition. Br₂ decolorizes from red-brown to colorless." },
-  { from: "Alkene", to: "Dihaloalkane", reagents: ["I₂", "Cl₂", "Br₂"], conditions: [], type: ["Addition"], fact: "Electrophilic addition. Br₂ decolorizes from red-brown to colorless." },
-  { from: "Alkene", to: "Alcohol", reagents: ["dil. H₂SO₄"], conditions: ["heat"], type: ["Addition"], fact: "Acid-catalyzed hydration follows Markovnikov's rule." },
-  { from: "Alkene", to: "Diol", reagents: ["Cr₂O₇²⁻", "MnO₄⁻"], conditions: [""], type: ["Addition"], fact: "Oxidises alkenes to glycols (diols)." },
-  { from: "Alkane", to: "Haloalkane", reagents: ["Cl₂", "Br₂", "I₂"], conditions: ["uv"], type: ["Substitution"], fact: "UV light initiates radical chain reaction. Mixture of products possible." },
-  { from: "Alcohol", to: "Haloalkane", reagents: ["PCl₃", "PCl₅", "SOCl₂", "HBr", "HI"], conditions: ["reflux"], type: ["Substitution"], fact: "Converts OH to halide. SN2 for 1°, SN1 for 3°." },
-  { from: "Haloalkane", to: "Alcohol", reagents: ["aq. KOH"], conditions: ["reflux"], type: ["Substitution"], fact: "OH⁻ replaces halogen. SN2 for 1°, SN1 for 3°." },
-  { from: "Haloalkane", to: "Amine", reagents: ["conc. NH₃"], conditions: ["heat"], type: ["Substitution"], fact: "Forms primary amine. Excess NH₃ prevents further substitution." },
-  { from: "Alcohol (1°)", to: "Aldehyde", reagents: ["Cr₂O₇²⁻ / H⁺", "MnO₄⁻ / H⁺"], conditions: ["distil"], type: ["Oxidation"], fact: "Distillation stops at aldehyde before over-oxidation." },
-  { from: "Alcohol (1°)", to: "Carboxylic Acid", reagents: ["Cr₂O₇²⁻ / H⁺", "MnO₄⁻ / H⁺"], conditions: ["reflux"], type: ["Oxidation"], fact: "Fully oxidizes to carboxylic acid." },
-  { from: "Alcohol (2°)", to: "Ketone", reagents: ["Cr₂O₇²⁻ / H⁺", "MnO₄⁻ / H⁺"], conditions: ["reflux"], type: ["Oxidation"], fact: "Ketones resist further oxidation." },
-  { from: "Alcohol", to: "Alkene", reagents: ["conc. H₂SO₄"], conditions: ["heat"], type: ["Elimination"], fact: "Dehydration removes water. Zaitsev's rule applies." },
-  { from: "Aldehyde", to: "Carboxylic Acid", reagents: ["Cr₂O₇²⁻ / H⁺", "MnO₄⁻ / H⁺"], conditions: ["reflux"], type: ["Oxidation"], fact: "Aldehydes are easily oxidized; ketones are not." },
-  { from: "Aldehyde", to: "Alcohol (1°)", reagents: ["NaBH₄", "LiAlH₄"], conditions: [], type: ["Reduction"], fact: "Reduces to primary alcohols." },
-  { from: "Ketone", to: "Alcohol (2°)", reagents: ["NaBH₄", "LiAlH₄"], conditions: [], type: ["Reduction"], fact: "Reduces to secondary alcohols." },
-  { from: "Carboxylic Acid", to: "Acid Chloride", reagents: ["PCl₃", "PCl₅", "SOCl₂"], conditions: [], type: ["Substitution"], fact: "SOCl₂ preferred; byproducts are gases." },
-  { from: "Carboxylic Acid", to: "Ester", reagents: ["R-OH", "conc. H₂SO₄"], conditions: ["reflux"], type: ["Condensation"], fact: "Esterification with alcohols." },
-  { from: "Alcohol", to: "Ester", reagents: ["R-COOH", "conc. H₂SO₄"], conditions: ["reflux"], type: ["Condensation"], fact: "Esterification with carboxylic acids." },
-  { from: "Acid Chloride", to: "Ester", reagents: ["R-OH"], conditions: [], type: ["Condensation"], fact: "Fast, exothermic ester formation." },
-  { from: "Acid Chloride", to: "Amide (1°)", reagents: ["conc. NH₃", "alc. NH₃"], conditions: [], type: ["Substitution", "Condensation"], fact: "Forms primary amides; HCl gas produced." },
-  { from: "Acid Chloride", to: "Amide (2°)", reagents: ["R-NH₃"], conditions: ["reflux"], type: ["Substitution", "Condensation"], fact: "Forms secondary amides; HCl gas produced." },
-  { from: "Acid Chloride", to: "Carboxylic Acid", reagents: ["H₂O"], conditions: [], type: ["Hydrolysis", "Substitution"], fact: "Rapid hydrolysis to carboxylic acid." },
-  { from: "Carboxylic Acid", to: "Amide", reagents: ["conc. NH₃", "alc. NH₃"], conditions: ["heat"], type: ["Condensation", "Substitution"], fact: "Forms amides; water is a byproduct." },
-  { from: "Ester", to: "Carboxylic Acid", reagents: ["H₂O"], conditions: ["acidic", "reflux"], type: ["Hydrolysis"], fact: "Acidic hydrolysis is reversible." },
-  { from: "Ester", to: "Carboxylate", reagents: ["H₂O"], conditions: ["basic", "reflux"], type: ["Hydrolysis"], fact: "Saponification produces soap." },
-  { from: "Ester", to: "Amide", reagents: ["conc. NH₃", "alc. NH₃"], conditions: ["reflux"], type: ["Hydrolysis"], fact: "Ammonolysis forms amides." },
-  { from: "Amide", to: "Amine", reagents: ["NaBH₄", "LiAlH₄"], conditions: [], type: ["Reduction"], fact: "LiAlH₄ reduces amides to amines." },
-  { from: "Amine", to: "Ammonium Salt", reagents: ["H₂O"], conditions: ["acidic"], type: ["Acid-Base"], fact: "Amines react with acids to form salts." },
-  { from: "Ammonium Salt", to: "Amine", reagents: ["H₂O"], conditions: ["basic"], type: ["Acid-Base"], fact: "Base liberates free amine." },
-  { from: "Carboxylate Acid", to: "Carboxylic Ion", reagents: ["H₂O"], conditions: ["basic"], type: ["Acid-Base"], fact: "Base forms carboxylate ion." },
-  { from: "Carboxylate Ion", to: "Carboxylic Acid", reagents: ["H₂O"], conditions: ["acidic"], type: ["Acid-Base"], fact: "Acid reprotonates carboxylate." }
-];
+    const reactions = [
+      { from: "Alkene", to: "Alkane", reagents: ["H₂"], conditions: ["catalyst", "heat"], type: ["Addition"], fact: "Hydrogenation: adds H₂ across double bond. Requires metal catalyst." },
+      { from: "Alkene", to: "Addition Polymer", reagents: ["R-C=C-R"], conditions: ["catalyst", "heat", "pressure"], type: ["Addition", "Condensation"], fact: "Polymerisation where a polymer is polymerised (=." },
+      { from: "Alkene", to: "Haloalkane", reagents: ["HI", "HBr", "HCl"], conditions: [], type: ["Addition"], fact: "Electrophilic addition. Br₂ decolorizes from red-brown to colorless." },
+      { from: "Alkene", to: "Dihaloalkane", reagents: ["I₂", "Cl₂", "Br₂"], conditions: [], type: ["Addition"], fact: "Electrophilic addition. Br₂ decolorizes from red-brown to colorless." },
+      { from: "Alkene", to: "Alcohol", reagents: ["dil. H₂SO₄"], conditions: ["heat"], type: ["Addition"], fact: "Acid-catalyzed hydration follows Markovnikov's rule." },
+      { from: "Alkene", to: "Diol", reagents: ["Cr₂O₇²⁻", "MnO₄⁻"], conditions: ["cold"], type: ["Addition"], fact: "Oxidises alkenes to glycols (diols)." },
+      { from: "Alkane", to: "Haloalkane", reagents: ["Cl₂", "Br₂", "I₂"], conditions: ["uv"], type: ["Substitution"], fact: "UV light initiates radical chain reaction. Mixture of products possible." },
+      { from: "Alcohol", to: "Haloalkane", reagents: ["PCl₃", "PCl₅", "SOCl₂", "HBr", "HI"], conditions: ["reflux"], type: ["Substitution"], fact: "Converts OH to halide. SN2 for 1°, SN1 for 3°." },
+      { from: "Haloalkane", to: "Alcohol", reagents: ["aq. KOH"], conditions: ["reflux"], type: ["Substitution"], fact: "OH⁻ replaces halogen. SN2 for 1°, SN1 for 3°." },
+      { from: "Haloalkane", to: "Amine", reagents: ["conc. NH₃"], conditions: ["heat"], type: ["Substitution"], fact: "Forms primary amine. Excess NH₃ prevents further substitution." },
+      { from: "Alcohol (1°)", to: "Aldehyde", reagents: ["Cr₂O₇²⁻ / H⁺", "MnO₄⁻ / H⁺"], conditions: ["distil"], type: ["Oxidation"], fact: "Distillation stops at aldehyde before over-oxidation." },
+      { from: "Alcohol (1°)", to: "Carboxylic Acid", reagents: ["Cr₂O₇²⁻ / H⁺", "MnO₄⁻ / H⁺"], conditions: ["reflux"], type: ["Oxidation"], fact: "Fully oxidizes to carboxylic acid." },
+      { from: "Alcohol (2°)", to: "Ketone", reagents: ["Cr₂O₇²⁻ / H⁺", "MnO₄⁻ / H⁺"], conditions: ["reflux"], type: ["Oxidation"], fact: "Ketones resist further oxidation." },
+      { from: "Alcohol", to: "Alkene", reagents: ["conc. H₂SO₄"], conditions: ["heat"], type: ["Elimination"], fact: "Dehydration removes water. Zaitsev's rule applies." },
+      { from: "Aldehyde", to: "Carboxylic Acid", reagents: ["Cr₂O₇²⁻ / H⁺", "MnO₄⁻ / H⁺"], conditions: ["reflux"], type: ["Oxidation"], fact: "Aldehydes are easily oxidized; ketones are not." },
+      { from: "Aldehyde", to: "Alcohol (1°)", reagents: ["NaBH₄", "LiAlH₄"], conditions: [], type: ["Reduction"], fact: "Reduces to primary alcohols." },
+      { from: "Ketone", to: "Alcohol (2°)", reagents: ["NaBH₄", "LiAlH₄"], conditions: [], type: ["Reduction"], fact: "Reduces to secondary alcohols." },
+      { from: "Carboxylic Acid", to: "Acid Chloride", reagents: ["PCl₃", "PCl₅", "SOCl₂"], conditions: [], type: ["Substitution"], fact: "SOCl₂ preferred; byproducts are gases." },
+      { from: "Carboxylic Acid", to: "Ester", reagents: ["R-OH", "conc. H₂SO₄"], conditions: ["reflux"], type: ["Condensation"], fact: "Esterification with alcohols." },
+      { from: "Alcohol", to: "Ester", reagents: ["R-COOH", "conc. H₂SO₄"], conditions: ["reflux"], type: ["Condensation"], fact: "Esterification with carboxylic acids." },
+      { from: "Acid Chloride", to: "Ester", reagents: ["R-OH"], conditions: [], type: ["Condensation"], fact: "Fast, exothermic ester formation." },
+      { from: "Acid Chloride", to: "Amide (1°)", reagents: ["conc. NH₃", "alc. NH₃"], conditions: [], type: ["Substitution", "Condensation"], fact: "Forms primary amides; HCl gas produced." },
+      { from: "Acid Chloride", to: "Amide (2°)", reagents: ["R-NH₂"], conditions: [], type: ["Substitution", "Condensation"], fact: "Forms secondary amides; HCl gas produced." },
+      { from: "Acid Chloride", to: "Carboxylic Acid", reagents: ["H₂O"], conditions: [], type: ["Hydrolysis", "Substitution"], fact: "Rapid hydrolysis to carboxylic acid." },
+      { from: "Carboxylic Acid", to: "Amide", reagents: ["conc. NH₃", "alc. NH₃"], conditions: ["heat"], type: ["Condensation", "Substitution"], fact: "Forms amides; water is a byproduct." },
+      { from: "Ester", to: "Carboxylic Acid", reagents: ["H₂O"], conditions: ["acidic", "reflux"], type: ["Hydrolysis"], fact: "Acidic hydrolysis is reversible." },
+      { from: "Ester", to: "Carboxylate", reagents: ["OH⁻"], conditions: ["basic", "reflux"], type: ["Hydrolysis"], fact: "Saponification produces soap." },
+      { from: "Ester", to: "Amide", reagents: ["conc. NH₃", "alc. NH₃"], conditions: ["reflux"], type: ["Hydrolysis"], fact: "Ammonolysis forms amides." },
+      { from: "Amide", to: "Amine", reagents: ["NaBH₄", "LiAlH₄"], conditions: [], type: ["Reduction"], fact: "LiAlH₄ reduces amides to amines." },
+      { from: "Amine", to: "Ammonium Salt", reagents: ["H⁺"], conditions: ["acidic"], type: ["Acid-Base"], fact: "Amines react with acids to form salts." },
+      { from: "Ammonium Salt", to: "Amine", reagents: ["OH⁻"], conditions: ["basic"], type: ["Acid-Base"], fact: "Base liberates free amine." },
+      { from: "Carboxylic Acid", to: "Carboxylate", reagents: ["OH⁻"], conditions: ["basic"], type: ["Acid-Base"], fact: "Base forms carboxylate ion." },
+      { from: "Carboxylate", to: "Carboxylic Acid", reagents: ["H⁺"], conditions: ["acidic"], type: ["Acid-Base"], fact: "Acid reprotonates carboxylate." }
+    ];
 
-// Generate valid starters and targets automatically from the list
-const validStarters = [...new Set(reactions.map(r => r.from))];
-const validTargets = [...new Set(reactions.map(r => r.to))];
+    const validStarters = [...new Set(reactions.map(r => r.from))];
+    const validTargets = [...new Set(reactions.map(r => r.to))];
 
-      const difficultySteps = {
-        baby: { min: 2, max: 2 },
-        easy: { min: 2, max: 3 },
-        med: { min: 3, max: 4 },
-        hard: { min: 4, max: 5 },
-        evil: { min: 8, max: 10 }
-      };
+    const difficultySteps = {
+      baby: { min: 2, max: 2 },
+      easy: { min: 2, max: 3 },
+      med: { min: 3, max: 4 },
+      hard: { min: 4, max: 5 },
+      evil: { min: 8, max: 10 }
+    };
 
-      // === Theme Toggle ===
-      $("theme-toggle").addEventListener("click", () => {
-        isDark = !isDark;
-        document.body.setAttribute("data-theme", isDark ? "dark" : "light");
-        $("theme-toggle").textContent = isDark ? "☀️ Light" : "🌙 Dark";
-      });
+    // === Theme Toggle ===
+    $("theme-toggle").addEventListener("click", () => {
+      isDark = !isDark;
+      document.body.setAttribute("data-theme", isDark ? "dark" : "light");
+      $("theme-toggle").textContent = isDark ? "☀️ Light" : "🌙 Dark";
+    });
 
-      // === Difficulty Buttons ===
-      document.querySelectorAll(".diff-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-          document.querySelectorAll(".diff-btn").forEach(b => b.classList.remove("active"));
-          btn.classList.add("active");
-          const newDifficulty = btn.id.replace("diff-", "");
-          if (newDifficulty !== difficulty) {
-            difficulty = newDifficulty;
-            reset();
-          }
-        });
-      });
-
-      // === Reset Game ===
-      function reset() {
-        correctPath = [];
-        userSteps = [];
-        feedbackEl.style.display = "none";
-        factEl.style.display = "none";
-        $("steps-container").innerHTML = "";
-        $("conditions-pool").innerHTML = "";
-        $("reagents-pool").innerHTML = "";
-        $("products-pool").innerHTML = "";
-        initGame();
+    // === Sticky Toggle ===
+    $("sticky-toggle").addEventListener("click", () => {
+      isSticky = !isSticky;
+      const container = document.querySelector('.container');
+      if (isSticky) {
+        container.classList.add('sticky-pools');
+      } else {
+        container.classList.remove('sticky-pools');
       }
+      $("sticky-toggle").textContent = isSticky ? "📍 Unpin" : "📌 Sticky Pools";
+    });
 
-      // === Init Game ===
-      function initGame() {
-        start = validStarters[Math.floor(Math.random() * validStarters.length)];
-        target = validTargets[Math.floor(Math.random() * validTargets.length)];
-
-        $("start").textContent = start;
-        $("target").textContent = target;
-
-        const path = findPath(start, target, difficultySteps[difficulty]);
-        if (!path || path.length === 0) return setTimeout(initGame, 100);
-
-        correctPath = path;
-        userSteps = path.map(() => ({ condition: null, reagent: null, product: null }));
-
-        renderSteps();
-        generatePools();
-      }
-
-      // === BFS Pathfinding ===
-      function findPath(from, to, stepsRange) {
-        const queue = [[from]];
-        const visited = new Set();
-        const min = stepsRange.min;
-        const max = stepsRange.max;
-        
-        let attempts = 0;
-        const maxAttempts = 1000; // Prevent infinite loops
-
-        while (queue.length && attempts < maxAttempts) {
-          attempts++;
-          const path = queue.shift();
-          const last = path[path.length - 1];
-
-          if (path.length > max + 1) continue;
-          if (path.length >= min + 1 && last === to) return buildReactionPath(path);
-
-          const visitKey = `${last}-${path.length}`;
-          if (visited.has(visitKey)) continue;
-          visited.add(visitKey);
-
-          reactions.forEach(r => {
-            if (r.from === last) {
-              const next = [...path, r.to];
-              if (next.length <= max + 1) queue.push(next);
-            }
-          });
+    // === Difficulty Buttons ===
+    document.querySelectorAll(".diff-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".diff-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        const newDifficulty = btn.id.replace("diff-", "");
+        if (newDifficulty !== difficulty) {
+          difficulty = newDifficulty;
+          reset();
         }
-        
-        // If no path found, try with relaxed constraints for evil mode
-        if (stepsRange === difficultySteps.evil) {
-          return findPath(from, to, { min: 3, max: 6 });
+      });
+    });
+
+    // === Reset Game ===
+    function reset() {
+      correctPath = [];
+      userSteps = [];
+      feedbackEl.style.display = "none";
+      factEl.style.display = "none";
+      $("steps-container").innerHTML = "";
+      $("conditions-pool").innerHTML = "";
+      $("reagents-pool").innerHTML = "";
+      $("products-pool").innerHTML = "";
+      initGame();
+    }
+
+    // === Init Game ===
+    function initGame() {
+      start = validStarters[Math.floor(Math.random() * validStarters.length)];
+      target = validTargets[Math.floor(Math.random() * validTargets.length)];
+
+      $("start").textContent = start;
+      $("target").textContent = target;
+
+      let path = null;
+
+      if (difficulty === "evil") {
+        // Evil: force long path with constraints
+        path = findLongPathWithConstraints(start, target, difficultySteps.evil);
+      } else {
+        // All others: shortest path
+        path = findShortestPath(start, target);
+      }
+
+      if (!path || path.length === 0) return setTimeout(initGame, 100);
+
+      correctPath = path;
+      userSteps = path.map(() => ({
+        condition: [],
+        reagent: [],
+        product: null
+      }));
+
+      // Pre-fill some steps on Evil mode
+      if (difficulty === "evil") {
+        applyEvilConstraints();
+      }
+
+      renderSteps();
+      generatePools();
+    }
+
+    // === SHORTEST PATH (BFS, no repeats) ===
+    function findShortestPath(from, to) {
+      const queue = [[from]];
+      const visited = new Set();
+
+      while (queue.length) {
+        const path = queue.shift();
+        const last = path[path.length - 1];
+
+        if (last === to) {
+          return buildReactionPath(path);
         }
-        
-        return null;
-      }
 
-      function buildReactionPath(nodes) {
-        return nodes.slice(0, -1).map((from, i) => {
-          const to = nodes[i + 1];
-          return reactions.find(r => r.from === from && r.to === to) || null;
-        }).filter(Boolean);
-      }
-
-      // === Render Steps ===
-      function renderSteps() {
-        const container = $("steps-container");
-        container.innerHTML = "";
-
-        correctPath.forEach((step, i) => {
-          // Create step with condition on left, arrow in middle, reagent on right
-          const stepDiv = document.createElement("div");
-          stepDiv.className = "step";
-
-          // Left: Condition drop zone
-          const condDrop = document.createElement("div");
-          condDrop.className = "drop-zone";
-          condDrop.dataset.step = i;
-          condDrop.dataset.type = "condition";
-          condDrop.textContent = "Condition";
-          if (userSteps[i].condition !== null) {
-            condDrop.innerHTML = `<span class="tag">${userSteps[i].condition || "None"}</span>`;
-            condDrop.classList.add("filled");
-          }
-          condDrop.addEventListener("dragover", e => {
-            e.preventDefault();
-            e.stopPropagation();
-          });
-          condDrop.addEventListener("drop", handleDrop);
-          const condCol = document.createElement("div");
-          condCol.className = "condition-drop";
-          condCol.appendChild(condDrop);
-
-          // Middle: Arrow
-          const arrowCol = document.createElement("div");
-          arrowCol.className = "arrow-container";
-          const arrow = document.createElement("div");
-          arrow.className = "arrow";
-          arrow.textContent = "↓";
-          arrowCol.appendChild(arrow);
-
-          // Right: Reagent drop zone
-          const reagDrop = document.createElement("div");
-          reagDrop.className = "drop-zone";
-          reagDrop.dataset.step = i;
-          reagDrop.dataset.type = "reagent";
-          reagDrop.textContent = "Reagent";
-          if (userSteps[i].reagent) {
-            reagDrop.innerHTML = `<span class="tag">${userSteps[i].reagent}</span>`;
-            reagDrop.classList.add("filled");
-          }
-          reagDrop.addEventListener("dragover", e => {
-            e.preventDefault();
-            e.stopPropagation();
-          });
-          reagDrop.addEventListener("drop", handleDrop);
-          const reagCol = document.createElement("div");
-          reagCol.className = "reagent-drop";
-          reagCol.appendChild(reagDrop);
-
-          stepDiv.appendChild(condCol);
-          stepDiv.appendChild(arrowCol);
-          stepDiv.appendChild(reagCol);
-          container.appendChild(stepDiv);
-
-          // Add intermediate product drop zone (except for last step)
-          if (i < correctPath.length - 1) {
-            const prodDrop = document.createElement("div");
-            prodDrop.className = "drop-zone";
-            prodDrop.dataset.step = i;
-            prodDrop.dataset.type = "product";
-            prodDrop.textContent = "Intermediate Product";
-            if (userSteps[i].product) {
-              prodDrop.innerHTML = `<span class="tag">${userSteps[i].product}</span>`;
-              prodDrop.classList.add("filled");
-            }
-            prodDrop.addEventListener("dragover", e => {
-              e.preventDefault();
-              e.stopPropagation();
-            });
-            prodDrop.addEventListener("drop", handleDrop);
-            const prodCol = document.createElement("div");
-            prodCol.className = "product-drop";
-            prodCol.appendChild(prodDrop);
-            container.appendChild(prodCol);
-          } else {
-            // For the last step, set the product automatically
-            userSteps[i].product = step.to;
-          }
-        });
-      }
-
-      // === Generate Pools ===
-      function generatePools() {
-        const allReagents = new Set();
-        const allConditions = new Set(["None"]);
-        const allProducts = new Set();
+        // Avoid cycles
+        if (path.length > 10) continue;
+        const visitKey = `${last}|${path.length}`;
+        if (visited.has(visitKey)) continue;
+        visited.add(visitKey);
 
         reactions.forEach(r => {
-          r.reagents.forEach(rg => allReagents.add(rg));
-          if (r.conditions.length === 0) {
-            allConditions.add("None");
-          } else {
-            r.conditions.forEach(c => allConditions.add(c));
+          if (r.from === last && !path.includes(r.to)) {  // No cycles
+            queue.push([...path, r.to]);
           }
-          allProducts.add(r.to);
         });
+      }
+      return null;
+    }
 
-        // Conditions (left)
-        Array.from(allConditions).sort().forEach(c => {
-          const el = createDraggable(c, "condition");
-          $("conditions-pool").appendChild(el);
-        });
+    // === EVIL: Long path with forced steps ===
+    function findLongPathWithConstraints(from, to, range) {
+      // First, try to find a path longer than shortest
+      const shortest = findShortestPath(from, to);
+      const shortestLength = shortest ? shortest.length : 1;
 
-        // Reagents (right)
-        Array.from(allReagents).sort().forEach(r => {
-          const el = createDraggable(r, "reagent");
-          $("reagents-pool").appendChild(el);
-        });
+      const maxAttempts = 500;
+      for (let i = 0; i < maxAttempts; i++) {
+        const path = randomLongPath(from, to, range.min, range.max);
+        if (path && path.length >= range.min && path.length !== shortestLength) {
+          return path;
+        }
+      }
+      // Fallback: return shortest if no long path found
+      return shortest;
+    }
 
-        // Products (bottom) – include ALL products including start and target
-        Array.from(allProducts).sort().forEach(p => {
-          const el = createDraggable(p, "product");
-          $("products-pool").appendChild(el);
-        });
-        
-        // Also add start compound to products pool for complex syntheses
-        if (!allProducts.has(start)) {
-          const startEl = createDraggable(start, "product");
-          $("products-pool").appendChild(startEl);
+    function randomLongPath(from, to, min, max) {
+      const path = [from];
+      const maxSteps = Math.min(max, 10);
+
+      while (path.length < maxSteps) {
+        const last = path[path.length - 1];
+        if (last === to && path.length >= min) break;
+
+        const candidates = reactions
+          .filter(r => r.from === last && !path.includes(r.to)) // Avoid immediate loops
+          .map(r => r.to);
+
+        if (candidates.length === 0) break;
+
+        const next = candidates[Math.floor(Math.random() * candidates.length)];
+        path.push(next);
+      }
+
+      if (path[path.length - 1] === to && path.length >= min) {
+        return buildReactionPath(path);
+      }
+      return null;
+    }
+
+    function buildReactionPath(nodes) {
+      return nodes.slice(0, -1).map((from, i) => {
+        const to = nodes[i + 1];
+        return reactions.find(r => r.from === from && r.to === to) || null;
+      }).filter(Boolean);
+    }
+
+    // === EVIL: Force some reagents ===
+    function applyEvilConstraints() {
+      const forceReagents = ["conc. NH₃", "Cr₂O₇²⁻ / H⁺", "H₂O", "NaBH₄"];
+      const forceStep = Math.floor(Math.random() * correctPath.length);
+      const forcedReagent = forceReagents[Math.floor(Math.random() * forceReagents.length)];
+
+      // Modify reaction to use forced reagent if possible
+      const step = correctPath[forceStep];
+      if (step && step.reagents.includes(forcedReagent)) {
+        // Already uses it? Cool.
+      } else {
+        // Replace reagent with forced one if possible
+        const alt = reactions.find(r => r.from === step.from && r.to === step.to && r.reagents.includes(forcedReagent));
+        if (alt) {
+          correctPath[forceStep] = alt;
         }
       }
 
-      function createDraggable(text, kind) {
-        const el = document.createElement("div");
-        el.className = `draggable ${kind}`;
-        el.textContent = text;
-        el.draggable = true;
-        el.dataset.kind = kind;
-        el.addEventListener("dragstart", e => {
-          e.dataTransfer.setData("text/plain", e.target.textContent);
-          e.dataTransfer.effectAllowed = "move";
-        });
-        return el;
-      }
+      // Pre-fill user step
+      userSteps[forceStep].reagent = [forcedReagent];
+      userSteps[forceStep].condition = [...(correctPath[forceStep].conditions || [])];
+    }
 
-      // === Handle Drop ===
-      function handleDrop(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        const data = e.dataTransfer.getData("text/plain");
-        let dropZone = e.target;
-        
-        // Find the actual drop zone if we clicked on a child element
-        while (dropZone && !dropZone.classList.contains("drop-zone")) {
-          dropZone = dropZone.parentElement;
-        }
-        
-        if (!dropZone || !dropZone.dataset.step || !dropZone.dataset.type) {
-          return;
-        }
-        
-        const stepIndex = parseInt(dropZone.dataset.step);
-        const type = dropZone.dataset.type;
+    // === Render Steps ===
+    function renderSteps() {
+      const container = $("steps-container");
+      container.innerHTML = "";
 
-        // Allow any drop - don't validate here, validate on submit instead
-        dropZone.innerHTML = `<span class="tag">${data === "None" ? "None" : data}</span>`;
-        dropZone.classList.add("filled");
-        userSteps[stepIndex][type] = data === "None" ? "" : data;
-      }
+      correctPath.forEach((step, i) => {
+        const stepDiv = document.createElement("div");
+        stepDiv.className = "step";
 
-      // === Helpful Hint ===
-      $("helpful-hint").addEventListener("click", () => {
-        // Find all empty drop zones
-        const emptyZones = [];
-        userSteps.forEach((step, i) => {
-          if (step.condition === null) emptyZones.push({stepIndex: i, type: 'condition'});
-          if (step.reagent === null) emptyZones.push({stepIndex: i, type: 'reagent'});
-          if (step.product === null && i < correctPath.length - 1) emptyZones.push({stepIndex: i, type: 'product'});
-        });
-        
-        if (emptyZones.length === 0) {
-          feedbackEl.style.display = "block";
-          feedbackEl.className = "feedback ok";
-          feedbackEl.textContent = "💡 All boxes are filled! Try submitting your pathway.";
-          return;
-        }
-        
-        // Pick a random empty zone
-        const randomZone = emptyZones[Math.floor(Math.random() * emptyZones.length)];
-        const stepIndex = randomZone.stepIndex;
-        const type = randomZone.type;
-        const step = correctPath[stepIndex];
-        
-        let correctValue = "";
-        if (type === "condition") {
-          correctValue = step.conditions.length === 0 ? "None" : step.conditions[0];
-        } else if (type === "reagent") {
-          correctValue = step.reagents[0];
-        } else if (type === "product") {
-          correctValue = step.to;
-        }
-        
-        // Find the drop zone element and fill it
-        const dropZones = document.querySelectorAll(`[data-step="${stepIndex}"][data-type="${type}"]`);
-        if (dropZones.length > 0) {
-          const dropZone = dropZones[0];
-          dropZone.innerHTML = `<span class="tag">${correctValue === "None" ? "None" : correctValue}</span>`;
-          dropZone.classList.add("filled");
-          userSteps[stepIndex][type] = correctValue === "None" ? "" : correctValue;
-          
-          feedbackEl.style.display = "block";
-          feedbackEl.className = "feedback ok";
-          feedbackEl.textContent = `💡 Hint: Added ${correctValue} to step ${stepIndex + 1}!`;
+        const condDrop = createDropZone("condition", i, userSteps[i].condition);
+        const condCol = document.createElement("div");
+        condCol.className = "condition-drop";
+        condCol.appendChild(condDrop);
+
+        const arrowCol = document.createElement("div");
+        arrowCol.className = "arrow-container";
+        const arrow = document.createElement("div");
+        arrow.className = "arrow";
+        arrow.textContent = "↓";
+        arrowCol.appendChild(arrow);
+
+        const reagDrop = createDropZone("reagent", i, userSteps[i].reagent);
+        const reagCol = document.createElement("div");
+        reagCol.className = "reagent-drop";
+        reagCol.appendChild(reagDrop);
+
+        stepDiv.appendChild(condCol);
+        stepDiv.appendChild(arrowCol);
+        stepDiv.appendChild(reagCol);
+        container.appendChild(stepDiv);
+
+        if (i < correctPath.length - 1) {
+          const prodDrop = createDropZone("product", i, userSteps[i].product ? [userSteps[i].product] : []);
+          prodDrop.dataset.single = "true";
+          const prodRow = document.createElement("div");
+          prodRow.className = "product-drop";
+          prodRow.appendChild(prodDrop);
+          container.appendChild(prodRow);
+        } else {
+          userSteps[i].product = step.to;
         }
       });
+    }
 
-      // === Submit ===
-      $("submit").addEventListener("click", () => {
-        const allFilled = userSteps.every((s, i) => {
-          // For the last step, product is automatically filled
-          if (i === correctPath.length - 1) {
-            return s.condition !== null && s.reagent !== null;
+    // === Create Drop Zone ===
+    function createDropZone(type, stepIndex, values) {
+      const dropZone = document.createElement("div");
+      dropZone.className = "drop-zone";
+      dropZone.dataset.step = stepIndex;
+      dropZone.dataset.type = type;
+      dropZone.textContent = values.length === 0 ? (type === "product" ? "Intermediate" : type.charAt(0).toUpperCase() + type.slice(1)) : "";
+
+      if (values.length > 0) {
+        dropZone.innerHTML = "";
+        values.forEach(val => {
+          const tag = document.createElement("span");
+          tag.className = "tag";
+          tag.textContent = val;
+          tag.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (dropZone.dataset.single === "true") {
+              userSteps[stepIndex][type] = null;
+              dropZone.innerHTML = "";
+              dropZone.textContent = type === "product" ? "Intermediate" : type.charAt(0).toUpperCase() + type.slice(1);
+            } else {
+              const arr = userSteps[stepIndex][type];
+              const i = arr.indexOf(val);
+              if (i > -1) arr.splice(i, 1);
+              tag.remove();
+              if (arr.length === 0) {
+                dropZone.textContent = type === "product" ? "Intermediate" : type.charAt(0).toUpperCase() + type.slice(1);
+              }
+            }
+          });
+          dropZone.appendChild(tag);
+        });
+        dropZone.classList.add("filled");
+      }
+
+      dropZone.addEventListener("dragover", e => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+      });
+      dropZone.addEventListener("drop", handleDrop);
+
+      return dropZone;
+    }
+
+    // === Generate Pools ===
+    function generatePools() {
+      const allReagents = new Set();
+      const allConditions = new Set(["None"]);
+      const allProducts = new Set();
+
+      reactions.forEach(r => {
+        r.reagents.forEach(rg => allReagents.add(rg));
+        if (r.conditions.length === 0) {
+          allConditions.add("None");
+        } else {
+          r.conditions.forEach(c => allConditions.add(c));
+        }
+        allProducts.add(r.to);
+      });
+
+      Array.from(allConditions).sort().forEach(c => {
+        const el = createDraggable(c, "condition");
+        $("conditions-pool").appendChild(el);
+      });
+
+      Array.from(allReagents).sort().forEach(r => {
+        const el = createDraggable(r, "reagent");
+        $("reagents-pool").appendChild(el);
+      });
+
+      Array.from(allProducts).sort().forEach(p => {
+        const el = createDraggable(p, "product");
+        $("products-pool").appendChild(el);
+      });
+
+      if (!allProducts.has(start)) {
+        const startEl = createDraggable(start, "product");
+        $("products-pool").appendChild(startEl);
+      }
+    }
+
+    function createDraggable(text, kind) {
+      const el = document.createElement("div");
+      el.className = `draggable ${kind}`;
+      el.textContent = text;
+      el.draggable = true;
+      el.dataset.kind = kind;
+      el.addEventListener("dragstart", e => {
+        e.dataTransfer.setData("text/plain", e.target.textContent);
+        e.dataTransfer.effectAllowed = "copyMove";
+      });
+      return el;
+    }
+
+    // === Handle Drop ===
+    function handleDrop(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const data = e.dataTransfer.getData("text/plain");
+      let dropZone = e.target;
+      while (dropZone && !dropZone.classList.contains("drop-zone")) {
+        dropZone = dropZone.parentElement;
+      }
+      if (!dropZone || !dropZone.dataset.step || !dropZone.dataset.type) return;
+
+      const stepIndex = parseInt(dropZone.dataset.step);
+      const type = dropZone.dataset.type;
+      const isSingle = dropZone.dataset.single === "true";
+
+      if (dropZone.textContent.includes("Intermediate") || dropZone.textContent.includes("Condition") || dropZone.textContent.includes("Reagent")) {
+        dropZone.innerHTML = "";
+      }
+
+      if (isSingle) {
+        dropZone.innerHTML = "";
+        const tag = document.createElement("span");
+        tag.className = "tag";
+        tag.textContent = data;
+        dropZone.appendChild(tag);
+        userSteps[stepIndex].product = data;
+        dropZone.classList.add("filled");
+        return;
+      }
+
+      const arr = userSteps[stepIndex][type];
+      if (!arr.includes(data)) {
+        arr.push(data);
+        const tag = document.createElement("span");
+        tag.className = "tag";
+        tag.textContent = data;
+        tag.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const i = arr.indexOf(data);
+          if (i > -1) arr.splice(i, 1);
+          tag.remove();
+          if (arr.length === 0) {
+            dropZone.textContent = type === "product" ? "Intermediate" : type.charAt(0).toUpperCase() + type.slice(1);
+            dropZone.classList.remove("filled");
           }
-          return s.condition !== null && s.reagent !== null && s.product !== null;
         });
+        dropZone.appendChild(tag);
+        dropZone.classList.add("filled");
+      }
+    }
 
-        const allCorrect = userSteps.every((s, i) => {
-          const r = correctPath[i];
-          const condMatch = r.conditions.length === 0 ? s.condition === "" : r.conditions.includes(s.condition);
-          const reagMatch = r.reagents.includes(s.reagent);
-          const prodMatch = s.product === r.to; // This is automatically correct for last step
-          return r && condMatch && reagMatch && prodMatch;
-        });
+    // === Helpful Hint ===
+    $("helpful-hint").addEventListener("click", () => {
+      const emptyZones = [];
+      userSteps.forEach((step, i) => {
+        if (step.condition.length === 0) emptyZones.push({stepIndex: i, type: 'condition'});
+        if (step.reagent.length === 0) emptyZones.push({stepIndex: i, type: 'reagent'});
+        if (step.product === null && i < correctPath.length - 1) emptyZones.push({stepIndex: i, type: 'product'});
+      });
+
+      if (emptyZones.length === 0) {
+        feedbackEl.style.display = "block";
+        feedbackEl.className = "feedback ok";
+        feedbackEl.textContent = "💡 All boxes are filled! Try submitting.";
+        return;
+      }
+
+      const randomZone = emptyZones[Math.floor(Math.random() * emptyZones.length)];
+      const stepIndex = randomZone.stepIndex;
+      const type = randomZone.type;
+      const step = correctPath[stepIndex];
+
+      let value = "";
+      if (type === "condition") {
+        value = step.conditions.length === 0 ? "None" : step.conditions[0];
+      } else if (type === "reagent") {
+        value = step.reagents[0];
+      } else if (type === "product") {
+        value = step.to;
+      }
+
+      const dropZones = document.querySelectorAll(`[data-step="${stepIndex}"][data-type="${type}"]`);
+      if (dropZones.length > 0) {
+        const dropZone = dropZones[0];
+        if (type === "product") {
+          dropZone.innerHTML = `<span class="tag">${value}</span>`;
+          userSteps[stepIndex].product = value;
+        } else {
+          const arr = userSteps[stepIndex][type];
+          if (!arr.includes(value)) {
+            arr.push(value);
+            const tag = document.createElement("span");
+            tag.className = "tag";
+            tag.textContent = value;
+            dropZone.appendChild(tag);
+            if (arr.length === 1) dropZone.textContent = "";
+          }
+        }
+        dropZone.classList.add("filled");
 
         feedbackEl.style.display = "block";
-        factEl.style.display = "none";
-
-        if (allFilled && allCorrect) {
-          feedbackEl.className = "feedback ok";
-          feedbackEl.textContent = `✅ Success! You reached ${target} in ${correctPath.length} steps.`;
-        } else if (!allFilled) {
-          feedbackEl.className = "feedback bad";
-          feedbackEl.textContent = "❌ Please complete all fields in each step.";
-        } else {
-          feedbackEl.className = "feedback bad";
-          feedbackEl.textContent = "❌ Some entries are incorrect. Check reagents, conditions, and products.";
-        }
-      });
-
-      // === Show Answer ===
-      $("show-answer").addEventListener("click", () => {
-        let ans = `Target: ${target}\nStart: ${start}\n\n`;
-        correctPath.forEach(s => {
-          ans += `${s.from} → ${s.to}\n`;
-          ans += `Reagent: ${s.reagents.join(" or ")}\n`;
-          ans += `Condition: ${s.conditions.length ? s.conditions.join(", ") : "None"}\n`;
-          ans += `${s.fact}\n\n`;
-        });
-        factEl.textContent = ans;
-        factEl.style.display = "block";
-      });
-
-      $("reset").addEventListener("click", reset);
-
-      // === Start Game ===
-      reset();
+        feedbackEl.className = "feedback ok";
+        feedbackEl.textContent = `💡 Hint: Added ${value} to step ${stepIndex + 1}.`;
+      }
     });
-  </script>
+
+    // === Submit ===
+    $("submit").addEventListener("click", () => {
+      const allFilled = userSteps.every((s, i) => {
+        const hasCond = s.condition.length > 0 || (correctPath[i].conditions.length === 0);
+        const hasReag = s.reagent.length > 0;
+        const hasProd = i === correctPath.length - 1 || s.product !== null;
+        return hasCond && hasReag && hasProd;
+      });
+
+      const allCorrect = userSteps.every((s, i) => {
+        const r = correctPath[i];
+        const condMatch = r.conditions.every(c => s.condition.includes(c));
+        const reagMatch = r.reagents.every(rg => s.reagent.includes(rg));
+        const prodMatch = i === correctPath.length - 1 || s.product === r.to;
+        return condMatch && reagMatch && prodMatch;
+      });
+
+      feedbackEl.style.display = "block";
+      factEl.style.display = "none";
+
+      if (allFilled && allCorrect) {
+        feedbackEl.className = "feedback ok";
+        feedbackEl.textContent = `✅ Success! You reached ${target} in ${correctPath.length} steps.`;
+      } else if (!allFilled) {
+        feedbackEl.className = "feedback bad";
+        feedbackEl.textContent = "❌ Please complete all fields in each step.";
+      } else {
+        feedbackEl.className = "feedback bad";
+        feedbackEl.textContent = "❌ Some entries are incorrect. Check reagents, conditions, and products.";
+      }
+    });
+
+    // === Show Answer ===
+    $("show-answer").addEventListener("click", () => {
+      let ans = `Target: ${target}\nStart: ${start}\n\n`;
+      correctPath.forEach(s => {
+        ans += `${s.from} → ${s.to}\n`;
+        ans += `Reagent: ${s.reagents.join(" and ")}\n`;
+        ans += `Condition: ${s.conditions.length ? s.conditions.join(" and ") : "None"}\n`;
+        ans += `${s.fact}\n\n`;
+      });
+      factEl.textContent = ans;
+      factEl.style.display = "block";
+    });
+
+    $("reset").addEventListener("click", reset);
+
+    // Start the game
+    reset();
+  });
+</script>
 </body>
 </html>
