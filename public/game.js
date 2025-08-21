@@ -532,15 +532,15 @@ window.onload = async () => {
   };
 
   // Get and create the overall leaderboard panel
-  updateOverallLeaderboard();
+  //updateOverallLeaderboard();
 
   // Do not allow guesses to be submit when there is no game loaded
   document.getElementById('submitBtn').disabled = true;
   document.getElementById('leafletMap').style.pointerEvents = 'none';
 
   // Get and setup the recent seed panel
-  loadRecentSeeds();
-  setInterval(loadRecentSeeds, 30000);
+  //loadRecentSeeds();
+  //setInterval(loadRecentSeeds, 30000);
 };
 
 async function sendScoreForOverallLeaderboardToServer(scoreValue) {
