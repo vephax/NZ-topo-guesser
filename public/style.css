@@ -173,7 +173,7 @@ h1 {
 }
 
 #recentSeedsPanel,
-#gameTypeLeaderboard {
+#overallLeaderboard {
   flex: 1 1 50%; /* each takes half width, and can shrink/grow */
   max-height: 60vh;
   max-width: 390px;
@@ -203,12 +203,23 @@ h1 {
 }
 
 
-#gameTypeLeaderboard p{
-  font-size: 0.75rem;
-  font-weight: 400;
+#overallLeaderboard h3{
+  text-align: center;
+  text-decoration: underline;
+  font-size: 1.5em;
 }
 
-#gameTypeLeaderboard table {
+#overallLeaderboard label{
+  display: flex;
+  margin-top: 10px;
+  font-size: 0.90em;
+}
+#overallLeaderboard label select{
+  margin-left: 10px;
+}
+
+#overallLeaderboard table {
+  border: 1px solid #000000;
   width: 100%;
   border-collapse: collapse;
   font-family: Arial, sans-serif;
@@ -217,19 +228,19 @@ h1 {
   color: #444; /* dark grey text */
 }
 
-#gameTypeLeaderboard th,
-#gameTypeLeaderboard td {
+#overallLeaderboard th,
+#overallLeaderboard td {
   padding: 8px 12px;
   text-align: center;
   border: none;
 }
 
-#gameTypeLeaderboard thead th {
+#overallLeaderboard thead th {
   background-color: #ddd; /* light grey header background */
   font-weight: 600;
 }
 
-#gameTypeLeaderboard tbody tr:nth-child(even) {
+#overallLeaderboard tbody tr:nth-child(even) {
   background-color: #f5f5f5; /* subtle alternate row grey */
 }
 

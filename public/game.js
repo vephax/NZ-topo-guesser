@@ -445,7 +445,7 @@ function submitGuess() {
 
     // Are we in normal mode?
     if (timerMode === "30" && zoom === 14) {
-      sendScoreForGameTypeLeaderboardToServer(scoreTotal, gameType);
+      sendScoreForOverallLeaderboardToServer(scoreTotal, gameType);
     }
     
     sendSeedLeaderboardToServer({
@@ -500,6 +500,7 @@ function initMap() {
 window.onload = async () => {
   initMap();
 
+  // Get the play data
   const savedGuest = localStorage.getItem("topoguesser_player");
   if (savedGuest) {
     currentUser = savedGuest;
@@ -509,13 +510,15 @@ window.onload = async () => {
     enterNewUsername();
   }
 
+  // Show changes logs if a new version
   showChangelogs();
+  
+  document.getElementById("gameTitle").textContent = "NZ Topo Guesser V" + currentVersion + " - Sponsored by Water";
 
   // Setup a bunch of buttons
   document.getElementById("changePlayerBtn").onclick = () => {
     enterNewUsername();
   };
-  document.getElementById("gameTitle").textContent = "NZ Topo Guesser V" + currentVersion + " - Sponsored by Water";
 
   document.getElementById("showAllGuessesBtn").onclick = () => {
     const seed = parseInt(document.getElementById("seed").value);
@@ -531,8 +534,10 @@ window.onload = async () => {
     document.getElementById("analysisPanel").style.display = 'none';
   };
 
-  // Get and create the game type leaderboard panel
-  updateGameTypeLeaderboard(gameType = "Everywhere", sortBy = "totalScore");
+  // Setup the overall leaderboard panel
+  updateOverallLeaderboard();
+  document.getElementById("overallLeaderboardGameType").onchange = updateOverallLeaderboard;
+  document.getElementById("overallLeaderboardSortBy").onchange = updateOverallLeaderboard;
 
   // Do not allow guesses to be submit when there is no game loaded
   document.getElementById('submitBtn').disabled = true;
@@ -543,8 +548,8 @@ window.onload = async () => {
   setInterval(loadRecentSeeds, 30000);
 };
 
-async function sendScoreForGameTypeLeaderboardToServer(scoreValue, gameType) {
-  const res = await fetch('/gameTypeLeaderboard', {
+async function sendScoreForOverallLeaderboardToServer(scoreValue, gameType) {
+  const res = await fetch('/overallLeaderboard', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ user: currentUser, scoreToAdd: scoreValue, gameType: gameType }),
@@ -701,13 +706,18 @@ function showSeedLeaderboard() {
   });
 }
 
-async function updateGameTypeLeaderboard(leaderboardGameType, sortBy = "totalScore") {
+async function updateOverallLeaderboard() {
   // Get the container
-  const container = document.getElementById('gameTypeLeaderboard');
+  const container = document.getElementById('overallLeaderboardData');
+  container.innerHTML = '<p>Loading...</p>'
+
+  // Get the chosen leaderboard type
+  leaderboardGameType = document.getElementById("overallLeaderboardGameType").value;
+  sortBy = document.getElementById("overallLeaderboardSortBy").value;
 
   try {
     // Fetch leaderboard data filtered by gameType
-    const res = await fetch(`/gameTypeLeaderboard?gameType=${encodeURIComponent(leaderboardGameType)}`);
+    const res = await fetch(`/overallLeaderboard?gameType=${encodeURIComponent(leaderboardGameType)}`);
     const result = await res.json();
 
     if (!result.success) {
@@ -719,7 +729,7 @@ async function updateGameTypeLeaderboard(leaderboardGameType, sortBy = "totalSco
     let entries = result.entries.map(e => ({
       player: e.user,
       totalScore: e.totalScore,
-      roundsPlayed: e.gamesPlayed,
+      gamesPlayed: e.gamesPlayed,
       averageScore: e.gamesPlayed > 0 ? e.totalScore / e.gamesPlayed : 0
     }));
 
@@ -730,7 +740,7 @@ async function updateGameTypeLeaderboard(leaderboardGameType, sortBy = "totalSco
       if (sortBy === "totalScore") {
         valA = a.totalScore; valB = b.totalScore;
       } else if (sortBy === "gamesPlayed") {
-        valA = a.roundsPlayed; valB = b.roundsPlayed;
+        valA = a.gamesPlayed; valB = b.gamesPlayed;
       } else if (sortBy === "averageScore") {
         valA = a.averageScore; valB = b.averageScore;
       }
@@ -743,7 +753,6 @@ async function updateGameTypeLeaderboard(leaderboardGameType, sortBy = "totalSco
 
     // Build table header
     let html = `
-    <h3>Overall Leaderboard</h3>
     <table>
       <thead>
         <tr>
@@ -765,7 +774,7 @@ async function updateGameTypeLeaderboard(leaderboardGameType, sortBy = "totalSco
           <td>${placing}</td>
           <td>${entry.player}</td>
           <td>${entry.totalScore}</td>
-          <td>${entry.roundsPlayed}</td>
+          <td>${entry.gamesPlayed}</td>
           <td>${Math.round(entry.averageScore)}</td>
         </tr>
       `;

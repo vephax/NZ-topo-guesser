@@ -97,21 +97,29 @@
 
 
     <!-- Leaderboard -->
-    <div id="gameTypeLeaderboard">
-      <h3>Game Type Leaderboard</h3>
-      <table>
-        <thead>
-          <tr>
-          <th></th>
-          <th>Player Name</th>
-          <th>Total Score</th>
-          <th>Games Played</th>
-          <th>Average Score</th>
-        </tr>
-      </thead>
-      <tbody>
-      </tbody>
-    </table>
+    <div id="overallLeaderboard">
+      <div>
+      <h3>Overall Leaderboard</h3>
+        <label>Game Type:
+          <select id="overallLeaderboardGameType">
+            <option value="Everywhere">Everywhere</option>
+            <option value="Beach">Beach</option>
+            <option value="Urban">Urban</option>
+            <option value="Highway">State Highway</option>
+            <option value="Bush">Bush</option>
+          </select>
+        </label>
+        <label>Sort By:
+        <select id="overallLeaderboardSortBy">
+        <option value="totalScore">Total Score</option>
+        <option value="gamesPlayed">Games Played</option>
+        <option value="averageScore">Average Score</option>
+      </select>
+      </label>
+    </div>
+    <div id="overallLeaderboardData">
+      <p>Loading...</p>
+    </div>
   </div>
   </div>
 
@@ -169,33 +177,33 @@
   </div>
 
   <!-- Audio -->
-  <audio id="good1" src="SoundEffects/Good/are_you_single.mp3" preload="auto"></audio>
-  <audio id="good2" src="SoundEffects/Good/damn_that_good.mp3" preload="auto"></audio>
-  <audio id="good3" src="SoundEffects/Good/canterbury_above_average.mp3" preload="auto"></audio>
-  <audio id="good4" src="SoundEffects/Good/family_proud.mp3" preload="auto"></audio>
-  <audio id="good5" src="SoundEffects/Good/fantastic.mp3" preload="auto"></audio>
-  <audio id="good6" src="SoundEffects/Good/gold_star.mp3" preload="auto"></audio>
-  <audio id="good7" src="SoundEffects/Good/hope_left_world.mp3" preload="auto"></audio>
-  <audio id="good8" src="SoundEffects/Good/kid_thought_chathams.mp3" preload="auto"></audio>
-  <audio id="good9" src="SoundEffects/Good/make_me_proud.mp3" preload="auto"></audio>
-  <audio id="good10" src="SoundEffects/Good/oh_yeah.mp3" preload="auto"></audio>
-  <audio id="good11" src="SoundEffects/Good/perfect_keep_it_up.mp3" preload="auto"></audio>
-  <audio id="good12" src="SoundEffects/Good/absolutely_stunning.mp3" preload="auto"></audio>
-  <audio id="good13" src="SoundEffects/Good/damn_smashed.mp3" preload="auto"></audio>
+  <audio id="good1" src="SoundEffects/Good/are_you_single.mp3" preload="none"></audio>
+  <audio id="good2" src="SoundEffects/Good/damn_that_good.mp3" preload="none"></audio>
+  <audio id="good3" src="SoundEffects/Good/canterbury_above_average.mp3" preload="none"></audio>
+  <audio id="good4" src="SoundEffects/Good/family_proud.mp3" preload="none"></audio>
+  <audio id="good5" src="SoundEffects/Good/fantastic.mp3" preload="none"></audio>
+  <audio id="good6" src="SoundEffects/Good/gold_star.mp3" preload="none"></audio>
+  <audio id="good7" src="SoundEffects/Good/hope_left_world.mp3" preload="none"></audio>
+  <audio id="good8" src="SoundEffects/Good/kid_thought_chathams.mp3" preload="none"></audio>
+  <audio id="good9" src="SoundEffects/Good/make_me_proud.mp3" preload="none"></audio>
+  <audio id="good10" src="SoundEffects/Good/oh_yeah.mp3" preload="none"></audio>
+  <audio id="good11" src="SoundEffects/Good/perfect_keep_it_up.mp3" preload="none"></audio>
+  <audio id="good12" src="SoundEffects/Good/absolutely_stunning.mp3" preload="none"></audio>
+  <audio id="good13" src="SoundEffects/Good/damn_smashed.mp3" preload="none"></audio>
 
-  <audio id="bad1" src="SoundEffects/Bad/pathetic.mp3" preload="auto"></audio>
-  <audio id="bad2" src="SoundEffects/Bad/oh_my_chathams.mp3" preload="auto"></audio>
-  <audio id="bad3" src="SoundEffects/Bad/trash_perfect.mp3" preload="auto"></audio>
-  <audio id="bad4" src="SoundEffects/Bad/absolutely_worthless.mp3" preload="auto"></audio>
-  <audio id="bad5" src="SoundEffects/Bad/toddler_done_better.mp3" preload="auto"></audio>
-  <audio id="bad6" src="SoundEffects/Bad/try_the_naki.mp3" preload="auto"></audio>
-  <audio id="bad7" src="SoundEffects/Bad/mess_up_left_with_right.mp3" preload="auto"></audio>
-  <audio id="bad8" src="SoundEffects/Bad/disgusting_wellington_better.mp3" preload="auto"></audio>
-  <audio id="bad9" src="SoundEffects/Bad/111_ambulance_stupid.mp3" preload="auto"></audio>
-  <audio id="bad10" src="SoundEffects/Bad/missclick.mp3" preload="auto"></audio>
-  <audio id="bad11" src="SoundEffects/Bad/better_eyes_closed.mp3" preload="auto"></audio>
-  <audio id="bad12" src="SoundEffects/Bad/aghh_heart_attack.mp3" preload="auto"></audio>
-  <audio id="bad13" src="SoundEffects/Bad/roast_nelson.mp3" preload="auto"></audio>
+  <audio id="bad1" src="SoundEffects/Bad/pathetic.mp3" preload="none"></audio>
+  <audio id="bad2" src="SoundEffects/Bad/oh_my_chathams.mp3" preload="none"></audio>
+  <audio id="bad3" src="SoundEffects/Bad/trash_perfect.mp3" preload="none"></audio>
+  <audio id="bad4" src="SoundEffects/Bad/absolutely_worthless.mp3" preload="none"></audio>
+  <audio id="bad5" src="SoundEffects/Bad/toddler_done_better.mp3" preload="none"></audio>
+  <audio id="bad6" src="SoundEffects/Bad/try_the_naki.mp3" preload="none"></audio>
+  <audio id="bad7" src="SoundEffects/Bad/mess_up_left_with_right.mp3" preload="none"></audio>
+  <audio id="bad8" src="SoundEffects/Bad/disgusting_wellington_better.mp3" preload="none"></audio>
+  <audio id="bad9" src="SoundEffects/Bad/111_ambulance_stupid.mp3" preload="none"></audio>
+  <audio id="bad10" src="SoundEffects/Bad/missclick.mp3" preload="none"></audio>
+  <audio id="bad11" src="SoundEffects/Bad/better_eyes_closed.mp3" preload="none"></audio>
+  <audio id="bad12" src="SoundEffects/Bad/aghh_heart_attack.mp3" preload="none"></audio>
+  <audio id="bad13" src="SoundEffects/Bad/roast_nelson.mp3" preload="none"></audio>
 
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>

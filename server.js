@@ -70,11 +70,11 @@ app.get('/guesses', async (req, res) => {
 });
 
 // GET route for overall leaderboard
-app.get('/gameTypeLeaderboard', async (req, res) => {
+app.get('/overallLeaderboard', async (req, res) => {
   const { gameType } = req.query;
 
   let query = supabase
-    .from('gameTypeLeaderboard')
+    .from('overallLeaderboard')
     .select('user, totalScore, gamesPlayed, gameType');
 
   // If gameType is provided, filter by it
@@ -93,7 +93,7 @@ app.get('/gameTypeLeaderboard', async (req, res) => {
 });
 
 // Update the overall leaderboard
-app.post('/gameTypeLeaderboard', async (req, res) => {
+app.post('overallLeaderboard', async (req, res) => {
   const { user, scoreToAdd, gameType } = req.body;
 
   if (!user || typeof scoreToAdd !== 'number') {
@@ -103,7 +103,7 @@ app.post('/gameTypeLeaderboard', async (req, res) => {
   try {
     // Fetch existing user data
     const { data: existing, error: fetchError } = await supabase
-      .from('gameTypeLeaderboard')
+      .from('overallLeaderboard')
       .select('totalScore, gamesPlayed')
       .eq('user', user)
       .eq('gameType', gameType)
@@ -124,7 +124,7 @@ app.post('/gameTypeLeaderboard', async (req, res) => {
 
     // Upsert the new data
     const { error: upsertError } = await supabase
-      .from('gameTypeLeaderboard')
+      .from('overallLeaderboard')
       .upsert(
         [{ user, totalScore: newTotalScore, gamesPlayed: newGamesPlayed, gameType }],
         { onConflict: ['user', 'gameType'] }
