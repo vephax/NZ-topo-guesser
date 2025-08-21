@@ -749,7 +749,7 @@ async function updateGameTypeLeaderboard(leaderboardGameType, sortBy = "totalSco
         valA = a.averageScore; valB = b.averageScore;
       }
 
-      return sortOrder === "asc" ? valA - valB : valB - valA;
+      return valA - valB;
     });
 
     // Emojis for the top 3
