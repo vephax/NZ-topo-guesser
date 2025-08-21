@@ -94,24 +94,25 @@ app.get('/gameTypeLeaderboard', async (req, res) => {
 
 // Update the overall leaderboard
 app.post('/gameTypeLeaderboard', async (req, res) => {
-  const { user, scoreToAdd } = req.body;
+  const { user, gameType, scoreToAdd } = req.body;
 
   if (!user || typeof scoreToAdd !== 'number') {
     return res.status(400).json({ success: false, message: 'Invalid request body' });
   }
 
-  // 1. Fetch existing user data
+  // Fetch existing user data
   const { data: existing, error: fetchError } = await supabase
     .from('gameTypeLeaderboard')
     .select('totalScore, gamesPlayed')
     .eq('user', user)
+    .eq('gameType', gameType)
     .single();
 
   if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 = no rows found
     return res.status(500).json({ success: false, message: 'Error fetching leaderboard' });
   }
 
-  // 2. Calculate new totals
+  // Default increments if player leaderboard does not yet exist
   let newTotalScore = scoreToAdd;
   let newGamesPlayed = 1;
 
@@ -120,16 +121,16 @@ app.post('/gameTypeLeaderboard', async (req, res) => {
     newGamesPlayed = existing.gamesPlayed + 1;
   }
 
-  // 3. Upsert the new data
+  // Upsert the new data
   const { error: upsertError } = await supabase
     .from('gameTypeLeaderboard')
-    .upsert([{ user, totalScore: newTotalScore, gamesPlayed: newGamesPlayed }], { onConflict: 'user' });
+    .upsert([{ user, totalScore: newTotalScore, gamesPlayed: newGamesPlayed, gameType: gameType }], { onConflict: ['user', 'gameType'] });
 
   if (upsertError) {
     return res.status(500).json({ success: false, message: 'Error updating leaderboard' });
   }
 
-  // 4. Success response
+  // Success response
   res.json({ success: true, totalScore: newTotalScore, gamesPlayed: newGamesPlayed });
 });
 

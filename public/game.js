@@ -547,7 +547,7 @@ async function sendScoreForGameTypeLeaderboardToServer(scoreValue) {
   const res = await fetch('/gameTypeLeaderboard', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ user: currentUser, scoreToAdd: scoreValue }),
+    body: JSON.stringify({ user: currentUser, scoreToAdd: scoreValue, gameType: gameType }),
   });
 }
 
