@@ -757,18 +757,18 @@ async function updateGameTypeLeaderboard(leaderboardGameType, sortBy = "totalSco
 
     // Build table header
     let html = `
-      <h3>Everywhere Leaderboard</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Placing</th>
-            <th>Player Name</th>
-            <th>Total Score</th>
-            <th>Games Played</th>
-            <th>Average Score</th>
-          </tr>
-        </thead>
-      <tbody>
+    <h3>Overall Leaderboard</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Placing</th>
+          <th>Player Name</th>
+          <th>Total Score</th>
+          <th>Games Played</th>
+          <th>Average Score</th>
+        </tr>
+      </thead>
+    <tbody>
     `;
 
     // Build table rows
