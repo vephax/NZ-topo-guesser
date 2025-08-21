@@ -444,8 +444,8 @@ function submitGuess() {
     document.getElementById('replayBtn').disabled = false;
 
     // Are we in normal mode?
-    if (timerMode === "30" && gameType === "Everywhere" && zoom === 14) {
-      sendScoreForGameTypeLeaderboardToServer(scoreTotal);
+    if (timerMode === "30" && zoom === 14) {
+      sendScoreForGameTypeLeaderboardToServer(scoreTotal, gameType);
     }
     
     sendSeedLeaderboardToServer({
@@ -543,7 +543,7 @@ window.onload = async () => {
   setInterval(loadRecentSeeds, 30000);
 };
 
-async function sendScoreForGameTypeLeaderboardToServer(scoreValue) {
+async function sendScoreForGameTypeLeaderboardToServer(scoreValue, gameType) {
   const res = await fetch('/gameTypeLeaderboard', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -626,8 +626,6 @@ async function showChangelogs() {
 }
 
 function sendSeedLeaderboardToServer(data) {
-  console.log("📤 Sending leaderboard data to server:", data);
-
   fetch('/leaderboard', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -636,18 +634,6 @@ function sendSeedLeaderboardToServer(data) {
   .then(res => res.json())
   .then(result => {
     console.log("📥 Server response:", result);
-
-    if (!result.success) {
-      console.warn("⚠️ Leaderboard update failed:", result.message || 'Unknown error');
-      if (result.error) {
-        console.error("❌ Supabase error:", result.error);
-      }
-      if (result.data && result.data.length === 0) {
-        console.warn("⚠️ No rows affected, likely RLS or constraint issue.");
-      }
-    } else {
-      console.log("✅ Leaderboard update success:", result.message);
-    }
   })
   .catch(err => {
     console.error("🔥 Fetch or server error:", err);
