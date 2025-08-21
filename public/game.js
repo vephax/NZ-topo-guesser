@@ -445,7 +445,7 @@ function submitGuess() {
 
     // Are we in normal mode?
     if (timerMode === "30" && gameType === "Everywhere" && zoom === 14) {
-      sendScoreForOverallLeaderboardToServer(scoreTotal);
+      sendScoreForGameTypeLeaderboardToServer(scoreTotal);
     }
     
     sendSeedLeaderboardToServer({
@@ -531,8 +531,8 @@ window.onload = async () => {
     document.getElementById("analysisPanel").style.display = 'none';
   };
 
-  // Get and create the overall leaderboard panel
-  updateOverallLeaderboard();
+  // Get and create the game type leaderboard panel
+  updateGameTypeLeaderboard(gameType = "Everywhere", sortBy = "totalScore");
 
   // Do not allow guesses to be submit when there is no game loaded
   document.getElementById('submitBtn').disabled = true;
@@ -543,8 +543,8 @@ window.onload = async () => {
   setInterval(loadRecentSeeds, 30000);
 };
 
-async function sendScoreForOverallLeaderboardToServer(scoreValue) {
-  const res = await fetch('/overallLeaderboard', {
+async function sendScoreForGameTypeLeaderboardToServer(scoreValue) {
+  const res = await fetch('/gameTypeLeaderboard', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ user: currentUser, scoreToAdd: scoreValue }),
@@ -715,66 +715,84 @@ function showSeedLeaderboard() {
   });
 }
 
-async function updateOverallLeaderboard() {
+async function updateGameTypeLeaderboard(leaderboardGameType, sortBy = "totalScore") {
   // Get the container
-  const container = document.getElementById('overallLeaderboard');
-  if (!container) return;
+  const container = document.getElementById('gameTypeLeaderboard');
 
-  // Get the leaderboard data from the server
-  const res = await fetch('/overallleaderboard');
-  const result = await res.json();
-  if (!result.success) {
-    container.innerHTML = "<p>Failed to load leaderboard</p>";
-    return;
-  }
+  try {
+    // Fetch leaderboard data filtered by gameType
+    const res = await fetch(`/gameTypeLeaderboard?gameType=${encodeURIComponent(leaderboardGameType)}`);
+    const result = await res.json();
 
-  let entries = result.entries.map(e => ({
-    player: e.user,
-    totalScore: e.totalScore,
-    roundsPlayed: e.gamesPlayed
-  }));
+    if (!result.success) {
+      container.innerHTML = "<p>Failed to load leaderboard</p>";
+      return;
+    }
 
-  // Sort entries by totalScore descending (highest first)
-  entries.sort((a, b) => b.totalScore - a.totalScore);
+    // Prepare entries
+    let entries = result.entries.map(e => ({
+      player: e.user,
+      totalScore: e.totalScore,
+      roundsPlayed: e.gamesPlayed,
+      averageScore: e.gamesPlayed > 0 ? e.totalScore / e.gamesPlayed : 0
+    }));
 
-  // emojis for top 3
-  const medals = ['🏆', '🥈', '🥉'];
+    // Sort client-side
+    entries.sort((a, b) => {
+      let valA, valB;
 
-  // Build table header
-  let html = `
-    <h3>Overall Leaderboard<\h3>
-    <p>Normal game type and Normal time mode<\p>
-    <table>
-      <thead>
-        <tr>
-          <th>Placing</th>
-          <th>Player Name</th>
-          <th>Total Score</th>
-          <th>Games Played</th>
-          <th>Average Score</th>
-        </tr>
-      </thead>
-    <tbody>
-  `;
+      if (sortBy === "totalScore") {
+        valA = a.totalScore; valB = b.totalScore;
+      } else if (sortBy === "gamesPlayed") {
+        valA = a.roundsPlayed; valB = b.roundsPlayed;
+      } else if (sortBy === "averageScore") {
+        valA = a.averageScore; valB = b.averageScore;
+      }
 
-  // Build table rows
-  entries.forEach((entry, index) => {
-  const placing = medals[index] ? `${medals[index]} ${index + 1}` : `${index + 1}`;
-    html += `
-      <tr>
-        <td>${placing}</td>
-        <td>${entry.player}</td>
-        <td>${entry.totalScore}</td>
-        <td>${entry.roundsPlayed}</td>
-        <td>${Math.round(entry.totalScore / entry.roundsPlayed)}</td>
-      </tr>
+      return sortOrder === "asc" ? valA - valB : valB - valA;
+    });
+
+    // Emojis for the top 3
+    const emojis = ['🏆', '🥈', '🥉'];
+
+    // Build table header
+    let html = `
+      <h3>Everywhere Leaderboard</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Placing</th>
+            <th>Player Name</th>
+            <th>Total Score</th>
+            <th>Games Played</th>
+            <th>Average Score</th>
+          </tr>
+        </thead>
+      <tbody>
     `;
-  });
 
-  html += '</tbody></table>';
+    // Build table rows
+    entries.forEach((entry, index) => {
+      const placing = emojis[index] ? `${emojis[index]}` : `${index + 1}`;
+      html += `
+        <tr>
+          <td>${placing}</td>
+          <td>${entry.player}</td>
+          <td>${entry.totalScore}</td>
+          <td>${entry.roundsPlayed}</td>
+          <td>${Math.round(entry.averageScore)}</td>
+        </tr>
+      `;
+    });
 
-  // Update container content
-  container.innerHTML = html;
+    html += '</tbody></table>';
+
+    // Update container content
+    container.innerHTML = html;
+  } catch (err) {
+    console.error("Error fetching leaderboard:", err);
+    container.innerHTML = "<p>Error loading leaderboard</p>";
+  }
 }
 
 function showSeedAnalysis(seed) {
