@@ -94,7 +94,7 @@ app.get('/gameTypeLeaderboard', async (req, res) => {
 
 // Update the overall leaderboard
 app.post('/gameTypeLeaderboard', async (req, res) => {
-  const { user, gameType, scoreToAdd } = req.body;
+  const { user, scoreToAdd, gameType } = req.body;
 
   if (!user || typeof scoreToAdd !== 'number') {
     return res.status(400).json({ success: false, message: 'Invalid request body' });
