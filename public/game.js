@@ -544,14 +544,17 @@ window.onload = async () => {
 };
 
 async function sendScoreForOverallLeaderboardToServer(scoreValue) {
+  /*
   const res = await fetch('/overallLeaderboard', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ user: currentUser, scoreToAdd: scoreValue }),
   });
+  */
 }
 
 function sendGuessToServer(lat, lng, distance) {
+  /*
   if (!currentUser) return;
   const seed = parseInt(document.getElementById("seed").value);
   const payload = { user: currentUser, seed, round: roundsPlayed, lat, lng, distance };
@@ -561,6 +564,7 @@ function sendGuessToServer(lat, lng, distance) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   })
+  */
 }
 
 async function enterNewUsername(){
@@ -626,6 +630,7 @@ async function showChangelogs() {
 }
 
 function sendSeedLeaderboardToServer(data) {
+  /*
   console.log("📤 Sending leaderboard data to server:", data);
 
   fetch('/leaderboard', {
@@ -652,6 +657,7 @@ function sendSeedLeaderboardToServer(data) {
   .catch(err => {
     console.error("🔥 Fetch or server error:", err);
   });
+  */
 }
 
 function loadOtherGuesses() {
