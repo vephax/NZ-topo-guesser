@@ -100,38 +100,47 @@ app.post('/gameTypeLeaderboard', async (req, res) => {
     return res.status(400).json({ success: false, message: 'Invalid request body' });
   }
 
-  // Fetch existing user data
-  const { data: existing, error: fetchError } = await supabase
-    .from('gameTypeLeaderboard')
-    .select('totalScore, gamesPlayed')
-    .eq('user', user)
-    .eq('gameType', gameType)
-    .single();
+  try {
+    // Fetch existing user data
+    const { data: existing, error: fetchError } = await supabase
+      .from('gameTypeLeaderboard')
+      .select('totalScore, gamesPlayed')
+      .eq('user', user)
+      .eq('gameType', gameType)
+      .single();
 
-  if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 = no rows found
-    return res.status(500).json({ success: false, message: 'Error fetching leaderboard' });
+    if (fetchError && fetchError.code !== 'PGRST116') {
+      return res.status(500).json({ success: false, message: 'Error fetching leaderboard' });
+    }
+
+    // Default increments if player leaderboard does not yet exist
+    let newTotalScore = scoreToAdd;
+    let newGamesPlayed = 1;
+
+    if (existing) {
+      newTotalScore = existing.totalScore + scoreToAdd;
+      newGamesPlayed = existing.gamesPlayed + 1;
+    }
+
+    // Upsert the new data
+    const { error: upsertError } = await supabase
+      .from('gameTypeLeaderboard')
+      .upsert(
+        [{ user, totalScore: newTotalScore, gamesPlayed: newGamesPlayed, gameType }],
+        { onConflict: ['user', 'gameType'] }
+      );
+
+    if (upsertError) {
+      console.error('Supabase upsert error:', upsertError);
+      return res.status(500).json({ success: false, message: 'Error updating leaderboard' });
+    }
+
+    // Success response
+    res.json({ success: true, totalScore: newTotalScore, gamesPlayed: newGamesPlayed });
+  } catch (err) {
+    console.error('Unexpected error:', err);
+    res.status(500).json({ success: false, message: 'Unexpected server error' });
   }
-
-  // Default increments if player leaderboard does not yet exist
-  let newTotalScore = scoreToAdd;
-  let newGamesPlayed = 1;
-
-  if (existing) {
-    newTotalScore = existing.totalScore + scoreToAdd;
-    newGamesPlayed = existing.gamesPlayed + 1;
-  }
-
-  // Upsert the new data
-  const { error: upsertError } = await supabase
-    .from('gameTypeLeaderboard')
-    .upsert([{ user, totalScore: newTotalScore, gamesPlayed: newGamesPlayed, gameType: gameType }], { onConflict: ['user', 'gameType'] });
-
-  if (upsertError) {
-    return res.status(500).json({ success: false, message: 'Error updating leaderboard' });
-  }
-
-  // Success response
-  res.json({ success: true, totalScore: newTotalScore, gamesPlayed: newGamesPlayed });
 });
 
 
