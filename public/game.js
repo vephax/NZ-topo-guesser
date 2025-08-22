@@ -833,6 +833,10 @@ async function loadRecentGames() {
   
   let recentGames = result.games;
 
+  if (recentGames.length === 0) {
+  console.warn("No games returned from backend:", result);
+  }
+
   // Sort by time first played
   recentGames.sort((a, b) => {
     return new Date(b.timeCreated) - new Date(a.timeCreated);
