@@ -92,7 +92,7 @@ app.get('/overallLeaderboard', async (req, res) => {
   res.json({ success: true, entries: data });
 });
 
-// Update the overall leaderboard
+// update data to the overall leaderboard
 app.post('overallLeaderboard', async (req, res) => {
   const { user, scoreToAdd, gameType } = req.body;
 
@@ -144,7 +144,7 @@ app.post('overallLeaderboard', async (req, res) => {
 });
 
 
-// Update the leaderboard by seed
+// Update the game leaderboard
 app.post('/leaderboard', async (req, res) => {
   const { user, seed, totalScore, rounds } = req.body;
 
@@ -239,34 +239,23 @@ app.get('/seed-analysis/:seed', async (req, res) => {
   res.json({ roundData, answers: answersMap });
 });
 
-app.get('/api/seeds/recent', async (req, res) => {
-  // Example: return last 10 distinct seeds with counts and rounds
+app.get('games', async (req, res) => {
+  const { gameCategory } = req.query;
 
-  // You may want to write SQL or supabase query that gets distinct seeds,
-  // counts distinct users, and total rounds played for each seed.
+  let query = supabase
+    .from('games')
+    .select('gameID, gameCategory, seed, gameType, playedBy, zoom, timeSetting, totalRounds, timeCreated');
+    
+  if (gameCategory) {
+    query = query.eq('gameCategory', gameCategory);
+  }
 
-  // Here's a simplified example:
-  const { data, error } = await supabase
-    .from('guesses')
-    .select('seed, user, round', { count: 'exact' });
+  const { data, error } = await query;
 
-  if (error) return res.status(500).json({ error: error.message });
+  if (error) {
+    console.error("Supabase error:", error);
+    return res.status(500).json({ success: false });
+  }
 
-  // Aggregate data by seed
-  const seedsMap = {};
-  data.forEach(({ seed, user, round }) => {
-    if (!seedsMap[seed]) {
-      seedsMap[seed] = { seed, playerSet: new Set(), roundsSet: new Set() };
-    }
-    seedsMap[seed].playerSet.add(user);
-    seedsMap[seed].roundsSet.add(round);
-  });
-
-  const recentSeeds = Object.values(seedsMap).map(s => ({
-    seed: s.seed,
-    playerCount: s.playerSet.size,
-    totalRounds: s.roundsSet.size
-  })).sort((a,b) => b.seed - a.seed).slice(0,10);
-
-  res.json(recentSeeds);
+  res.json({ success: true, games: data });
 });

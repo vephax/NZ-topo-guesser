@@ -544,8 +544,8 @@ window.onload = async () => {
   document.getElementById('leafletMap').style.pointerEvents = 'none';
 
   // Get and setup the recent seed panel
-  loadRecentSeeds();
-  setInterval(loadRecentSeeds, 30000);
+  loadRecentGames();
+  setInterval(loadRecentGames, 30000);
 };
 
 async function sendScoreForOverallLeaderboardToServer(scoreValue, gameType) {
@@ -733,7 +733,7 @@ async function updateOverallLeaderboard() {
       averageScore: e.gamesPlayed > 0 ? e.totalScore / e.gamesPlayed : 0
     }));
 
-    // Sort client-side
+    // Sort the leaderboard
     entries.sort((a, b) => {
       let valA, valB;
 
@@ -747,6 +747,11 @@ async function updateOverallLeaderboard() {
 
       return valB - valA;
     });
+
+    // If there is no data tell the user
+    if (entries.length === 0){
+      entries = {player: "Nobody has played yet, there is no data to display"}
+    }
 
     // Emojis for the top 3
     const emojis = ['🏆', '🥈', '🥉'];
@@ -766,7 +771,7 @@ async function updateOverallLeaderboard() {
     <tbody>
     `;
 
-    // Build table rows
+    // Build table rows depending on data
     entries.forEach((entry, index) => {
       const placing = emojis[index] ? `${emojis[index]}` : `${index + 1}`;
       html += `
@@ -814,21 +819,34 @@ function showSeedAnalysis(seed) {
   });
 }
 
-function loadRecentSeeds() {
-  fetch('/api/seeds/recent').then(r => r.json()).then(seeds => {
-    const container = document.getElementById('recentSeedsList');
-    container.innerHTML = '';
-    seeds.forEach(s => {
-      const div = document.createElement('div');
-      div.className = 'seed-item';
-      div.innerHTML = `<strong>Seed ${s.seed}</strong><br/><small>${s.playerCount} players • ${s.totalRounds} rounds</small>`;
-      div.onclick = () => {
-        document.getElementById('seed').value = s.seed;
-        loadOtherGuesses();
-        map.setView([-41.3, 174.8], 5);
-      };
-    container.appendChild(div);
-    });
+async function loadRecentGames() {
+  // Try to get the games from the server that are 'recent'
+  try {
+    const res = await fetch(`/games?gameCategory=${encodeURIComponent("Recent")}`);
+    const result = await res.json();
+  }
+  catch {
+    console.error("Error occured whilst fetching recent games: ", err);
+    return;
+  }
+  
+  let recentGames = result.games;
+
+  // Sort by time first played
+  recentGames.sort((a, b) => {
+    return a.timeCreated - b.timeCreated;
+  });
+
+  const container = document.getElementById('recentSeedsList');
+  container.innerHTML = '';
+  recentGames.forEach(game => {
+  const div = document.createElement('div');
+  div.className = 'gamesPanelItem';
+  div.innerHTML = `<strong>Seed ${game.seed}</strong><br/><small>${game.playedBy.length} players • ${game.totalRounds} rounds</small> • ${game.difficulty} rounds</small>`;
+  div.onclick = () => {
+    document.getElementById('seed').value = game.seed;
+  };
+  container.appendChild(div);
   });
 }
 
