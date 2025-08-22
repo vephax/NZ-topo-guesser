@@ -821,12 +821,13 @@ function showSeedAnalysis(seed) {
 
 async function loadRecentGames() {
   // Try to get the games from the server that are 'recent'
+  let result;
   try {
     const res = await fetch(`/games?gameCategory=${encodeURIComponent("Recent")}`);
-    const result = await res.json();
+    result = await res.json();
   }
   catch {
-    console.error("Error occured whilst fetching recent games: ", err);
+    console.error("Error occured whilst fetching recent games: ", e);
     return;
   }
   
