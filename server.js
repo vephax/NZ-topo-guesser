@@ -239,7 +239,7 @@ app.get('/seed-analysis/:seed', async (req, res) => {
   res.json({ roundData, answers: answersMap });
 });
 
-app.get('games', async (req, res) => {
+app.get('/games', async (req, res) => {
   const { gameCategory } = req.query;
 
   let query = supabase
