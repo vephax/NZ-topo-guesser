@@ -835,7 +835,7 @@ async function loadRecentGames() {
 
   // Sort by time first played
   recentGames.sort((a, b) => {
-    return a.timeCreated - b.timeCreated;
+    return new Date(b.timeCreated) - new Date(a.timeCreated);
   });
 
   const container = document.getElementById('recentSeedsList');
