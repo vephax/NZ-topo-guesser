@@ -247,7 +247,7 @@ h1 {
 .gamesPanelItem {
   padding: 10px;
   margin: 5px 0;
-  border: 3px solid black;
+  border: 1px solid rgb(78, 78, 78);
   border-radius: 4px;
   cursor: pointer;
   transition: background 0.2s;

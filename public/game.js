@@ -845,7 +845,7 @@ async function loadRecentGames() {
     div.className = 'gamesPanelItem';
 
     // Set the corresponding game type colour for aeshetics
-    switch (gameType){
+    switch (game.gameType){
       case "Bush":
         div.style.backgroundColor = "#9ac38bff";
         break;
