@@ -830,12 +830,8 @@ async function loadRecentGames() {
     console.error("Error occured whilst fetching recent games: ", err);
     return;
   }
-  
-  let recentGames = result.games;
 
-  if (recentGames.length === 0) {
-  console.warn("No games returned from backend:", result);
-  }
+  let recentGames = result.games;
 
   // Sort by time first played
   recentGames.sort((a, b) => {
@@ -845,12 +841,31 @@ async function loadRecentGames() {
   const container = document.getElementById('recentSeedsList');
   container.innerHTML = '';
   recentGames.forEach(game => {
-  const div = document.createElement('div');
-  div.className = 'gamesPanelItem';
-  div.innerHTML = `<strong>Seed ${game.seed}</strong><br/><small>${game.playedBy.length} players • ${game.totalRounds} rounds</small> • ${game.difficulty} rounds</small>`;
-  div.onclick = () => {
-    document.getElementById('seed').value = game.seed;
-  };
+    const div = document.createElement('div');
+    div.className = 'gamesPanelItem';
+
+    // Set the corresponding game type colour for aeshetics
+    switch (gameType){
+      case "Bush":
+        div.style.backgroundColor = "#9ac38bff";
+        break;
+      case "Beach":
+        div.style.backgroundColor = "#95cedaff";
+        break;
+      case "Highway":
+        div.style.backgroundColor = "#ef8a8aff";
+        break;
+      case "Everywhere":
+        div.style.backgroundColor = "#f5f5f5";
+        break;
+      case "Urban":
+        div.style.backgroundColor = "#f1b78aff";
+        break;
+    }
+    div.innerHTML = `<strong>Seed ${game.seed}</strong><br/><small>${game.playedBy.length} players • ${game.totalRounds} rounds</small></small>`;
+    div.onclick = () => { 
+      document.getElementById('seed').value = game.seed 
+    };
   container.appendChild(div);
   });
 }
