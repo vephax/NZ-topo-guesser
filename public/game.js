@@ -790,7 +790,7 @@ async function updateOverallLeaderboard() {
     // Update container content
     container.innerHTML = html;
   } catch (err) {
-    console.error("Error fetching leaderboard:", err);
+    console.error("Error occured whilst fetching an overall leaderboard:");
     container.innerHTML = "<p>Error loading leaderboard</p>";
   }
 }
@@ -827,7 +827,7 @@ async function loadRecentGames() {
     result = await res.json();
   }
   catch {
-    console.error("Error occured whilst fetching recent games: ", e);
+    console.error("Error occured whilst fetching recent games");
     return;
   }
   
