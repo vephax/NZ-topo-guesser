@@ -75,6 +75,7 @@ app.get('/guesses/:gameID/userDistances', async (req, res) => {
   }
 });
 */
+
 app.get('/guesses/:gameID/userDistances', async (req, res) => {
   const { gameID } = req.params;
 
@@ -90,17 +91,18 @@ app.get('/guesses/:gameID/userDistances', async (req, res) => {
   try {
     const { data, error, status, statusText } = await supabase
       .from('guesses')
-      .select('user,distance,round')
+      .select('user,distance,round') // comma-separated, not multiple args
       .eq('gameID', gameID);
 
-    // Save Supabase response for debugging
+    // Save full Supabase response
     debugResult.supabase = { data, error, status, statusText };
 
     if (error) {
+      // Return full error object, not just message
       return res.status(500).json({
         success: false,
         message: 'Supabase query error',
-        error: error || 'Unknown error',
+        error: error, // return the full object
         debug: debugResult,
       });
     }
@@ -116,7 +118,7 @@ app.get('/guesses/:gameID/userDistances', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Unexpected server error',
-      error: err || 'Unknown error',
+      error: err, // return full error
       debug: debugResult,
     });
   }

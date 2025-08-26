@@ -875,7 +875,7 @@ function showGameInfoPanel(game){
 async function createGameLeaderboardHTML(gameID) {
   const res = await fetch(`/guesses/:${gameID}/userDistances`)
   result = res.json;
-  if (!result.success) console.error(`An error occured when trying to get leaderboard data for gameID: ${gameID}` + result.error);
+  if (!result.success) console.error(`An error occured when trying to get leaderboard data for gameID: ${gameID} \n` + result.error + result.debug);
   data = result.data;
 
   // Find out how many rounds exist
