@@ -294,7 +294,7 @@ function submitGuess() {
     sendGuessToServer(guessLat, guessLng, dist);
     
     // Are we in normal mode?
-    if (_game.timerDuration === 30 && _game.zoom === 14) {
+    if (_game.timerDuration === 30 && _game.zoom === 14 && _game.totalRounds === 5) {
       sendScoreForOverallLeaderboardToServer(_totalScore, _game.gameType);
     }
       
@@ -754,7 +754,8 @@ async function loadRecentGames() {
 
     //Somewhat temporary
     if (game.playedBy.includes(currentUser)){
-      div.color = "#280037ff";
+      const h3 = div.querySelector('h3'); 
+      h3.style.color = "#3a0045ff";
     }
 
     // Set the corresponding game type colour for neat aeshetics
@@ -775,7 +776,7 @@ async function loadRecentGames() {
         div.style.backgroundColor = "#f1b78aff";
         break;
     }
-    if (game.zoom != 14 || game.timerDuration != 30){
+    if (game.zoom != 14 || game.timerDuration != 30 || game.totlaRounds != 5){
       div.innerHTML = `<strong>${game.gameType}</strong> - Custom Settings <br/><small>${game.playedBy.length} players • ${game.totalRounds} rounds • seed ${game.seed} </small>`;
     }
     else {
@@ -853,7 +854,9 @@ function showGameInfoPanel(game){
 
   // Setup the buttons
   html += `<div id="gameInfoButtons">`;
-  if (game !== _game){
+  if (game !== _game && game.playedBy.includes(currentUser)){
+    html += `<p>You have already played this game so select another or </p>`
+  } else if (game !== _game){
     html += `<button class="blueButton" id="playGameBtn">Play this Game</button>
     <p> or </p>`
   } else{
@@ -864,7 +867,7 @@ function showGameInfoPanel(game){
 
   infoPanel.innerHTML = html;
 
-  if (game !== _game){
+  if (game !== _game && !game.playedBy.includes(currentUser)){
     document.getElementById("playGameBtn").onclick = () => startNewGame(game);
   }
   document.getElementById("createNewGameBtn").onclick = showNewGamePanel;
