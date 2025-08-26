@@ -872,7 +872,7 @@ function showGameInfoPanel(game){
 
 function createGameLeaderboardHTML(gameID) {
 
-  return fetch(`/guess/:${gameID}/userDistances`)
+  return fetch(`/guesses/:${gameID}/userDistances`)
   .then(r => r.json())
   .then(data => {
     // Find out how many rounds exist
