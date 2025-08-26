@@ -873,10 +873,19 @@ function showGameInfoPanel(game){
 }
 
 async function createGameLeaderboardHTML(gameID) {
-  const res = await fetch(`/guesses/:${gameID}/userDistances`)
-  result = res.json;
-  if (!result.success) console.error(`An error occured when trying to get leaderboard data for gameID: ${gameID} \n` + result.error + '\n' + result.debug + '\n' + result.message);
-  data = result.data;
+  const res = await fetch(`/guesses/${gameID}/userDistances`); // remove the colon
+  const result = await res.json(); // call the function
+
+  if (!result.success) {
+    console.error(
+      `An error occurred when trying to get leaderboard data for gameID: ${gameID}\n` +
+      'Error: ' + JSON.stringify(result.error, null, 2) + '\n' +
+      'Debug: ' + JSON.stringify(result.debug, null, 2) + '\n' +
+      'Message: ' + result.message
+    );
+  }
+
+  const data = result.data;
 
   // Find out how many rounds exist
   const totalRounds = Math.max(...data.map(g => g.round));
