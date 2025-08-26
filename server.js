@@ -59,7 +59,6 @@ app.get('/guesses/:seed/:round', async (req, res) => {
 */
 
 // GET distances for a specific game (for leaderboards)
-/*
 app.get('/guesses/:gameID/userDistances', async (req, res) => {
   const { gameID } = req.params;
 
@@ -72,87 +71,6 @@ app.get('/guesses/:gameID/userDistances', async (req, res) => {
     res.json({ data, success: true });
   } catch (err) {
     res.status(500).json({ success: false, error: 'test 2' });
-  }
-});
-*/
-
-app.get('/guesses/:gameID/userDistances', async (req, res) => {
-  const { gameID } = req.params;
-
-  // Debug object always exists
-  const debugResult = {
-    request: {
-      params: req.params,
-      query: req.query,
-    },
-    supabaseResponse: null,
-    caughtError: null,
-  };
-
-  try {
-    let response;
-
-    try {
-      // Attempt query
-      response = await supabase
-        .from('guesses')
-        .select('user,distance,round') // comma-separated
-        .eq('gameID', gameID);
-
-      debugResult.supabaseResponse = response;
-
-      // If Supabase returned an error object
-      if (response && response.error) {
-        return res.status(500).json({
-          success: false,
-          message: 'Supabase query returned an error',
-          error: JSON.stringify(response.error, Object.getOwnPropertyNames(response.error)),
-          debug: debugResult,
-        });
-      }
-
-      // Success
-      return res.json({
-        success: true,
-        data: response?.data ?? null,
-        debug: debugResult,
-      });
-    } catch (supabaseErr) {
-      // Capture thrown Supabase error
-      debugResult.caughtError = supabaseErr;
-
-      // Convert to JSON-safe string
-      let serializedError;
-      try {
-        serializedError = JSON.stringify(supabaseErr, Object.getOwnPropertyNames(supabaseErr));
-      } catch {
-        serializedError = String(supabaseErr);
-      }
-
-      return res.status(500).json({
-        success: false,
-        message: 'Supabase threw an exception',
-        error: serializedError,
-        debug: debugResult,
-      });
-    }
-  } catch (err) {
-    // Any other unexpected runtime error
-    debugResult.caughtError = err;
-
-    let serializedErr;
-    try {
-      serializedErr = JSON.stringify(err, Object.getOwnPropertyNames(err));
-    } catch {
-      serializedErr = String(err);
-    }
-
-    return res.status(500).json({
-      success: false,
-      message: 'Unexpected server error',
-      error: serializedErr,
-      debug: debugResult,
-    });
   }
 });
 
