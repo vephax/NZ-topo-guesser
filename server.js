@@ -67,10 +67,10 @@ app.get('/guesses/:gameID/userDistances', async (req, res) => {
       .from('guesses')
       .select('user,distance,round')
       .eq('gameID', gameID);
-    if (error) return res.status(500).json({ success: false, error: error.message });
+    if (error) return res.status(500).json({ success: false, error: 'test 1' });
     res.json({ data, success: true });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: 'test 2' });
   }
 });
 
