@@ -785,7 +785,7 @@ async function loadRecentGames() {
     //Somewhat temporary
     if (game.playedBy.includes(currentUser)){
       const strong = div.querySelector('strong'); 
-      strong.style.color = "#5c006eff";
+      strong.style.color = "#b70ddaff";
     }
 
     div.onclick = () => { 
