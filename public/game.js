@@ -575,6 +575,8 @@ async function sendScoreForOverallLeaderboardToServer(scoreValue, gameType) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ user: currentUser, scoreToAdd: scoreValue, gameType: gameType }),
   });
+  const result = await res.json();
+  if (!result.success) console.error("An error occured when fetching overall leaderboard: \n" + result.message);
 }
 
 function sendGuessToServer(lat, lng, distance) {
@@ -657,7 +659,8 @@ async function updateOverallLeaderboard() {
 
     // If there is no data tell the user
     if (entries.length === 0){
-      entries = {player: "Nobody has played yet, there is no data to display"}
+      container.innerHTML = "<p>Nobody has played yet; there is no data to display</p>";
+      return;
     }
 
     // Emojis for the top 3
@@ -780,7 +783,7 @@ async function loadRecentGames() {
     //Somewhat temporary
     if (game.playedBy.includes(currentUser)){
       const strong = div.querySelector('strong'); 
-      strong.style.color = "#3a0045ff";
+      strong.style.color = "#5c006eff";
     }
 
     div.onclick = () => { 
