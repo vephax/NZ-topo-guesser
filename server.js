@@ -230,7 +230,7 @@ app.post('/games/:gameID/players', async (req, res) => {
   const { data, error } = await supabase
     .from('games')
     .update({ playedBy: supabase.fn.array_append('playedBy', newPlayer) })
-    .eq('id', id)
+    .eq('gameID', gameID)
     .select();
 
   if (error) return res.status(400).json({ error });

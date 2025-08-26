@@ -779,7 +779,7 @@ async function loadRecentGames() {
       div.innerHTML = `<strong>${game.gameType}</strong> - Custom Settings <br/><small>${game.playedBy.length} players • ${game.totalRounds} rounds • seed ${game.seed} </small>`;
     }
     else {
-      div.innerHTML = `<strong>${game.gameType}</strong><br/><small>${game.playedBy.length} players • ${game.totalRounds} rounds • seed ${game.seed} </small></small>`;
+      div.innerHTML = `<strong>${game.gameType}</strong><br/><small>${game.playedBy.length} player(s) • ${game.totalRounds} rounds • seed ${game.seed} </small></small>`;
     }
 
     //Somewhat temporary
