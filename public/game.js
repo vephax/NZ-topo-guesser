@@ -866,70 +866,72 @@ function showGameInfoPanel(game){
 
   infoPanel.innerHTML = html;
 
-  document.getElementById("playGameBtn").onclick = () => startNewGame(game);
+  if (game !== _game){
+    document.getElementById("playGameBtn").onclick = () => startNewGame(game);
+  }
   document.getElementById("createNewGameBtn").onclick = showNewGamePanel;
 }
 
-function createGameLeaderboardHTML(gameID) {
+async function createGameLeaderboardHTML(gameID) {
+  const res = await fetch(`/guesses/:${gameID}/userDistances`)
+  result = res.json;
+  if (!result.success) console.logerror(`An error occured when trying to get leaderboard data for gameID: ${gameID}`);
+  data = result.data;
 
-  return fetch(`/guesses/:${gameID}/userDistances`)
-  .then(r => r.json())
-  .then(data => {
-    // Find out how many rounds exist
-    const totalRounds = Math.max(...data.map(g => g.round));
+  // Find out how many rounds exist
+  const totalRounds = Math.max(...data.map(g => g.round));
 
-    // Group results by user and compute scores
-    const users = {};
-    data.forEach(g => {
-      if (!users[g.user]) {
-        users[g.user] = { scores: Array(totalRounds).fill(null), total: 0 };
-      }
-      const score = calculateScore(g.distance);
-      users[g.user].scores[g.round - 1] = score;
-      users[g.user].total += score;
-    });
-
-    // Sort users by total score
-    const sortedUsers = Object.entries(users).sort(
-      (a, b) => b[1].total - a[1].total
-    );
-
-    // Build HTML
-    let html = `<table>`;
-    html += `<thead><tr style="border-bottom: 1px solid black;"><th>Placing</th>`;
-    html += `<th>Player</th>`;
-    html += `<th>Total</th>`;
-    for (let i = 1; i <= totalRounds; i++) {
-      html += `<th>Round ${i}</th>`;
+  // Group results by user and compute scores
+  const users = {};
+  data.forEach(g => {
+    if (!users[g.user]) {
+      users[g.user] = { scores: Array(totalRounds).fill(null), total: 0 };
     }
-    html += `</tr></thead><tbody>`;
-
-    let placing = 1;
-    sortedUsers.forEach(([user, { scores, total }]) => {
-      if (placing === 1) html += `<tr style="background-color: rgba(255, 223, 148, 1);">`;
-      else if (placing === 2) html += `<tr style="background-color: rgba(220, 217, 217, 1);">`;
-      else if (placing === 3) html += `<tr style="background-color: rgba(252, 191, 126, 1);">`;
-      else html += `<tr>`;
-
-      html += `<td>${placing}</td>`;
-      html += `<td>${user}</td>`;
-      html += `<td><b>${total}</b></td>`;
-      scores.forEach(score => {
-        // Assign colours to the score depending on how well they did
-        if (score > 250) html += `<td style="color:rgb(69, 152, 69); font-weight: bold;">`;
-        else if (score < 50 && score !== null) html += `<td style="color: rgb(216, 0, 0); font-weight: bold;">`;
-        else html += `<td>`;
-
-        html += `${score !== null ? score : "-"}</td>`;
-      });
-      html += `</tr>`;
-      placing++;
-    });
-
-    html += `</tbody></table>`;
-
-    return html;
+    const score = calculateScore(g.distance);
+    users[g.user].scores[g.round - 1] = score;
+    users[g.user].total += score;
   });
+
+  // Sort users by total score
+  const sortedUsers = Object.entries(users).sort(
+    (a, b) => b[1].total - a[1].total
+  );
+
+  // Build HTML
+  let html = `<table>`;
+  html += `<thead><tr style="border-bottom: 1px solid black;"><th>Placing</th>`;
+  html += `<th>Player</th>`;
+  html += `<th>Total</th>`;
+  for (let i = 1; i <= totalRounds; i++) {
+    html += `<th>Round ${i}</th>`;
+  }
+  html += `</tr></thead><tbody>`;
+
+  let placing = 1;
+  sortedUsers.forEach(([user, { scores, total }]) => {
+    if (placing === 1) html += `<tr style="background-color: rgba(255, 223, 148, 1);">`;
+    else if (placing === 2) html += `<tr style="background-color: rgba(220, 217, 217, 1);">`;
+    else if (placing === 3) html += `<tr style="background-color: rgba(252, 191, 126, 1);">`;
+    else html += `<tr>`;
+
+    html += `<td>${placing}</td>`;
+    html += `<td>${user}</td>`;
+    html += `<td><b>${total}</b></td>`;
+    scores.forEach(score => {
+      // Assign colours to the score depending on how well they did
+      if (score > 250) html += `<td style="color:rgb(69, 152, 69); font-weight: bold;">`;
+      else if (score < 50 && score !== null) html += `<td style="color: rgb(216, 0, 0); font-weight: bold;">`;
+      else html += `<td>`;
+
+      html += `${score !== null ? score : "-"}</td>`;
+    });
+    html += `</tr>`;
+    placing++;
+  });
+
+  html += `</tbody></table>`;
+
+  return html;
 }
 
 function showNewGamePanel(){
@@ -1031,7 +1033,7 @@ async function showChangelogs() {
   // Show changelogs one by one, allow user to skip remaining
   for (let i = 0; i < newVersions.length; i++) {
     const { version, changelog } = newVersions[i];
-    
+
     let message;
     if (version != currentVersion){
       message = `What's new in version ${version}:\n\n${changelog}\n\nPress OK to see next update or Cancel to skip.`;
