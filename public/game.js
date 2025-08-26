@@ -567,7 +567,7 @@ function addNewPlayer(gameID, player){
   fetch(`/games/:${gameID}/players`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ gameID: gameID, newPlayer: player }),
+    body: JSON.stringify({ newPlayer: player }),
   });
 }
 
