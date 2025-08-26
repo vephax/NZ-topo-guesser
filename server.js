@@ -79,7 +79,7 @@ app.get('/guesses/:gameID/userDistances', async (req, res) => {
 app.get('/guesses/:gameID/userDistances', async (req, res) => {
   const { gameID } = req.params;
 
-  // Always include request info
+  // Debug object always exists
   const debugResult = {
     request: {
       params: req.params,
@@ -90,48 +90,67 @@ app.get('/guesses/:gameID/userDistances', async (req, res) => {
   };
 
   try {
-    // Await the Supabase call without destructuring
     let response;
+
     try {
+      // Attempt query
       response = await supabase
         .from('guesses')
-        .select('user,distance,round') // comma-separated!
+        .select('user,distance,round') // comma-separated
         .eq('gameID', gameID);
+
       debugResult.supabaseResponse = response;
+
+      // If Supabase returned an error object
+      if (response && response.error) {
+        return res.status(500).json({
+          success: false,
+          message: 'Supabase query returned an error',
+          error: JSON.stringify(response.error, Object.getOwnPropertyNames(response.error)),
+          debug: debugResult,
+        });
+      }
+
+      // Success
+      return res.json({
+        success: true,
+        data: response?.data ?? null,
+        debug: debugResult,
+      });
     } catch (supabaseErr) {
-      // Capture any thrown Supabase error
+      // Capture thrown Supabase error
       debugResult.caughtError = supabaseErr;
+
+      // Convert to JSON-safe string
+      let serializedError;
+      try {
+        serializedError = JSON.stringify(supabaseErr, Object.getOwnPropertyNames(supabaseErr));
+      } catch {
+        serializedError = String(supabaseErr);
+      }
+
       return res.status(500).json({
         success: false,
         message: 'Supabase threw an exception',
-        error: supabaseErr,
+        error: serializedError,
         debug: debugResult,
       });
     }
-
-    // If response exists, check for error property
-    if (response?.error) {
-      return res.status(500).json({
-        success: false,
-        message: 'Supabase returned an error',
-        error: response.error,
-        debug: debugResult,
-      });
-    }
-
-    // Success
-    res.json({
-      success: true,
-      data: response?.data ?? null,
-      debug: debugResult,
-    });
   } catch (err) {
-    // Catch any other unexpected runtime errors
+    // Any other unexpected runtime error
     debugResult.caughtError = err;
-    res.status(500).json({
+
+    let serializedErr;
+    try {
+      serializedErr = JSON.stringify(err, Object.getOwnPropertyNames(err));
+    } catch {
+      serializedErr = String(err);
+    }
+
+    return res.status(500).json({
       success: false,
       message: 'Unexpected server error',
-      error: err,
+      error: serializedErr,
       debug: debugResult,
     });
   }
