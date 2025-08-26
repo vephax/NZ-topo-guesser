@@ -752,12 +752,6 @@ async function loadRecentGames() {
     const div = document.createElement('div');
     div.classList.add('gamesPanelItem');
 
-    //Somewhat temporary
-    if (game.playedBy.includes(currentUser)){
-      const h3 = div.querySelector('h3'); 
-      h3.style.color = "#3a0045ff";
-    }
-
     // Set the corresponding game type colour for neat aeshetics
     switch (game.gameType){
       case "Bush":
@@ -776,12 +770,20 @@ async function loadRecentGames() {
         div.style.backgroundColor = "#f1b78aff";
         break;
     }
+
     if (game.zoom != 14 || game.timerDuration != 30 || game.totlaRounds != 5){
       div.innerHTML = `<strong>${game.gameType}</strong> - Custom Settings <br/><small>${game.playedBy.length} players • ${game.totalRounds} rounds • seed ${game.seed} </small>`;
     }
     else {
       div.innerHTML = `<strong>${game.gameType}</strong><br/><small>${game.playedBy.length} players • ${game.totalRounds} rounds • seed ${game.seed} </small></small>`;
     }
+
+    //Somewhat temporary
+    if (game.playedBy.includes(currentUser)){
+      const h3 = div.querySelector('h3'); 
+      h3.style.color = "#3a0045ff";
+    }
+
     div.onclick = () => { 
       if (div === selectedPanelItem) return;
       
