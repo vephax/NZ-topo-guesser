@@ -61,12 +61,17 @@ app.get('/guesses/:seed/:round', async (req, res) => {
 // GET distances for a specific game (for leaderboards)
 app.get('/guesses/:gameID/userDistances', async (req, res) => {
   const { gameID } = req.params;
-  const { data, error } = await supabase
-    .from('guesses')
-    .select('user', 'distance', 'round')
-    .eq('gameID', Number(gameID));
-  if (error) return res.status(500).json({ success: false, error: error.message });
-  res.json( {data: data, success:true });
+
+  try {
+    const { data, error } = await supabase
+      .from('guesses')
+      .select('user', 'distance', 'round')
+      .eq('gameID', gameID);
+    if (error) return res.status(500).json({ success: false, error: error.message });
+    res.json({ data, success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 /*
