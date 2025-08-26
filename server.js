@@ -208,7 +208,7 @@ app.post('/games', async (req, res) => {
   const { gameCategory, seed, gameType, playedBy, totalRounds, zoom, timerDuration } = req.body;
 
   const { data, error } = await supabase
-    .from('overallLeaderboard')
+    .from('games')
     .insert(
       [{ gameCategory, seed, gameType, playedBy, totalRounds, zoom, timerDuration }]
     )
