@@ -73,6 +73,7 @@ h1 {
 
 #gameInfoPanelLeft, #gameLeaderboardPanel{
   flex: 1 1 50%; /* each takes half width, and can shrink/grow */
+  width: 400px;
 }
 
 #gameInfoPanelLeft{

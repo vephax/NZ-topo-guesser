@@ -887,6 +887,10 @@ async function createGameLeaderboardHTML(gameID) {
 
   const guessData = result.data;
 
+  if (guessData.length === 0){
+    return `<p>Nobody has played this game yet.</p>`;
+  }
+
   // Find out how many rounds exist
   const totalRounds = Math.max(...guessData.map(g => g.round));
 
