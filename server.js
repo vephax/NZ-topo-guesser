@@ -59,6 +59,7 @@ app.get('/guesses/:seed/:round', async (req, res) => {
 */
 
 // GET distances for a specific game (for leaderboards)
+/*
 app.get('/guesses/:gameID/userDistances', async (req, res) => {
   const { gameID } = req.params;
 
@@ -71,6 +72,53 @@ app.get('/guesses/:gameID/userDistances', async (req, res) => {
     res.json({ data, success: true });
   } catch (err) {
     res.status(500).json({ success: false, error: 'test 2' });
+  }
+});
+*/
+app.get('/guesses/:gameID/userDistances', async (req, res) => {
+  const { gameID } = req.params;
+
+  const debugResult = {
+    request: {
+      params: req.params,
+      query: req.query,
+    },
+    supabase: null,
+    caughtError: null,
+  };
+
+  try {
+    const { data, error, status, statusText } = await supabase
+      .from('guesses')
+      .select('user,distance,round')
+      .eq('gameID', gameID);
+
+    // Save Supabase response for debugging
+    debugResult.supabase = { data, error, status, statusText };
+
+    if (error) {
+      return res.status(500).json({
+        success: false,
+        message: 'Supabase query error',
+        error: error || 'Unknown error',
+        debug: debugResult,
+      });
+    }
+
+    res.json({
+      success: true,
+      data,
+      debug: debugResult,
+    });
+  } catch (err) {
+    debugResult.caughtError = err;
+
+    res.status(500).json({
+      success: false,
+      message: 'Unexpected server error',
+      error: err || 'Unknown error',
+      debug: debugResult,
+    });
   }
 });
 
