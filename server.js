@@ -66,7 +66,7 @@ app.get('/guesses/:gameID/userDistances', async (req, res) => {
     const { data, error } = await supabase
       .from('guesses')
       .select('user,distance,round')
-      .eq('gameID', gameID);
+      .eq('gameID', Number(gameID));
     if (error) return res.status(500).json({ success: false, error: 'test 1' });
     res.json({ data, success: true });
   } catch (err) {
