@@ -230,7 +230,7 @@ function startNewGame(game) {
   nextRound();
 
   if (_game.playedBy[0] !== currentUser){
-    addNewPlayer(gameID, currentUser);
+    addNewPlayer(game.gameID, currentUser);
   }
 }
 
@@ -327,12 +327,7 @@ function submitGuess() {
     `;
 
     // Are we in normal mode?
-    console.log('game finished');
-    console.log(_game.timerDuration);
-    console.log(_game.zoom);
-    console.log(_game.totalRounds);
     if (Number(_game.timerDuration) === 30 && Number(_game.zoom) === 14 && Number(_game.totalRounds) === 5) {
-      console.log('in normal mode');
       sendScoreForOverallLeaderboardToServer(_totalScore, _game.gameType);
     }
 
