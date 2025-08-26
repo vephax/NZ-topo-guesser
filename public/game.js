@@ -753,7 +753,7 @@ async function loadRecentGames() {
     div.classList.add('gamesPanelItem');
 
     //Somewhat temporary
-    if (game.playedBy.contains(currentUser)){
+    if (game.playedBy.includes(currentUser)){
       div.color = "#280037ff";
     }
 
