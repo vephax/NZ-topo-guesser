@@ -331,7 +331,7 @@ function submitGuess() {
     console.log(_game.timerDuration);
     console.log(_game.zoom);
     console.log(_game.totalRounds);
-    if (_game.timerDuration === 30 && _game.zoom === 14 && _game.totalRounds === 5) {
+    if (Number(_game.timerDuration) === 30 && Number(_game.zoom) === 14 && Number(_game.totalRounds) === 5) {
       console.log('in normal mode');
       sendScoreForOverallLeaderboardToServer(_totalScore, _game.gameType);
     }
