@@ -564,7 +564,7 @@ function updateGameFeedbackUI() {
 /// === SERVER DATA SENDERS AND RECEIVERS ===
 
 function addNewPlayer(gameID, player){
-  fetch(`/games/:${gameID}/players`, {
+  fetch(`/games/${gameID}/players`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ newPlayer: player }),
