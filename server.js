@@ -204,7 +204,7 @@ app.get('/seed-analysis/:seed', async (req, res) => {
 });
 */
 
-app.post('games', async (req, res) => {
+app.post('/games', async (req, res) => {
   const {gameCategory, seed, gameType, playedBy, totalRounds, zoom, timerDuration } = req.body;
 
   const { error: insertError } = await supabase

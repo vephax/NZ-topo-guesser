@@ -10,10 +10,10 @@
 
   <script>
     // 📚 Study Mode: Load list of HTML files from /study folder
-  document.getElementById("studyBtn").addEventListener("click", () => {
+  document.getElementById("studyBtn").onclick = () => {
     document.getElementById("studyModal").style.display = "flex";
     loadStudyFiles();
-  });
+  };
 
   document.getElementById("closeStudyModal").addEventListener("click", () => {
     document.getElementById("studyModal").style.display = "none";
