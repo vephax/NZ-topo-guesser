@@ -883,15 +883,15 @@ async function createGameLeaderboardHTML(gameID) {
     );
   }
 
-  const data = result.data;
-  console.log(data);
+  const guessData = result.data;
+  console.log(guessData);
 
   // Find out how many rounds exist
-  const totalRounds = Math.max(...data.map(g => g.round));
+  const totalRounds = Math.max(...guessData.map(g => g.round));
 
   // Group results by user and compute scores
   const users = {};
-  data.forEach(g => {
+  guessData.forEach(g => {
     if (!users[g.user]) {
       users[g.user] = { scores: Array(totalRounds).fill(null), total: 0 };
     }
