@@ -883,9 +883,8 @@ async function createGameLeaderboardHTML(gameID) {
     );
   }
 
-  console.log(data);
-
   const data = result.data;
+  console.log(data);
 
   // Find out how many rounds exist
   const totalRounds = Math.max(...data.map(g => g.round));
