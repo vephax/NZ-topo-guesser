@@ -329,7 +329,6 @@ function submitGuess() {
       <button id="nextRoundBtn" class="blueButton" disabled>Next Round</button>
       <button id="submitBtn" class="blueButton" disabled>Submit Guess</button>
     `;
-    console.log('test');
     showGameInfoPanel(_game);
   } else{
     // This is not the final round
