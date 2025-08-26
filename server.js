@@ -113,7 +113,7 @@ app.get('/overallLeaderboard', async (req, res) => {
 });
 
 // update data to the overall leaderboard
-app.post('overallLeaderboard', async (req, res) => {
+app.post('/overallLeaderboard', async (req, res) => {
   const { user, scoreToAdd, gameType } = req.body;
 
   if (!user || typeof scoreToAdd !== 'number') {
