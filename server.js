@@ -59,11 +59,11 @@ app.get('/guesses/:seed/:round', async (req, res) => {
 */
 
 // GET distances for a specific game (for leaderboards)
-app.get('/guess/:gameID/userDistances', async (req, res) => {
+app.get('/guesses/:gameID/userDistances', async (req, res) => {
   const { gameID } = req.params;
   const { data, error } = await supabase
     .from('guesses')
-    .select('user', 'distance')
+    .select('user', 'distance', 'round')
     .eq('gameID', Number(gameID));
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
