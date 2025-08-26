@@ -14,7 +14,7 @@ h1 {
   font-weight: 700;
   color: #0078d4;
 }
-/* To be removed */
+
 #maintenanceMessage{
   margin-left: 200px;
   margin-right: 200px;
@@ -23,7 +23,22 @@ h1 {
   color: #ff0000;
 }
 
-#controls {
+#playerPanel {
+  background: #fff;
+  padding: 5px;
+  border-radius: 8px;
+  max-width: 400px;
+  margin: 0 auto 30px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  text-align: center;
+
+  display: flex;
+  align-items: center; /* vertically centers them */
+  justify-content: center; /* horizontally */
+  gap: 10px; 
+}
+
+#controls, #gameInfoPanel {
   background: #fff;
   padding: 20px;
   border-radius: 8px;
@@ -33,22 +48,84 @@ h1 {
   text-align: center;
 }
 
-#controls label,
-#controls input,
-#controls select {
-  font-size: 0.9rem;
-  margin: 0 8px 8px 0;
+#gameInfoPanel input,
+#gameInfoPanel select{
+  margin: 10px;
+  padding: 5px;
 }
 
-#controls input[type="number"],
-#controls select,
-#controls input[type="text"] {
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 6px 10px;
+#gameInfoPanel {
+  transition: background-color 0.5s;
 }
 
-#controls button:not(#changePlayerBtn) {
+#gameInfoButtons{
+  display: flex;
+  align-items: center; /* vertically */
+  justify-content: center; /* horizontal */
+  gap: 10px;                     
+}
+
+#gameInfoTopPanels{
+  display: flex;
+  margin: 0 auto 30px; /* center horizontally, with bottom margin */
+  padding: 0;
+}
+
+#gameInfoPanelLeft, #gameLeaderboardPanel{
+  flex: 1 1 50%; /* each takes half width, and can shrink/grow */
+}
+
+#gameInfoPanelLeft{
+  border-right: 1px solid black;
+}
+
+#gameInfoPanelLeft p{
+  text-align: left;
+}
+
+#gameLeaderboardPanel{
+  overflow-x: scroll;
+  justify-content: center;
+}
+
+#gameInfoPanel table{
+  margin: 0 20px;
+  width: 100%;
+}
+
+#gameInfoPanel td{
+  padding: 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#gameInfoPanel th{
+  padding-bottom: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.newGameSetting{
+  display: flex;
+  max-width: 800px; /* optional max width */
+  margin: 0 auto 30px; /* center horizontally, with bottom margin */
+  justify-content: center;
+  align-items: center;
+  text-align: right;
+}
+
+#gameInfoPanel label, 
+#gameInfoPanel input, 
+#gameInfoPanel select {
+  flex: 1 1 50%; /* each takes half width, and can shrink/grow */
+  max-width: 200px;
+  text-align: center;
+}
+#gameInfoPanel label{
+  text-align: right;
+}
+
+.blueButton{
   background: #0078d4;
   color: #fff;
   border: none;
@@ -56,20 +133,17 @@ h1 {
   padding: 8px 16px;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: background 0.2s;
-  margin: 8px 10px 0 0;
+  transition: background-color 0.2s;
+  margin: 8px 10px 5px 5px;
 }
 
-#controls button:disabled:not(#changePlayerBtn) {
+.blueButton:hover{
+  background: #005ba1;
+}
+
+.blueButton:disabled {
   background: #ccc;
   cursor: not-allowed;
-}
-
-#replayBtn {
-  background: #28a745 !important;
-  padding: 6px 12px !important;
-  font-size: 0.85rem !important;
-  width: auto !important;
 }
 
 .rainbow-button {
@@ -136,6 +210,7 @@ h1 {
 #leafletMap {
   flex: 1 1 400px;
   height: 600px;
+  max-width: 600px;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -150,13 +225,6 @@ h1 {
 
 #leafletMap {
   cursor: crosshair;
-}
-
-#playerDiv {
-  display: flex;
-  align-items: center; /* vertically centers them */
-  justify-content: center; /* horizontally */
-  gap: 10px; /* adds space between button and paragraph */
 }
 
 #userInfo {
@@ -175,7 +243,7 @@ h1 {
 #recentSeedsPanel,
 #overallLeaderboard {
   flex: 1 1 50%; /* each takes half width, and can shrink/grow */
-  max-height: 60vh;
+  max-height: 70vh;
   max-width: 390px;
   overflow-y: auto;
   background: white;
@@ -185,6 +253,10 @@ h1 {
   position: static;
 }
 
+#recentSeedsPanel{
+  display:grid;
+}
+
 #recentSeedsHeader {
   flex-shrink: 0; /* don’t shrink */
   background: white;
@@ -192,7 +264,6 @@ h1 {
   top: 0;
   z-index: 1;
   padding: 5px;
-    /* New flexbox rules */
   display: flex;
   align-items: center; /* vertically align items */
   gap: 10px;           /* spacing between them */
@@ -200,13 +271,15 @@ h1 {
 
 #recentSeedsList {
   overflow-y: auto; /* scroll only the list */
+  border-bottom: 1px solid black;
+  border-top: 1px solid black;
 }
-
 
 #overallLeaderboard h3{
   text-align: center;
   text-decoration: underline;
   font-size: 1.5em;
+  margin-bottom: 15px;
 }
 
 #overallLeaderboard label{
@@ -218,7 +291,7 @@ h1 {
   margin-left: 10px;
 }
 
-#overallLeaderboard table {
+#overallLeaderboard table, #gameLeaderboardPanel table {
   border: 1px solid #000000;
   width: 100%;
   border-collapse: collapse;
@@ -228,33 +301,47 @@ h1 {
   color: #444; /* dark grey text */
 }
 
-#overallLeaderboard th,
-#overallLeaderboard td {
+#overallLeaderboard th, #gameLeaderboardPanel th,
+#overallLeaderboard td, #gameLeaderboardPanel th {
   padding: 8px 4px;
   text-align: center;
   border: none;
 }
 
-#overallLeaderboard thead th {
+#overallLeaderboard thead th,
+#gameLeaderboardPanel thead th {
   background-color: #ddd; /* light grey header background */
   font-weight: 600;
 }
 
-#overallLeaderboard tbody tr:nth-child(even) {
+#overallLeaderboard tbody tr:nth-child(even),
+#gameLeaderboardPanel tbody tr:nth-child(even) {
   background-color: #f5f5f5; /* subtle alternate row grey */
+}
+#overallLeaderboard tbody tr:nth-child(odd),
+#gameLeaderboardPanel tbody tr:nth-child(odd) {
+  background-color: #fff; 
 }
 
 .gamesPanelItem {
   padding: 10px;
-  margin: 5px 0;
+  margin: 8px 0;
   border: 1px solid rgb(78, 78, 78);
-  border-radius: 4px;
+  border-radius: 5px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: margin-left 0.7s ease, border 0.7s ease, padding 0.7s ease;
 }
 
-.gamesPanelItem:hover {
-  background: #e0e0e0;
+.gamesPanelItem:hover:not(.selected) {
+  transition: margin-left 0.3s ease;
+  margin-left: 15px;
+}
+
+.gamesPanelItem.selected {
+  padding: 15px;
+  transition: margin-left 0.7s ease, border 0.7s ease, padding 0.7s ease;
+  margin-left: 45px;
+  border: 2px solid rgb(255, 213, 0);
 }
 
 .gamesPanelItem strong {

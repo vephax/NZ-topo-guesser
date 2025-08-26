@@ -81,21 +81,25 @@
     <button id="closeAnalysisBtn" style="margin-top:10px;">Close</button>
   </div>
 
-<h1 id="gameTitle">NZ Topo Guesser V - Sponsored by Water</h1>
-<!--<p id="maintenanceMessage"></p>-->
+  <h1 id="gameTitle">NZ Topo Guesser V - Sponsored by Water</h1>
+  <!--<p id="maintenanceMessage"></p>-->
+
+  <!-- Player Data Panel -->
+  <div id="playerPanel">
+    <p id="userInfo"></p>
+      <button id="changePlayerBtn">Change Player</button>
+  </div>
 
   <div id="topPanels">
-    <!-- Recents seeds -->
+    <!-- Recents games -->
     <div id="recentSeedsPanel">
       <div id="recentSeedsHeader">
-        <h3>Recent Seeds</h3>
-           <button class="rainbow-button" data-alt="Show All Guesses" id="showAllGuessesBtn"></button>
-          <button class="rainbow-button" data-alt="Analyze Seed" id="analyzeSeedBtn"></button>
+        <h3>Recent Games</h3>
       </div>
       <div id="recentSeedsList">Loading...</div>
     </div>
 
-    <!-- Leaderboard -->
+    <!-- Overall Leaderboard -->
     <div id="overallLeaderboard">
       <div>
       <h3>Overall Leaderboard</h3>
@@ -104,7 +108,7 @@
             <option value="Everywhere">Everywhere</option>
             <option value="Beach">Beach</option>
             <option value="Urban">Urban</option>
-            <option value="Highway">State Highway</option>
+            <option value="State Highway">State Highway</option>
             <option value="Bush">Bush</option>
           </select>
         </label>
@@ -122,50 +126,18 @@
   </div>
   </div>
 
+  <!-- Game informtion panel -->
+  <div id="gameInfoPanel">
+    <button class="blueButton" id="createNewGameBtn">Create a New Game</button>
+  </div>
+
   <!-- Game controls tab -->
   <div id="controls">
-    <div id="playerDiv">
-      <p id="userInfo"></p>
-      <button id="changePlayerBtn">Change Player</button>
-    </div>
-    <label>Seed:
-      <input id="seed" type="number" value="121212" style="width:100px" />
-    </label>
-    <label>Zoom:
-      <select id="zoom">
-        <option value="12">12 (Easy)</option>
-        <option value="13">13 (Normal)</option>
-        <option value="14" selected>14 (Medium)</option>
-        <option value="15">15 (Hard)</option>
-      </select>
-    </label>
-    <label>Rounds:
-      <input id="totalRounds" type="number" min="1" value="5" style="width:60px" />
-    </label>
-    <label>Timer Mode:
-      <select id="timerMode">
-        <option value="30" selected>Normal (30 sec)</option>
-        <option value="5">Speedy (5 sec)</option>
-        <option value="60">Let him cook (60 sec)</option>
-        <option value="none">No Timer</option>
-      </select>
-    </label>
-    <label>Game Type:
-      <select id="gameType">
-        <option value="Everywhere">Everywhere</option>
-        <option value="Beach">Beach</option>
-        <option value="Urban">Urban</option>
-        <option value="Highway">State Highway</option>
-        <option value="Bush">Bush (experimental)</option>
-      </select>
-    </label>
-    <br/>
-    <button id="startBtn" disabled>Start Game</button>
-    <button id="submitBtn" disabled>Submit Guess</button>
-    <button id="replayBtn" disabled>Replay</button>
-    <div id="roundInfo">Round: 0 of 0</div>
-    <div id="totalScore">Total Score: 0</div>
+    <div id="roundInfo">Please select or create a new game</div>
+    <div id="totalScore"></div>
     <div id="result"></div>
+    <button id="nextRoundBtn" class="blueButton" disabled>Next Round</button>
+    <button id="submitBtn" class="blueButton" disabled>Submit Guess</button>
   </div>
 
   <div id="container">
@@ -203,6 +175,8 @@
   <audio id="bad11" src="SoundEffects/Bad/better_eyes_closed.mp3" preload="none"></audio>
   <audio id="bad12" src="SoundEffects/Bad/aghh_heart_attack.mp3" preload="none"></audio>
   <audio id="bad13" src="SoundEffects/Bad/roast_nelson.mp3" preload="none"></audio>
+  
+  <audio id="ranOutOfTime" src="SoundEffects/no_guess_submited.mp3" preload="none"></audio>
 
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>

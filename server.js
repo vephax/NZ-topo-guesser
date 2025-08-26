@@ -15,16 +15,14 @@ app.use((req, res, next) => {
 
 app.get("/ping", (req, res) => {
   res.send("pong");
-});
+}); 
 
 app.post('/guesses', async (req, res) => {
-  console.error("Testing");
-  const { user, seed, round, lat, lng, distance } = req.body;
-  console.log("Received guess:", { user, seed, round, lat, lng, distance });
+  const { gameID, round, user, lat, lng, distance } = req.body;
 
   const { data, error } = await supabase
     .from('guesses')
-    .insert([{ user, seed, round, lat, lng, distance }]);
+    .insert([{ gameID, round, user, lat, lng, distance }]);
 
   if (error) {
     console.error("Supabase insert error:", error);
@@ -34,6 +32,7 @@ app.post('/guesses', async (req, res) => {
   res.json({ success: true, data });
 });
 
+/*
 // POST an answer (insert)
 app.post('/answers', async (req, res) => {
   const { seed, round, lat, lng } = req.body;
@@ -43,7 +42,9 @@ app.post('/answers', async (req, res) => {
   if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true, data });
 });
+*/
 
+/*
 // GET guesses for a specific seed and round
 app.get('/guesses/:seed/:round', async (req, res) => {
   const { seed, round } = req.params;
@@ -55,7 +56,20 @@ app.get('/guesses/:seed/:round', async (req, res) => {
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 });
+*/
 
+// GET distances for a specific game (for leaderboards)
+app.get('/guess/:gameID/userDistances', async (req, res) => {
+  const { gameID } = req.params;
+  const { data, error } = await supabase
+    .from('guesses')
+    .select('user', 'distance')
+    .eq('gameID', Number(gameID));
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+/*
 // GET all guesses for a specific seed (query param)
 app.get('/guesses', async (req, res) => {
   const seed = Number(req.query.seed);
@@ -68,6 +82,7 @@ app.get('/guesses', async (req, res) => {
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 });
+*/
 
 // GET route for overall leaderboard
 app.get('/overallLeaderboard', async (req, res) => {
@@ -143,58 +158,6 @@ app.post('overallLeaderboard', async (req, res) => {
   }
 });
 
-
-// Update the game leaderboard
-app.post('/leaderboard', async (req, res) => {
-  const { user, seed, totalScore, rounds } = req.body;
-
-  const { data, error, status, statusText } = await supabase
-    .from('leaderboards')
-    .upsert([{ user, seed, totalScore, rounds }], { onConflict: ['user', 'seed'] });
-
-  // Return detailed info for debugging
-  if (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Supabase error',
-      error: error.message,
-      status,
-      statusText,
-      data,
-    });
-  }
-
-  // If no rows inserted or updated, data will be empty array
-  if (!data || data.length === 0) {
-    return res.status(200).json({
-      success: false,
-      message: 'No rows inserted or updated. Check constraints and policies.',
-      data,
-    });
-  }
-
-  return res.status(200).json({
-    success: true,
-    message: 'Leaderboard updated successfully.',
-    data,
-  });
-});
-
-// GET leaderboard by seed (query param)
-app.get('/leaderboard', async (req, res) => {
-  const seed = Number(req.query.seed);
-  if (!seed) return res.status(400).json({ error: 'Seed query param is required' });
-
-  const { data, error } = await supabase
-    .from('leaderboards')
-    .select('*')
-    .eq('seed', seed)
-    .order('totalScore', { ascending: false }); // higher score better
-
-  if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
-});
-
 // Serve static frontend files
 app.use(express.static('public'));
 
@@ -203,6 +166,7 @@ app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
 
+/*
 app.get('/seed-analysis/:seed', async (req, res) => {
   const seed = Number(req.params.seed);
   if (!seed) return res.status(400).json({ error: 'Invalid seed' });
@@ -238,13 +202,51 @@ app.get('/seed-analysis/:seed', async (req, res) => {
 
   res.json({ roundData, answers: answersMap });
 });
+*/
+
+app.post('games', async (req, res) => {
+  const {gameCategory, seed, gameType, playedBy, totalRounds, zoom, timerDuration } = req.body;
+
+  const { error: insertError } = await supabase
+    .from('overallLeaderboard')
+    .insert(
+      [{ 
+        gameCategory: gameCategory,
+        seed: seed,
+        gameType: gameType,
+        playedBy: playedBy,
+        totalRounds: totalRounds,
+        zoom: zoom,
+        timerDuration: timerDuration
+       }],
+    )
+    .select('gameID');
+  
+  if (insertError) return res.status(500).json({ success: false, message: 'Error inserting game.' });
+  
+  res.json({ success: true, gameID: gameID});
+});
+
+app.post('/games/:gameID/players', async (req, res) => {
+  const { gameID } = req.params;      
+  const { newPlayer } = req.body;
+
+  const { data, error } = await supabase
+    .from('games')
+    .update({ playedBy: supabase.fn.array_append('playedBy', newPlayer) })
+    .eq('id', id)
+    .select();
+
+  if (error) return res.status(400).json({ error });
+  res.json(data);
+});
 
 app.get('/games', async (req, res) => {
   const { gameCategory } = req.query;
 
   let query = supabase
     .from('games')
-    .select('gameID, gameCategory, seed, gameType, playedBy, zoom, timeSetting, totalRounds, timeCreated');
+    .select('gameID, gameCategory, seed, gameType, playedBy, zoom, timerDuration, totalRounds, timeCreated');
     
   if (gameCategory) {
     query = query.eq('gameCategory', gameCategory);

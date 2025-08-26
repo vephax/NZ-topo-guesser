@@ -1,9 +1,12 @@
 let seedObj = { value: 12345 };
 let answerLat = 0, answerLng = 0, guessLat = null, guessLng = null;
-let hasGuessed = false, timerInt = null, roundsPlayed = 0, totalRounds = 0, scoreTotal = 0;
-let map, guessMarker;
+let hasGuessed = false, timerInt = null, roundsPlayed = 0, totalRounds = 0, _totalScore = 0;
+let guessMap, guessMarker;
 let currentUser = null;
+let guessMapBasemapLayer = null;
 const currentVersion = "9.6.2";
+
+//const zoomToDifficulty ["z"]
 
 const versions = [
   { version: "9.2", changelog: "8/8/2025 \n The server works now. It only took 6 hours. No more AI slop is here. Leaderboards and seed analysis now work due to an actual game data system. A server. Not what was here before, aka a link." },
@@ -11,7 +14,6 @@ const versions = [
   { version: "9.3.1", changelog: "10/8/2025 \n - Fixes a bug where new players would not see version prompts and recents/leaderboard panels would not load."},
   { version: "9.4", changelog: "11/8/2025 \n\n - Changed the beach mode system so that you know choose a game type. Defaults to everywhere. \n\n - Brought back urban mode which is now a gametype and much much faster especially on good internet connections. The relative probabilities are not perfect (e.g. Dunedin) so if you notice any urban locations that are too common or too uncommon, let me know.\n\n - Made recent seeds panel have the header and buttons fixed at the top instead of scrolling with the menu. \n\n - Added average to overall leaderboard \n\n - Added state highway mode which places you somewhere on the stateway system. \n\n - Menno"},
   { version: "9.4.1", changelog: "11/8/2025 \n\n - Changed scoring system to now have a better function.\n if you get anywhere on the screen you will get maximum points \n\n - now rounds score, for average etc \n\n - rainbow buttons \n\n - boxes next to eachother \n\n - lowered chathams chance \n\n - Max 😁"},
-  { version: "9.4.2", changelog: "12/8/2025 \n\n - Added better version history logs.🥰🥰🥰 "},
   { version: "9.5", changelog: "12/8/2025 \n\n - Holy Guacamole, we're diversifying, \n now able to play study and practice studying \n with great functionality for all involved \n just scroll to the bottom to see the diversification \n most are prettttty acurate \n not liable for any problems you may have. "},
   { version: "9.6", changelog: "14/8/2025 \n\n This one is for Arya \n \n - Added Bush Mode (experimental) :D \n\n - Edited and added new audio clips. There are now 13 good and 13 bad. \n\n - Menno"},
   { version: "9.6.1", changelog: "14/8/2025 \n\n Holy Guacamole, we're diversifying, \n reaction schemer now exists \n with great functionality for all involved \n 🥰🥰🥰"},
@@ -123,12 +125,12 @@ const URBAN_TOWNS = [
 ];
 
 //Game values that are constant per game.
-let gameType;
-let zoom;
-let timerMode;
+let _game;
 
-// Set a random seed on startup
-document.getElementById('seed').value = Math.floor(Math.random() * 1000000000);
+let selectedPanelItem;
+
+const goodSounds = ['good1', 'good2', 'good3', 'good4', 'good5', 'good6', 'good7', 'good8', 'good9', 'good10', 'good11', 'good12', 'good13'];
+const badSounds = ['bad1', 'bad2', 'bad3', 'bad4', 'bad5', 'bad6', 'bad7', 'bad8', 'bad9', 'bad10', 'bad11', 'bad12', 'bad13'];
 
 // Get and check server status
 fetch("/ping")
@@ -143,14 +145,199 @@ fetch("/ping")
     console.error("❌ Server is not reachable:", err);
   });
 
-const goodSounds = ['good1', 'good2', 'good3', 'good4', 'good5', 'good6', 'good7', 'good8', 'good9', 'good10', 'good11', 'good12', 'good13'];
-const badSounds = ['bad1', 'bad2', 'bad3', 'bad4', 'bad5', 'bad6', 'bad7', 'bad8', 'bad9', 'bad10', 'bad11', 'bad12', 'bad13'];
+// On game open
+window.onload = async () => {
+  initMap();
 
-function playRandomSound(soundList) {
-  const id = soundList[Math.floor(Math.random() * soundList.length)];
-  const audio = document.getElementById(id);
-  if (audio) audio.play().catch(e => console.warn("Playback blocked:", e));
+  // Get the player data from storage
+  const savedPlayer = localStorage.getItem("topoguesser_player");
+  if (savedPlayer) {
+    currentUser = savedPlayer;
+    document.getElementById('userInfo').textContent = `🎮 Player: ${savedPlayer}`;
+  } else {
+    enterNewUsername();
+  }
+
+  // Show changes logs if a new version
+  showChangelogs();
+  
+  document.getElementById("gameTitle").textContent = "NZ Topo Guesser V" + currentVersion + " - Sponsored by Water";
+
+  // Setup a bunch of buttons
+  document.getElementById("changePlayerBtn").onclick = () => {
+    enterNewUsername();
+  };
+
+  document.getElementById("closeAnalysisBtn").onclick = () => {
+    document.getElementById("analysisPanel").style.display = 'none';
+  };
+  
+  document.getElementById("createNewGameBtn").onclick = showNewGamePanel;
+
+  // Setup the overall leaderboard panel
+  updateOverallLeaderboard();
+  document.getElementById("overallLeaderboardGameType").onchange = updateOverallLeaderboard;
+  document.getElementById("overallLeaderboardSortBy").onchange = updateOverallLeaderboard;
+
+  // Do not allow guesses to be submit when there is no game loaded
+  document.getElementById('submitBtn').disabled = true;
+  document.getElementById('leafletMap').style.pointerEvents = 'none';
+
+  // Get and setup the recent games panel
+  loadRecentGames();
+  setInterval(loadRecentGames, 30000);
+};
+
+function startNewGame(game) {
+  _game = game;
+
+  _totalScore = 0;
+  roundsPlayed = 0;
+  totalRounds = _game.totalRounds;
+
+  if (isNaN(_game.seed)) {
+    // Generate a random seed if no valid seed was entered
+    const randomSeed = Math.floor(Math.random() * 1000000000);
+    document.getElementById('seed').value = randomSeed;  // update the input field
+    seedObj.value = randomSeed;
+  } else {
+    seedObj.value = _game.seed;
+  }
+
+  // Remove previous answers
+  guessMap.eachLayer(layer => {
+    if (layer !== guessMapBasemapLayer) {
+      guessMap.removeLayer(layer);
+    }
+  });
+
+  document.getElementById("controls").innerHTML = `
+    <div id="roundInfo">Please select or create a new game</div>
+    <div id="totalScore"></div>
+    <div id="result"></div>
+    <button id="nextRoundBtn" class="blueButton" disabled>Next Round</button>
+    <button id="submitBtn" class="blueButton" disabled>Submit Guess</button>
+  `;
+
+  document.getElementById('nextRoundBtn').onclick = () => {
+    document.getElementById('nextRoundBtn').disabled = true;
+    nextRound();
+  };
+
+  document.getElementById('submitBtn').onclick = submitGuess;
+
+  nextRound();
+
+  if (_game.playedBy[0] !== currentUser){
+    addNewPlayer(gameID, currentUser);
+  }
 }
+
+async function nextRound(){
+  clearInterval(timerInt);
+  hasGuessed = false;
+  guessLat = guessLng = null;
+  document.getElementById('submitBtn').disabled = true;
+  document.getElementById('result').textContent = '';
+
+  document.getElementById('leafletMap').style.pointerEvents = 'none';
+  document.getElementById('mapFrame').style.pointerEvents = 'none';
+  
+  roundsPlayed++;
+  updateGameFeedbackUI();
+  
+  document.getElementById("mapFrame").scrollIntoView({
+    behavior: "smooth",
+    block: "center",
+    inline: "start"
+  });
+
+  const timerLen = _game.timerDuration === 0 ? null : parseInt(_game.timerDuration);
+  // Wait until we get a valid location
+  const loc = await getValidLocation();
+  answerLat = loc.lat;
+  answerLng = loc.lng;
+  document.getElementById('mapFrame').src = `https://www.topomap.co.nz/NZTopoMap?v=2&ll=${answerLat},${answerLng}&z=${_game.zoom}`;
+
+  if (guessMarker) guessMap.removeLayer(guessMarker);
+  
+  guessMap.setView([-41.3, 174.8], 5);
+  document.getElementById('leafletMap').style.pointerEvents = 'auto';
+
+  if (timerLen !== null) {
+    let t = timerLen;
+    document.getElementById('result').textContent = `Timer: ${t}s remaining…`;
+    timerInt = setInterval(() => {
+      t--;
+      if (t > 0) {
+        document.getElementById('result').textContent = `Timer: ${t}s remaining…`;
+      } else {
+        submitGuess();
+      }
+    }, 1000);
+  }
+}
+
+function submitGuess() {
+  hasGuessed = true;
+  document.getElementById('submitBtn').disabled = true;
+
+  clearInterval(timerInt);
+  document.getElementById('mapFrame').style.pointerEvents = 'auto';
+
+  // If the user has actually guessed
+  if (guessLat !== null){
+    const dist = haversine(answerLat, answerLng, guessLat, guessLng);
+    const score = calculateScore(dist);
+    _totalScore += score;
+
+    sendGuessToServer(guessLat, guessLng, dist);
+    
+    // Are we in normal mode?
+    if (_game.timerDuration === 30 && _game.zoom === 14) {
+      sendScoreForOverallLeaderboardToServer(_totalScore, _game.gameType);
+    }
+      
+    document.getElementById('result').textContent = `You were ${dist.toFixed(2)} km away → Score: ${score}/300`;
+    
+    if (dist < 100) playRandomSound(goodSounds);
+    else if (dist > 700) playRandomSound(badSounds);
+  }
+  else { // The user did not guess at all.
+    document.getElementById('result').textContent = `You forgot to submit a guess in the time limit! Score: 0`;
+
+    document.getElementById('ranOutOfTime').play();
+  }
+
+
+  L.circleMarker([answerLat, answerLng], {
+    radius: 10,
+    fillColor: 'green',
+    color: 'black',
+    weight: 2,
+    fillOpacity: 0.8
+  }).addTo(guessMap).bindPopup('📍 Actual Location').openPopup();
+
+  document.getElementById('nextRoundBtn').disabled = (roundsPlayed >= _game.totalRounds);
+
+  // If this is the final round
+  if (roundsPlayed >= _game.totalRounds) {
+    // Reset controls tab
+    document.getElementById('controls').innerHTML = `
+      <div id="totalScore"><strong>Game Completed with a Total Score of: ${_totalScore}</strong></div>
+      <div id="result"></div>
+      <button id="nextRoundBtn" class="blueButton" disabled>Next Round</button>
+      <button id="submitBtn" class="blueButton" disabled>Submit Guess</button>
+    `;
+    console.log('test');
+    showGameInfoPanel(_game);
+  } else{
+    // This is not the final round
+    updateGameFeedbackUI();
+  }
+}
+
+/// === GAME CREATION FUNCTIONS ===
 
 function getRandomNZRegion() {
   const region = NZ_REGIONS[Math.floor(seededRandom() * NZ_REGIONS.length)];
@@ -160,9 +347,35 @@ function getRandomNZRegion() {
   };
 }
 
+async function getValidLocation() {
+
+  if (_game.gameType === "Urban"){
+    return await getValidUrbanLocation();
+  }
+
+  for (let i = 0; i < 500; i++) {
+    const loc = getRandomNZRegion();
+    console.log("Checking location " + loc);
+
+    if (_game.gameType === "Beach") {
+      if (await tileHasLand(loc.lat, loc.lng) && await tileHasEnoughWater(loc.lat, loc.lng)) return loc;
+
+    } else if (_game.gameType === "State Highway") {
+      if (await tileHasEnoughHighway(loc.lat, loc.lng)) return loc;
+      
+    } else if (_game.gameType === "Bush") {
+      if (await tileHasEnoughBush(loc.lat, loc.lng)) return loc;
+
+    } else { //Gametype is }Everywhere"
+      if (await tileHasLand(loc.lat, loc.lng)) return loc;
+    }
+  }
+  return { lat: -41.3, lng: 174.8 };
+}
+
 async function tileHasLand(lat, lng) {
   const x = longitudeToTileX(lng), y = latitudeToTileY(lat);
-  const url = `https://basemaps.linz.govt.nz/v1/tiles/topo-raster/WebMercatorQuad/${zoom}/${x}/${y}.webp?api=c01k1w81j8nbj00y7gy7x4b17j6`;
+  const url = `https://basemaps.linz.govt.nz/v1/tiles/topo-raster/WebMercatorQuad/${_game.zoom}/${x}/${y}.webp?api=c01k1w81j8nbj00y7gy7x4b17j6`;
   try {
     const res = await fetch(url);
     if (!res.ok) return false;
@@ -182,7 +395,7 @@ async function tileHasLand(lat, lng) {
 
 async function tileHasEnoughBush(lat, lng) {
   const x = longitudeToTileX(lng), y = latitudeToTileY(lat);
-  const url = `https://basemaps.linz.govt.nz/v1/tiles/topo-raster/WebMercatorQuad/${zoom}/${x}/${y}.webp?api=c01k1w81j8nbj00y7gy7x4b17j6`;
+  const url = `https://basemaps.linz.govt.nz/v1/tiles/topo-raster/WebMercatorQuad/${_game.zoom}/${x}/${y}.webp?api=c01k1w81j8nbj00y7gy7x4b17j6`;
   try {
     const res = await fetch(url);
     if (!res.ok) return false;
@@ -210,7 +423,7 @@ async function tileHasEnoughBush(lat, lng) {
 
 async function tileHasEnoughWater(lat, lng) {
   const x = longitudeToTileX(lng), y = latitudeToTileY(lat);
-  const url = `https://basemaps.linz.govt.nz/v1/tiles/topo-raster/WebMercatorQuad/${zoom}/${x}/${y}.webp?api=c01k1w81j8nbj00y7gy7x4b17j6`;
+  const url = `https://basemaps.linz.govt.nz/v1/tiles/topo-raster/WebMercatorQuad/${_game.zoom}/${x}/${y}.webp?api=c01k1w81j8nbj00y7gy7x4b17j6`;
   try {
     const res = await fetch(url);
     if (!res.ok) return false;
@@ -282,7 +495,7 @@ async function getValidUrbanLocation(){
 
 async function tileHasEnoughUrban(lat, lng) {
   const x = longitudeToTileX(lng), y = latitudeToTileY(lat);
-  const url = `https://basemaps.linz.govt.nz/v1/tiles/topo-raster/WebMercatorQuad/${zoom}/${x}/${y}.webp?api=c01k1w81j8nbj00y7gy7x4b17j6`;
+  const url = `https://basemaps.linz.govt.nz/v1/tiles/topo-raster/WebMercatorQuad/${_game.zoom}/${x}/${y}.webp?api=c01k1w81j8nbj00y7gy7x4b17j6`;
   try {
     const res = await fetch(url);
     if (!res.ok) return false;
@@ -303,7 +516,7 @@ async function tileHasEnoughUrban(lat, lng) {
 
 async function tileHasEnoughHighway(lat, lng) {
   const x = longitudeToTileX(lng), y = latitudeToTileY(lat);
-  const url = `https://basemaps.linz.govt.nz/v1/tiles/topo-raster/WebMercatorQuad/${zoom}/${x}/${y}.webp?api=c01k1w81j8nbj00y7gy7x4b17j6`;
+  const url = `https://basemaps.linz.govt.nz/v1/tiles/topo-raster/WebMercatorQuad/${_game.zoom}/${x}/${y}.webp?api=c01k1w81j8nbj00y7gy7x4b17j6`;
   console.log(x + ", " + y);
   try {
     const res = await fetch(url);
@@ -323,230 +536,39 @@ async function tileHasEnoughHighway(lat, lng) {
   } catch { return false; }
 }
 
-async function getValidLocation() {
-
-  if (gameType === "Urban"){
-    return await getValidUrbanLocation();
-  }
-
-  for (let i = 0; i < 500; i++) {
-    const loc = getRandomNZRegion();
-    console.log("Checking location " + loc);
-
-    if (gameType === "Beach") {
-      if (await tileHasLand(loc.lat, loc.lng) && await tileHasEnoughWater(loc.lat, loc.lng)) return loc;
-
-    } else if (gameType === "Highway") {
-      if (await tileHasEnoughHighway(loc.lat, loc.lng)) return loc;
-      
-    } else if (gameType === "Bush") {
-      if (await tileHasEnoughBush(loc.lat, loc.lng)) return loc;
-
-    } else { //Gametype is }Everywhere"
-      if (await tileHasLand(loc.lat, loc.lng)) return loc;
-    }
-  }
-  return { lat: -41.3, lng: 174.8 };
-}
-
-function updateUI() {
-  document.getElementById('roundInfo').textContent = `Round ${roundsPlayed} of ${totalRounds}`;
-  document.getElementById('totalScore').textContent = `Total Score: ${scoreTotal}`;
-}
-
-async function startGame() {
-  clearInterval(timerInt);
-  hasGuessed = false;
-  guessLat = guessLng = null;
-  document.getElementById('submitBtn').disabled = true;
-  document.getElementById('result').textContent = '';
-
-  document.getElementById('leafletMap').style.pointerEvents = 'none';
-  document.getElementById('mapFrame').style.pointerEvents = 'none';
-
-  // The first round so setup game
-  if (roundsPlayed === 0) {
-    totalRounds = parseInt(document.getElementById('totalRounds').value) || 1;
-    scoreTotal = 0;
-    const sv = parseInt(document.getElementById('seed').value);
-    if (isNaN(sv)) {
-      // Generate a random seed if no valid seed was entered
-      const randomSeed = Math.floor(Math.random() * 1000000000);
-      document.getElementById('seed').value = randomSeed;  // update the input field
-      seedObj.value = randomSeed;
-    } else {
-      seedObj.value = sv;
-    }
-
-    // Get constant game values
-    zoom = +document.getElementById('zoom').value;
-    gameType = document.getElementById('gameType').value;
-    timerMode = document.getElementById('timerMode').value;
-  }
-  
-  roundsPlayed++;
-  updateUI();
-
-  const timerLen = timerMode === 'none' ? null : parseInt(timerMode);
-  // Wait until we get a valid location
-  const loc = await getValidLocation();
-  answerLat = loc.lat;
-  answerLng = loc.lng;
-  document.getElementById('mapFrame').src = `https://www.topomap.co.nz/NZTopoMap?v=2&ll=${answerLat},${answerLng}&z=${zoom}`;
-
-  if (guessMarker) map.removeLayer(guessMarker);
-  
-  map.setView([-41.3, 174.8], 5);
-  document.getElementById('leafletMap').style.pointerEvents = 'auto';
-
-  if (timerLen !== null) {
-    let t = timerLen;
-    document.getElementById('result').textContent = `Timer: ${t}s remaining…`;
-    timerInt = setInterval(() => {
-      t--;
-      if (t > 0) {
-        document.getElementById('result').textContent = `Timer: ${t}s remaining…`;
-      } else {
-        clearInterval(timerInt);
-        if (!hasGuessed && guessLat !== null) submitGuess();
-      }
-    }, 1000);
-  }
-}
-
-function submitGuess() {
-  if (hasGuessed || guessLat == null) return;
-  hasGuessed = true;
-  document.getElementById('submitBtn').disabled = true;
-
-  clearInterval(timerInt);
-  document.getElementById('mapFrame').style.pointerEvents = 'auto';
-  const dist = haversine(answerLat, answerLng, guessLat, guessLng);
-  const score = Math.max(0, Math.round(dist < 2.5 ? 300 : 300 - Math.sqrt(180 * (dist - 2.5))));
-
-
-  scoreTotal += score;
-  document.getElementById('result').textContent = `You were ${dist.toFixed(2)} km away → Score: ${score}/300`;
-  sendGuessToServer(guessLat, guessLng, dist);
-  updateUI();
-  setTimeout(loadOtherGuesses, 500);
-  L.circleMarker([answerLat, answerLng], {
-    radius: 10,
-    fillColor: 'green',
-    color: 'black',
-    weight: 2,
-    fillOpacity: 0.8
-  }).addTo(map).bindPopup('📍 Actual Location').openPopup();
-  document.getElementById('startBtn').disabled = (roundsPlayed >= totalRounds);
-
-  // If this is the final round
-  if (roundsPlayed >= totalRounds) {
-    document.getElementById('replayBtn').disabled = false;
-
-    // Are we in normal mode?
-    if (timerMode === "30" && zoom === 14) {
-      sendScoreForOverallLeaderboardToServer(scoreTotal, gameType);
-    }
-    
-    sendSeedLeaderboardToServer({
-      seed: parseInt(document.getElementById('seed').value),
-      user: currentUser,
-      totalScore: scoreTotal,
-      rounds: roundsPlayed
-    });
-    
-    setTimeout(showSeedLeaderboard, 1000);
-  }
-
-  if (dist < 100) playRandomSound(goodSounds);
-  else if (dist > 700) playRandomSound(badSounds);
-}
-
 function initMap() {
-  map = L.map('leafletMap', { center: [-41.3, 174.8], zoom: 5 });
+  guessMap = L.map('leafletMap', { center: [-41.3, 174.8], zoom: 5 });
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  guessMapBasemapLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18,
     attribution: '&copy; <a href="https://www.openstreetmap.org/">OSM</a> contributors'
-  }).addTo(map);
+  }).addTo(guessMap);
 
   // On offering a guess on the map
-  map.on('click', e => {
+  guessMap.on('click', e => {
     if (hasGuessed) return;
     guessLat = e.latlng.lat;
     guessLng = e.latlng.lng;
-    if (guessMarker) map.removeLayer(guessMarker);
-    guessMarker = L.marker([guessLat, guessLng]).addTo(map);
-    document.getElementById('result').textContent = `Guess: ${guessLat.toFixed(4)}, ${guessLng.toFixed(4)} – click Submit.`;
+    if (guessMarker) guessMap.removeLayer(guessMarker);
+    guessMarker = L.marker([guessLat, guessLng]).addTo(guessMap);
     document.getElementById('submitBtn').disabled = false;
   });
-  
-  document.getElementById('startBtn').onclick = () => {
-    document.getElementById('startBtn').disabled = true;
-    startGame();
-  };
-
-  document.getElementById('submitBtn').onclick = submitGuess;
-
-  document.getElementById('replayBtn').onclick = () => {
-    roundsPlayed = 0;
-    document.getElementById('seed').value = ""; // Clear seed input to trigger random seed
-    startGame();
-  };
-  updateUI();
 }
 
-// On game open
-window.onload = async () => {
-  initMap();
+function updateGameFeedbackUI() {
+  document.getElementById('roundInfo').textContent = `Round ${roundsPlayed} of ${totalRounds}`;
+  document.getElementById('totalScore').textContent = `Total Score: ${_totalScore}`;
+}
 
-  // Get the play data
-  const savedGuest = localStorage.getItem("topoguesser_player");
-  if (savedGuest) {
-    currentUser = savedGuest;
-    document.getElementById('userInfo').textContent = `🎮 Player: ${savedGuest}`;
-    document.getElementById('startBtn').disabled = false;
-  } else {
-    enterNewUsername();
-  }
+/// === SERVER DATA SENDERS AND RECEIVERS ===
 
-  // Show changes logs if a new version
-  showChangelogs();
-  
-  document.getElementById("gameTitle").textContent = "NZ Topo Guesser V" + currentVersion + " - Sponsored by Water";
-
-  // Setup a bunch of buttons
-  document.getElementById("changePlayerBtn").onclick = () => {
-    enterNewUsername();
-  };
-
-  document.getElementById("showAllGuessesBtn").onclick = () => {
-    const seed = parseInt(document.getElementById("seed").value);
-    loadAllGuesses(seed);
-  };
-
-  document.getElementById("analyzeSeedBtn").onclick = () => {
-    const seed = parseInt(document.getElementById('seed').value);
-    showSeedAnalysis(seed);
-  };
-
-  document.getElementById("closeAnalysisBtn").onclick = () => {
-    document.getElementById("analysisPanel").style.display = 'none';
-  };
-
-  // Setup the overall leaderboard panel
-  updateOverallLeaderboard();
-  document.getElementById("overallLeaderboardGameType").onchange = updateOverallLeaderboard;
-  document.getElementById("overallLeaderboardSortBy").onchange = updateOverallLeaderboard;
-
-  // Do not allow guesses to be submit when there is no game loaded
-  document.getElementById('submitBtn').disabled = true;
-  document.getElementById('leafletMap').style.pointerEvents = 'none';
-
-  // Get and setup the recent seed panel
-  loadRecentGames();
-  setInterval(loadRecentGames, 30000);
-};
+function addNewPlayer(gameID, player){
+  fetch(`/games/:${gameID}/players`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ gameID: gameID, newPlayer: player }),
+  });
+}
 
 async function sendScoreForOverallLeaderboardToServer(scoreValue, gameType) {
   const res = await fetch('/overallLeaderboard', {
@@ -558,8 +580,7 @@ async function sendScoreForOverallLeaderboardToServer(scoreValue, gameType) {
 
 function sendGuessToServer(lat, lng, distance) {
   if (!currentUser) return;
-  const seed = parseInt(document.getElementById("seed").value);
-  const payload = { user: currentUser, seed, round: roundsPlayed, lat, lng, distance };
+  const payload = { gameID: _game.gameID, round: roundsPlayed, user: currentUser, lat, lng, distance };
   
   fetch("/guesses", {
     method: "POST",
@@ -568,90 +589,13 @@ function sendGuessToServer(lat, lng, distance) {
   })
 }
 
-async function enterNewUsername(){
-    const name = prompt("Enter your username:", "e.g. James") || "Player";
-    currentUser = name;
-    localStorage.setItem("topoguesser_player", name);
-    document.getElementById('userInfo').innerHTML = `🎮 Guest: <b>${name}</b>`;
-    document.getElementById('startBtn').disabled = false;
-    document.getElementById('googleBtn').style.display = 'none';
-}
-
-// Determine what version is more recent
-function compareVersions(v1, v2) {
-  const splitV1 = v1.split('.').map(Number);
-  const splitV2 = v2.split('.').map(Number);
-  for (let i = 0; i < Math.max(splitV1.length, splitV2.length); i++) {
-    const num1 = splitV1[i] || 0;
-    const num2 = splitV2[i] || 0;
-    if (num1 > num2) return 1;
-    if (num1 < num2) return -1;
-  }
-  return 0;
-}
-
-async function showChangelogs() {
-  let lastVersion = localStorage.getItem('lastVersionSeen') || "0.0";
-
-  // Find all versions greater than lastVersion
-  const newVersions = versions.filter(v => compareVersions(v.version, lastVersion) === 1);
-
-  if (newVersions.length === 0) {
-    // No new versions, no need to show anything
-    return;
-  }
-
-  // Show changelogs one by one, allow user to skip remaining
-  for (let i = 0; i < newVersions.length; i++) {
-    const { version, changelog } = newVersions[i];
-
-    // Here, for simplicity, use confirm dialogs.
-    // In real UI, replace with modal or custom banner with "Next" and "Skip" buttons
-    let message;
-    if (version != currentVersion){
-      message = `What's new in version ${version}:\n\n${changelog}\n\nPress OK to see next update or Cancel to skip.`;
-    }
-    else {
-      message = `What's new in version ${version}:\n\n${changelog}`;
-    }
-
-    const proceed = confirm(message);
-
-    if (!proceed) {
-      // User chose to skip remaining updates
-      break;
-    }
-
-    // Update stored version to current one shown
-    localStorage.setItem('lastVersionSeen', version);
-  }
-
-  // After showing, make sure lastVersionSeen is set to currentVersion
-  localStorage.setItem('lastVersionSeen', currentVersion);
-}
-
-function sendSeedLeaderboardToServer(data) {
-  fetch('/leaderboard', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  })
-  .then(res => res.json())
-  .then(result => {
-    console.log("📥 Server response:", result);
-  })
-  .catch(err => {
-    console.error("🔥 Fetch or server error:", err);
-  });
-}
-
 function loadOtherGuesses() {
   const seed = parseInt(document.getElementById("seed").value);
   const round = roundsPlayed;
   fetch(`/guesses/${seed}/${round}`).then(r => r.json()).then(data => {
     data.forEach(g => {
       if (g.user !== currentUser) {
-        const score = Math.max(0, Math.round(100 - 40 * (Math.log(g.distance + 1) - 5)));
+        const score = calculateScore(g.distance);
         const color = getUserColor(g.user);
         L.circleMarker([g.lat, g.lng], {
           radius: 6,
@@ -659,7 +603,7 @@ function loadOtherGuesses() {
           color: "white",
           weight: 1,
           fillOpacity: 0.7
-        }).addTo(map).bindPopup(`
+        }).addTo(guessMap).bindPopup(`
           <b style="color:${color}">${g.user}</b><br/>
           ${g.distance.toFixed(2)} km away<br/>
         `);
@@ -668,43 +612,7 @@ function loadOtherGuesses() {
   });
 }
 
-function loadAllGuesses(seed) {
-  fetch(`/guesses?seed=${seed}`).then(r => r.json()).then(data => {
-    map.eachLayer(l => {
-      if (l instanceof L.CircleMarker || l instanceof L.Marker) {
-        map.removeLayer(l);
-        }
-      });
-      data.forEach(g => {
-        const color = getUserColor(g.user);
-        L.circleMarker([g.lat, g.lng], {
-          radius: 6,
-          fillColor: color,
-          color: "white",
-          weight: 1,
-          fillOpacity: 0.7
-        }).addTo(map).bindPopup(`
-        <b style="color:${color}">${g.user}</b><br/>
-        Round ${g.round}<br/>
-        ${g.distance.toFixed(2)} km away
-      `);
-    });
-  });
-}
-
-function showSeedLeaderboard() {
-    const seed = parseInt(document.getElementById("seed").value);
-    fetch(`/leaderboard?seed=${seed}`).then(r => r.json()).then(data => {
-      const list = data.map(d => {
-        const color = getUserColor(d.user);
-        return `<li><strong style="color:${color}">${d.user}</strong>: ${d.totalScore} pts (${d.rounds} rounds)</li>`;
-      }).join("");
-      document.getElementById("result").innerHTML += `
-      <br/><strong>🏆 Leaderboard:</strong>
-      <ol>${list}</ol>
-    `;
-  });
-}
+/// === OTHER UI FUNCTIONS ===
 
 async function updateOverallLeaderboard() {
   // Get the container
@@ -808,7 +716,7 @@ function showSeedAnalysis(seed) {
       }
       html += `<br>`;
       guesses.forEach((g, i) => {
-        const score = Math.max(0, Math.round(100 - 40 * (Math.log(g.distance + 1) - 5)));
+        const score = caluclateScore(g.distance);
         const color = getUserColor(g.user);
         html += `${i+1}. <b style="color:${color}">${g.user}</b>: ${score} pts (${g.distance.toFixed(2)}km)<br>`;
       });
@@ -837,23 +745,28 @@ async function loadRecentGames() {
   recentGames.sort((a, b) => {
     return new Date(b.timeCreated) - new Date(a.timeCreated);
   });
-
+  
   const container = document.getElementById('recentSeedsList');
   container.innerHTML = '';
   recentGames.forEach(game => {
     const div = document.createElement('div');
-    div.className = 'gamesPanelItem';
+    div.classList.add('gamesPanelItem');
 
-    // Set the corresponding game type colour for aeshetics
+    //Somewhat temporary
+    if (game.playedBy.contains(currentUser)){
+      div.color = "#280037ff";
+    }
+
+    // Set the corresponding game type colour for neat aeshetics
     switch (game.gameType){
       case "Bush":
-        div.style.backgroundColor = "#9ac38bff";
+        div.style.backgroundColor = "#a2df8cff";
         break;
       case "Beach":
-        div.style.backgroundColor = "#95cedaff";
+        div.style.backgroundColor = "#a3dbe7ff";
         break;
-      case "Highway":
-        div.style.backgroundColor = "#ef8a8aff";
+      case "State Highway":
+        div.style.backgroundColor = "#f39595ff";
         break;
       case "Everywhere":
         div.style.backgroundColor = "#f5f5f5";
@@ -862,13 +775,296 @@ async function loadRecentGames() {
         div.style.backgroundColor = "#f1b78aff";
         break;
     }
-    div.innerHTML = `<strong>Seed ${game.seed}</strong><br/><small>${game.playedBy.length} players • ${game.totalRounds} rounds</small></small>`;
+    if (game.zoom != 14 || game.timerDuration != 30){
+      div.innerHTML = `<strong>${game.gameType}</strong> - Custom Settings <br/><small>${game.playedBy.length} players • ${game.totalRounds} rounds • seed ${game.seed} </small>`;
+    }
+    else {
+      div.innerHTML = `<strong>${game.gameType}</strong><br/><small>${game.playedBy.length} players • ${game.totalRounds} rounds • seed ${game.seed} </small></small>`;
+    }
     div.onclick = () => { 
-      document.getElementById('seed').value = game.seed 
+      if (div === selectedPanelItem) return;
+      
+      div.classList.add('selected');
+
+      // Set the previousilly selected item back to default
+      if (selectedPanelItem){
+        selectedPanelItem.classList.remove('selected');
+      }
+
+      selectedPanelItem = div;
+
+      infoPanel = document.getElementById("gameInfoPanel");
+
+      if (!isFullyVisible(infoPanel) || !infoPanel.classList.contains("open")){
+        infoPanel.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+        inline: "center"
+        });
+      }
+
+      showGameInfoPanel(game);
     };
   container.appendChild(div);
   });
 }
+
+//When a game is selected from the games panel
+function showGameInfoPanel(game){
+
+  const infoPanel = document.getElementById("gameInfoPanel");
+
+  if (!infoPanel.classList.contains("open")){
+    infoPanel.classList.add("open");
+  }
+
+  switch (game.gameType){
+    case "Bush":
+      infoPanel.style.backgroundColor = "#dff5d4ff";
+      break;
+    case "Beach":
+      infoPanel.style.backgroundColor = "#daeef3ff";
+      break;
+    case "State Highway":
+      infoPanel.style.backgroundColor = "#ffdedeff";
+      break;
+    case "Everywhere":
+      infoPanel.style.backgroundColor = "#ffffffff";
+      break;
+    case "Urban":
+      infoPanel.style.backgroundColor = "#ffeddfff";
+      break;
+  }
+
+  let html = '<div id="gameInfoTopPanels">';
+
+  // Setup the left 'settings' panel
+  html += ` <div id="gameInfoPanelLeft">
+    <h3>${game.gameType}</h3>
+    <p> Seed: ${game.seed}</p>
+    <p> Rounds: ${game.totalRounds}</p>
+    <p> Difficulty (zoom): ${game.zoom}</p>
+    <p> Timer Duration: ${game.timerDuration}</p>
+    <p> First played by: ${game.playedBy[0]}</p>
+  </div>`;
+
+  // Setup the game leaderboard panel
+  html += `<div><h3>Game Leaderboard</h3><div id="gameLeaderboardPanel">`;
+  html += createGameLeaderboardHTML(game.gameID);
+  html += `</div></div></div>`;
+
+  // Setup the buttons
+  html += `<div id="gameInfoButtons">`;
+  if (game !== _game){
+    html += `<button class="blueButton" id="playGameBtn">Play this Game</button>
+    <p> or </p>`
+  } else{
+    html += `<p>Select a Game or </p>`;
+  }
+  html += `<button class="blueButton" id="createNewGameBtn">Create a New Game</button>
+  </div>`;
+
+  infoPanel.innerHTML = html;
+
+  document.getElementById("playGameBtn").onclick = () => startNewGame(game);
+  document.getElementById("createNewGameBtn").onclick = showNewGamePanel;
+}
+
+function createGameLeaderboardHTML(gameID) {
+
+  return fetch(`/guess/:${gameID}/userDistances`)
+  .then(r => r.json())
+  .then(data => {
+    // Find out how many rounds exist
+    const totalRounds = Math.max(...data.map(g => g.round));
+
+    // Group results by user and compute scores
+    const users = {};
+    data.forEach(g => {
+      if (!users[g.user]) {
+        users[g.user] = { scores: Array(totalRounds).fill(null), total: 0 };
+      }
+      const score = calculateScore(g.distance);
+      users[g.user].scores[g.round - 1] = score;
+      users[g.user].total += score;
+    });
+
+    // Sort users by total score
+    const sortedUsers = Object.entries(users).sort(
+      (a, b) => b[1].total - a[1].total
+    );
+
+    // Build HTML
+    let html = `<table>`;
+    html += `<thead><tr style="border-bottom: 1px solid black;"><th>Placing</th>`;
+    html += `<th>Player</th>`;
+    html += `<th>Total</th>`;
+    for (let i = 1; i <= totalRounds; i++) {
+      html += `<th>Round ${i}</th>`;
+    }
+    html += `</tr></thead><tbody>`;
+
+    let placing = 1;
+    sortedUsers.forEach(([user, { scores, total }]) => {
+      if (placing === 1) html += `<tr style="background-color: rgba(255, 223, 148, 1);">`;
+      else if (placing === 2) html += `<tr style="background-color: rgba(220, 217, 217, 1);">`;
+      else if (placing === 3) html += `<tr style="background-color: rgba(252, 191, 126, 1);">`;
+      else html += `<tr>`;
+
+      html += `<td>${placing}</td>`;
+      html += `<td>${user}</td>`;
+      html += `<td><b>${total}</b></td>`;
+      scores.forEach(score => {
+        // Assign colours to the score depending on how well they did
+        if (score > 250) html += `<td style="color:rgb(69, 152, 69); font-weight: bold;">`;
+        else if (score < 50 && score !== null) html += `<td style="color: rgb(216, 0, 0); font-weight: bold;">`;
+        else html += `<td>`;
+
+        html += `${score !== null ? score : "-"}</td>`;
+      });
+      html += `</tr>`;
+      placing++;
+    });
+
+    html += `</tbody></table>`;
+
+    return html;
+  });
+}
+
+function showNewGamePanel(){
+  panel = document.getElementById("gameInfoPanel");
+  panel.style.backgroundColor = "#fff";
+
+  let html = `
+    <h3>Create your New Game</h3></br>
+    <div class="newGameSetting">
+      <label>Game Type:</label>
+        <select id="newGameType">
+          <option value="Everywhere">Everywhere</option>
+          <option value="Beach">Beach</option>
+          <option value="Urban">Urban</option>
+          <option value="State Highway">State Highway</option>
+          <option value="Bush">Bush</option>
+        </select></br>
+    </div>
+    <div class="newGameSetting">
+      <label>Difficulty (zoom):</label> 
+      <select id="newZoom">
+        <option value="12">Easy</option>
+        <option value="13">Medium</option>
+        <option value="14">Moderate</option>
+        <option value="15">Hard</option>
+      </select></br>
+    </div>
+    <div class="newGameSetting">
+      <label>Timer Duration:</label>
+      <select id="newTimerDuration">
+        <option value="5">Speedy (5 sec)</option>
+        <option value="30">Normal (30 sec)</option>
+        <option value="60">Let Him Cook (60 sec)</option>
+        <option value="0">No Timer</option>
+      </select></br>
+    </div>
+    <div class="newGameSetting">
+      <label>Number of Rounds:</label>
+      <input id="newTotalRounds" type="number"></input>
+    </div>
+    <div class="newGameSetting">
+      <label>Seed:</label> 
+      <input id="newSeed" type="number"></input></br>
+    </div>
+    <button id="newGameBtn" class="blueButton">Play</button>
+  `;
+
+  panel.innerHTML = html;
+
+  document.getElementById("newZoom").value = "14";
+  document.getElementById("newTimerDuration").value = "30";
+  document.getElementById("newTotalRounds").value = 5;    
+  document.getElementById("newSeed").value = Math.floor(Math.random() * 1000000000); 
+  
+  document.getElementById('newGameBtn').onclick = OnNewGame;
+}
+
+async function OnNewGame(){
+
+  let game = {
+    gameCategory: "Recent",
+    seed: document.getElementById("newSeed").value,
+    gameType: document.getElementById("newGameType").value,
+    totalRounds: document.getElementById("newTotalRounds").value,
+    playedBy: [currentUser],
+    totalRounds: document.getElementById("newTotalRounds").value,
+    zoom: document.getElementById("newZoom").value,
+    timerDuration: document.getElementById("newTimerDuration").value
+  };
+
+  const res = await fetch(`/games`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ game }),
+  });
+
+  result = await res.json();
+  if (!result.success){
+    console.error("An error occured on new game creation");
+    return;
+  }
+
+  game.gameID = result.gameID;
+
+  startNewGame(game);
+}
+
+async function showChangelogs() {
+  let lastVersion = localStorage.getItem('lastVersionSeen') || "0.0";
+
+  // Find all versions greater than lastVersion
+  const newVersions = versions.filter(v => compareVersions(v.version, lastVersion) === 1);
+
+  if (newVersions.length === 0) {
+    // No new versions, no need to show anything
+    return;
+  }
+
+  // Show changelogs one by one, allow user to skip remaining
+  for (let i = 0; i < newVersions.length; i++) {
+    const { version, changelog } = newVersions[i];
+
+    // Here, for simplicity, use confirm dialogs.
+    // In real UI, replace with modal or custom banner with "Next" and "Skip" buttons
+    let message;
+    if (version != currentVersion){
+      message = `What's new in version ${version}:\n\n${changelog}\n\nPress OK to see next update or Cancel to skip.`;
+    }
+    else {
+      message = `What's new in version ${version}:\n\n${changelog}`;
+    }
+
+    const proceed = confirm(message);
+
+    if (!proceed) {
+      // User chose to skip remaining updates
+      break;
+    }
+
+    // Update stored version to current one shown
+    localStorage.setItem('lastVersionSeen', version);
+  }
+
+  // After showing, make sure lastVersionSeen is set to currentVersion
+  localStorage.setItem('lastVersionSeen', currentVersion);
+}
+
+async function enterNewUsername(){
+    const name = prompt("Enter your username:", "e.g. James") || "Player";
+    currentUser = name;
+    localStorage.setItem("topoguesser_player", name);
+    document.getElementById('userInfo').innerHTML = `🎮 Player: <b>${name}</b>`;
+}
+
+/// === HELPER FUNCTIONS ===
 
 // Generate consistent color for a user
 function getUserColor(user) {
@@ -880,8 +1076,20 @@ function getUserColor(user) {
   return `hsl(${hue}, 70%, 50%)`;
 }
 
+function isFullyVisible(element) {
+  const rect = element.getBoundingClientRect();
+  return (
+    rect.top >= 0 &&
+    rect.left >= 0 &&
+    rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+    rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+  );
+}
 
-// === HELPER FUNCTIONS ===
+function calculateScore(distance){
+  return Math.max(0, Math.round(distance < 2.5 ? 300 : 300 - Math.sqrt(180 * (distance - 2.5))));
+}
+
 function seededRandom() {
   seedObj.value = (seedObj.value * 9301 + 49297) % 233280;
   return seedObj.value / 233280;
@@ -895,6 +1103,7 @@ function wrapLongitude(lon) {
   return ((lon + 180) % 360 + 360) % 360 - 180;
 }
 
+// Calculates distance between two coordinates
 function haversine(aLat, aLng, bLat, bLng) {
   const toRad = x => x * Math.PI / 180, R = 6371;
   const dLat = toRad(bLat - aLat), dLng = toRad(bLng - aLng);
@@ -904,12 +1113,12 @@ function haversine(aLat, aLng, bLat, bLng) {
 
 function longitudeToTileX(lon) {
   const wrapped = wrapLongitude(lon);
-  return Math.floor((wrapped + 180) / 360 * Math.pow(2, zoom));
+  return Math.floor((wrapped + 180) / 360 * Math.pow(2, _game.zoom));
 }
 
 function latitudeToTileY(lat) {
   const rad = lat * Math.PI / 180;
-  return Math.floor((1 - Math.log(Math.tan(rad) + 1/Math.cos(rad)) / Math.PI) / 2 * Math.pow(2, zoom));
+  return Math.floor((1 - Math.log(Math.tan(rad) + 1/Math.cos(rad)) / Math.PI) / 2 * Math.pow(2, _game.zoom));
 }
 
 function compareVersions(v1, v2) {
@@ -923,3 +1132,10 @@ function compareVersions(v1, v2) {
   }
   return 0;
 }
+
+function playRandomSound(soundList) {
+  const id = soundList[Math.floor(Math.random() * soundList.length)];
+  const audio = document.getElementById(id);
+  if (audio) audio.play().catch(e => console.warn("Playback blocked:", e));
+}
+
