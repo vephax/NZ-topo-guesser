@@ -849,9 +849,7 @@ function showGameInfoPanel(game){
   </div>`;
 
   // Setup the game leaderboard panel
-  html += `<div><h3>Game Leaderboard</h3><div id="gameLeaderboardPanel">`;
-  html += createGameLeaderboardHTML(game.gameID);
-  html += `</div></div></div>`;
+  html += `<div><h3>Game Leaderboard</h3><div id="gameLeaderboardPanel">Loading...</div></div></div>`;
 
   // Setup the buttons
   html += `<div id="gameInfoButtons">`;
@@ -870,6 +868,10 @@ function showGameInfoPanel(game){
     document.getElementById("playGameBtn").onclick = () => startNewGame(game);
   }
   document.getElementById("createNewGameBtn").onclick = showNewGamePanel;
+
+  createGameLeaderboardHTML(game.gameID).then(html => {
+    document.getElementById("gameLeaderboardPanel").innerHTML = html;
+  });
 }
 
 async function createGameLeaderboardHTML(gameID) {
@@ -884,7 +886,6 @@ async function createGameLeaderboardHTML(gameID) {
   }
 
   const guessData = result.data;
-  console.log(guessData);
 
   // Find out how many rounds exist
   const totalRounds = Math.max(...guessData.map(g => g.round));
