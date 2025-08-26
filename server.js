@@ -205,26 +205,19 @@ app.get('/seed-analysis/:seed', async (req, res) => {
 */
 
 app.post('/games', async (req, res) => {
-  const {gameCategory, seed, gameType, playedBy, totalRounds, zoom, timerDuration } = req.body;
+  const { gameCategory, seed, gameType, playedBy, totalRounds, zoom, timerDuration } = req.body;
 
-  const { error: insertError } = await supabase
+  const { data, error } = await supabase
     .from('overallLeaderboard')
     .insert(
-      [{ 
-        gameCategory: gameCategory,
-        seed: seed,
-        gameType: gameType,
-        playedBy: playedBy,
-        totalRounds: totalRounds,
-        zoom: zoom,
-        timerDuration: timerDuration
-       }],
+      [{ gameCategory, seed, gameType, playedBy, totalRounds, zoom, timerDuration }]
     )
-    .select('gameID');
-  
-  if (insertError) return res.status(500).json({ success: false, message: 'Error inserting game.' });
-  
-  res.json({ success: true, gameID: gameID});
+    .select('gameID'); // Ask Supabase to return the primary key
+
+  if (error) return res.status(500).json({ success: false, message: 'Error inserting game.' });
+
+  const gameID = data[0].gameID; // Extract the primary key from the inserted row
+  res.json({ success: true, gameID });
 });
 
 app.post('/games/:gameID/players', async (req, res) => {

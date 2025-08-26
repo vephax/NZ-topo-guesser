@@ -1003,7 +1003,7 @@ async function OnNewGame(){
   const res = await fetch(`/games`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ game }),
+    body: JSON.stringify(game),
   });
 
   result = await res.json();
@@ -1031,9 +1031,7 @@ async function showChangelogs() {
   // Show changelogs one by one, allow user to skip remaining
   for (let i = 0; i < newVersions.length; i++) {
     const { version, changelog } = newVersions[i];
-
-    // Here, for simplicity, use confirm dialogs.
-    // In real UI, replace with modal or custom banner with "Next" and "Skip" buttons
+    
     let message;
     if (version != currentVersion){
       message = `What's new in version ${version}:\n\n${changelog}\n\nPress OK to see next update or Cancel to skip.`;
