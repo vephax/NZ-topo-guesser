@@ -776,7 +776,7 @@ async function loadRecentGames() {
     }
 
     // Custom settings check
-    if (game.zoom != 14 || game.timerDuration != 30 || game.totalRounds != 5){
+    if (game.zoom !== 14 || game.timerDuration !== 30 || game.totalRounds !== 5){
       div.innerHTML = `<strong>${game.gameType}</strong> - Custom Settings <br/><small>${game.playedBy.length} players • ${game.totalRounds} rounds • seed ${game.seed} </small>`;
     }
     else {
@@ -1013,6 +1013,7 @@ function showNewGamePanel(){
 }
 
 async function OnNewGame(){
+  document.getElementById('newGameBtn').disabled = true;
 
   let game = {
     gameCategory: "Recent",
