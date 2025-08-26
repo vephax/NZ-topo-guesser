@@ -79,30 +79,33 @@ app.get('/guesses/:gameID/userDistances', async (req, res) => {
 app.get('/guesses/:gameID/userDistances', async (req, res) => {
   const { gameID } = req.params;
 
+  // Prepare debug object upfront
   const debugResult = {
     request: {
       params: req.params,
       query: req.query,
     },
-    supabase: null,
+    supabaseResponse: null,
     caughtError: null,
   };
 
   try {
-    const { data, error, status, statusText } = await supabase
+    // Make query and capture full response
+    const response = await supabase
       .from('guesses')
-      .select('user,distance,round') // comma-separated, not multiple args
+      .select('user,distance,round') // comma-separated!
       .eq('gameID', gameID);
 
-    // Save full Supabase response
-    debugResult.supabase = { data, error, status, statusText };
+    debugResult.supabaseResponse = response;
+
+    // Supabase returns { data, error, status, statusText }
+    const { data, error, status, statusText } = response;
 
     if (error) {
-      // Return full error object, not just message
       return res.status(500).json({
         success: false,
         message: 'Supabase query error',
-        error: error, // return the full object
+        error: error || response || 'Unknown error',
         debug: debugResult,
       });
     }
@@ -113,12 +116,13 @@ app.get('/guesses/:gameID/userDistances', async (req, res) => {
       debug: debugResult,
     });
   } catch (err) {
+    // Catch any runtime exceptions
     debugResult.caughtError = err;
 
     res.status(500).json({
       success: false,
       message: 'Unexpected server error',
-      error: err, // return full error
+      error: err || 'Unknown error',
       debug: debugResult,
     });
   }
