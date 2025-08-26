@@ -18,7 +18,7 @@ const versions = [
   { version: "9.6", changelog: "14/8/2025 \n\n This one is for Arya \n \n - Added Bush Mode (experimental) :D \n\n - Edited and added new audio clips. There are now 13 good and 13 bad. \n\n - Menno"},
   { version: "9.6.1", changelog: "14/8/2025 \n\n Holy Guacamole, we're diversifying, \n reaction schemer now exists \n with great functionality for all involved \n 🥰🥰🥰"},
   { version: "9.6.2", changelog: "15/8/2025 \n\n The trash has been removed due to Max's defeat in an art competition. You are welcome for my service. \n\n - Removed Chem Schemer PERMENANTLY! \n\n - Menno"},
-  { version: "10.0", changelog: "26/08/25 \n Whilst this update does not add much actual new content, this is by far the biggest update Topo Guesser has ever received. A brief overview is that the recent seeds panel has had a complete overhaul and you can now played other peoples seeds by game type and the overall leaderboard can now be differed by different game types. The highly requested 'Recommended Seeds' and 'Custom Seeds' are coming out next, this updates purpose was major game/seed system changes to support that.\n\n Please report any bugs you find (there will be many) on the google log doc. \n\n\n FULL CHANGELOG \n\n --- MAJOR CHANGES \n\n - Overall leaderboard now has a different tab for each game type and can be sorted based on user's preference. \n - Reworked recent seeds panel to now show different game types. \n - Recent seeds now store game difficulty (zoom), game timer duration among other things. \n - Reworked the 'controls' tab to be split into two different tabs. \n - Created a settings tab for people to view recent seeds before playing them. \n - Made recent seeds you have played show a different colour (although temporary and will be improved in next major update) \n - Created an improved leaderboard for each game which is just better and shows round by round scores. \n - Permanently removed show all guesses button and temporarily removed seed analysis button. (will be back later) \n - Added automatic scrolls to improve user experience when pressing certain buttons. \n\n --- MINOR CHANGES\n\n - Added a new audio clip to a specific scenario. Good luck finding it! \n - Made Overall Leaderboard require a game of exactly 5 rounds for player's score to be added. \n - Removed the useless text that showed over the timer that said where you guessed. \n - Moved the change player panel near the top of the screen. \n - audio no longer preloads to reduce memory usage on server. \n - Rebranded 'start game' with 'next round'. \n - Removed numbers after medals/trophies on the overall leaderboard. \n\n --- BUG FIXES \n - Fixed a bug where when the timer ran out and you had not placed a guess marker, you were given unlimited time. Now it gives score 0. \n - Fixed a bug where zooming out of the page would reveal more of the Topo map. (sorry Max)\n - Fixed a bug where recent seeds were not actually recent just large seeds. \n - Fixed a bug where recent seeds would glitch with the recent seeds panel header making an ugly scroll effect. \n- Fixed a bug where players were referred to as guests after entering a new player name. \n- Fixed a really old bug due to AI slop where blue buttons hover effect was not working. \n\n --- TECHNICAL CHANGES (for Max/AI and those curious) \n - Games are now based unique on an ID system rather than seed. \n- Reworked how game data is stored on the game data system. \n - Games are now sorted into categories, ('Recent', 'Recommended', 'Custom') \n - Reworked how games are created and started. \n - Restructured the entire games code. \n\n - Menno "}
+  { version: "10.0", changelog: "26/08/25 \n Whilst this update does not add much actual new content, this is by far the biggest update Topo Guesser has ever received. A brief overview is that the recent seeds panel has had a complete overhaul and you can now play other peoples seeds by game type and the overall leaderboard can now be differed by different game types. The highly requested 'Recommended Seeds' and 'Custom Seeds' are coming out next, this updates purpose was major game/seed system changes to support that.\n\n Please report any bugs you find (there will be many) on the google log doc. \n\n A full changelog can also be found on the google doc. \n - Menno \n\n p.s. This update was brought to you with minimal litres of water consumed."}
 ];
 
 // === REGION DATA ===
@@ -293,11 +293,6 @@ function submitGuess() {
     _totalScore += score;
 
     sendGuessToServer(guessLat, guessLng, dist);
-    
-    // Are we in normal mode?
-    if (_game.timerDuration === 30 && _game.zoom === 14 && _game.totalRounds === 5) {
-      sendScoreForOverallLeaderboardToServer(_totalScore, _game.gameType);
-    }
       
     document.getElementById('result').textContent = `You were ${dist.toFixed(2)} km away → Score: ${score}/300`;
     
@@ -330,6 +325,12 @@ function submitGuess() {
       <button id="nextRoundBtn" class="blueButton" disabled>Next Round</button>
       <button id="submitBtn" class="blueButton" disabled>Submit Guess</button>
     `;
+
+    // Are we in normal mode?
+    if (_game.timerDuration === 30 && _game.zoom === 14 && _game.totalRounds === 5) {
+      sendScoreForOverallLeaderboardToServer(_totalScore, _game.gameType);
+    }
+
     showGameInfoPanel(_game);
   } else{
     // This is not the final round
