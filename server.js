@@ -227,21 +227,32 @@ app.post('/games/:gameID/players', async (req, res) => {
   const { gameID } = req.params;      
   const { newPlayer } = req.body;
 
+  // Get current array
   const { data: game, error: fetchError } = await supabase
     .from('games')
     .select('playedBy')
     .eq('gameID', gameID)
     .single();
 
-  if (fetchError) return res.status(400).json({ error: fetchError });
+  if (fetchError) {
+    return res.status(400).json({ error: fetchError });
+  }
 
+  // Append new player
   const updatedArray = [...(game.playedBy || []), newPlayer];
 
+  // Update array
   const { data, error } = await supabase
     .from('games')
     .update({ playedBy: updatedArray })
-    .eq('gameID', gameID)g
+    .eq('gameID', gameID)
     .select();
+
+  if (error) {
+    return res.status(400).json({ error });
+  }
+
+  res.json(data);
 });
 
 app.get('/games', async (req, res) => {
