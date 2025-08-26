@@ -79,7 +79,7 @@ app.get('/guesses/:gameID/userDistances', async (req, res) => {
 app.get('/guesses/:gameID/userDistances', async (req, res) => {
   const { gameID } = req.params;
 
-  // Prepare debug object upfront
+  // Always include request info
   const debugResult = {
     request: {
       params: req.params,
@@ -90,39 +90,48 @@ app.get('/guesses/:gameID/userDistances', async (req, res) => {
   };
 
   try {
-    // Make query and capture full response
-    const response = await supabase
-      .from('guesses')
-      .select('user,distance,round') // comma-separated!
-      .eq('gameID', gameID);
-
-    debugResult.supabaseResponse = response;
-
-    // Supabase returns { data, error, status, statusText }
-    const { data, error, status, statusText } = response;
-
-    if (error) {
+    // Await the Supabase call without destructuring
+    let response;
+    try {
+      response = await supabase
+        .from('guesses')
+        .select('user,distance,round') // comma-separated!
+        .eq('gameID', gameID);
+      debugResult.supabaseResponse = response;
+    } catch (supabaseErr) {
+      // Capture any thrown Supabase error
+      debugResult.caughtError = supabaseErr;
       return res.status(500).json({
         success: false,
-        message: 'Supabase query error',
-        error: error || response || 'Unknown error',
+        message: 'Supabase threw an exception',
+        error: supabaseErr,
         debug: debugResult,
       });
     }
 
+    // If response exists, check for error property
+    if (response?.error) {
+      return res.status(500).json({
+        success: false,
+        message: 'Supabase returned an error',
+        error: response.error,
+        debug: debugResult,
+      });
+    }
+
+    // Success
     res.json({
       success: true,
-      data,
+      data: response?.data ?? null,
       debug: debugResult,
     });
   } catch (err) {
-    // Catch any runtime exceptions
+    // Catch any other unexpected runtime errors
     debugResult.caughtError = err;
-
     res.status(500).json({
       success: false,
       message: 'Unexpected server error',
-      error: err || 'Unknown error',
+      error: err,
       debug: debugResult,
     });
   }
