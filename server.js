@@ -121,7 +121,6 @@ app.post('/overallLeaderboard', async (req, res) => {
   }
 
   try {
-    // Fetch existing user data
     const { data: existing, error: fetchError } = await supabase
       .from('overallLeaderboard')
       .select('totalScore, gamesPlayed')
@@ -130,10 +129,10 @@ app.post('/overallLeaderboard', async (req, res) => {
       .single();
 
     if (fetchError && fetchError.code !== 'PGRST116') {
+      console.error(fetchError);
       return res.status(500).json({ success: false, message: 'Error fetching leaderboard' });
     }
 
-    // Default increments if player leaderboard does not yet exist
     let newTotalScore = scoreToAdd;
     let newGamesPlayed = 1;
 
@@ -142,21 +141,20 @@ app.post('/overallLeaderboard', async (req, res) => {
       newGamesPlayed = existing.gamesPlayed + 1;
     }
 
-    // Upsert the new data
-    const { error: upsertError } = await supabase
+    const { data, error: upsertError } = await supabase
       .from('overallLeaderboard')
       .upsert(
         [{ user, totalScore: newTotalScore, gamesPlayed: newGamesPlayed, gameType }],
         { onConflict: ['user', 'gameType'] }
-      );
+      )
+      .select();
 
     if (upsertError) {
       console.error('Supabase upsert error:', upsertError);
       return res.status(500).json({ success: false, message: 'Error updating leaderboard' });
     }
 
-    // Success response
-    res.json({ success: true, totalScore: newTotalScore, gamesPlayed: newGamesPlayed });
+    res.json({ success: true, totalScore: newTotalScore, gamesPlayed: newGamesPlayed, data });
   } catch (err) {
     console.error('Unexpected error:', err);
     res.status(500).json({ success: false, message: 'Unexpected server error' });
