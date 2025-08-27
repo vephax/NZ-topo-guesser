@@ -254,6 +254,7 @@ async function nextRound(){
   });
 
   const timerLen = _game.timerDuration === 0 ? null : parseInt(_game.timerDuration);
+  console.log(timerLen);
   // Wait until we get a valid location
   const loc = await getValidLocation();
   answerLat = loc.lat;
