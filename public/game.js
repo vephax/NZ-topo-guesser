@@ -122,7 +122,9 @@ const URBAN_TOWNS = [
   {lat: -42.450044, lng: 171.311789}, {lat: -42.575853, lng: 171.478815}, {lat: -42.718151, lng: 170.973102},
   {lat: -42.897521, lng: 170.817575}, {lat: -43.387221, lng: 170.182514}, {lat: -43.465393, lng: 170.018663},
   {lat: -43.880337, lng: 169.041095}, {lat: -43.939768, lng: 168.858919}, {lat: -46.130094, lng: 167.684155},
-  {lat: -46.898164, lng: 168.126397}
+  {lat: -46.898164, lng: 168.126397}, {lat: -38.456565, lng: 176.7062}, {lat: -38.409498, lng: 176.56424},
+  {lat: -38.152394, lng: 174.737935}, {lat: -38.064118, lng: 174.819131}, {lat: -38.009841, lng: 174.82192}, 
+  {lat: -43.952308, lng: -176.558232}
 ];
 
 //Game values that are constant per game.
@@ -254,7 +256,6 @@ async function nextRound(){
   });
 
   const timerLen = _game.timerDuration === 0 ? null : parseInt(_game.timerDuration);
-  console.log(timerLen);
   // Wait until we get a valid location
   const loc = await getValidLocation();
   answerLat = loc.lat;
