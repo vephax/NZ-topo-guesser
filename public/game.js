@@ -805,8 +805,6 @@ function showSeedAnalysis(seed) {
 
 // Game Tab can be "Played", "Recommended" or "Recent"
 async function gameTabUpdate(gameTab){
-  console.log("test");
-
   // Update the game tab UI
   if (_selectedGamesTab){
     _selectedGamesTab.classList.remove('selected');
