@@ -2,7 +2,7 @@ let seedObj = { value: 12345 };
 let answerLat = 0, answerLng = 0, guessLat = null, guessLng = null;
 let hasGuessed = false, timerInt = null, roundsPlayed = 0, totalRounds = 0, _totalScore = 0;
 let guessMap, guessMarker;
-let currentUser = null;
+let _currentUser = null;
 let guessMapBasemapLayer = null;
 const currentVersion = "10.0";
 
@@ -131,6 +131,7 @@ const URBAN_TOWNS = [
 let _game;
 
 let selectedPanelItem;
+let _selectedGamesTab;
 
 const goodSounds = ['good1', 'good2', 'good3', 'good4', 'good5', 'good6', 'good7', 'good8', 'good9', 'good10', 'good11', 'good12', 'good13'];
 const badSounds = ['bad1', 'bad2', 'bad3', 'bad4', 'bad5', 'bad6', 'bad7', 'bad8', 'bad9', 'bad10', 'bad11', 'bad12', 'bad13'];
@@ -155,7 +156,7 @@ window.onload = async () => {
   // Get the player data from storage
   const savedPlayer = localStorage.getItem("topoguesser_player");
   if (savedPlayer) {
-    currentUser = savedPlayer;
+    _currentUser = savedPlayer;
     document.getElementById('userInfo').textContent = `🎮 Player: ${savedPlayer}`;
   } else {
     enterNewUsername();
@@ -174,6 +175,10 @@ window.onload = async () => {
   document.getElementById("closeAnalysisBtn").onclick = () => {
     document.getElementById("analysisPanel").style.display = 'none';
   };
+
+  document.getElementById("recommendedGamesTabBtn").onclick = () => gameTabUpdate("Recommended");
+  document.getElementById("recentGamesTabBtn").onclick = () => gameTabUpdate("Recent");
+  document.getElementById("playedGamesTabBtn").onclick = () => gameTabUpdate("Played");
   
   document.getElementById("createNewGameBtn").onclick = showNewGamePanel;
 
@@ -186,9 +191,7 @@ window.onload = async () => {
   document.getElementById('submitBtn').disabled = true;
   document.getElementById('leafletMap').style.pointerEvents = 'none';
 
-  // Get and setup the recent games panel
-  loadRecentGames();
-  setInterval(loadRecentGames, 30000);
+  gameTabUpdate("Recommended")
 };
 
 function startNewGame(game) {
@@ -231,8 +234,8 @@ function startNewGame(game) {
 
   nextRound();
 
-  if (_game.playedBy[0] !== currentUser){
-    addNewPlayer(game.gameID, currentUser);
+  if (_game.playedBy[0] !== _currentUser){
+    addNewPlayer(game.gameID, _currentUser);
   }
 }
 
@@ -577,15 +580,15 @@ async function sendScoreForOverallLeaderboardToServer(scoreValue, gameType) {
   const res = await fetch('/overallLeaderboard', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ user: currentUser, scoreToAdd: scoreValue, gameType: gameType }),
+    body: JSON.stringify({ user: _currentUser, scoreToAdd: scoreValue, gameType: gameType }),
   });
   const result = await res.json();
   if (!result.success) console.error("An error occured when fetching overall leaderboard: \n" + result.message);
 }
 
 function sendGuessToServer(lat, lng, distance) {
-  if (!currentUser) return;
-  const payload = { gameID: _game.gameID, round: roundsPlayed, user: currentUser, lat, lng, distance };
+  if (!_currentUser) return;
+  const payload = { gameID: _game.gameID, round: roundsPlayed, user: _currentUser, lat, lng, distance };
   
   fetch("/guesses", {
     method: "POST",
@@ -599,7 +602,7 @@ function loadOtherGuesses() {
   const round = roundsPlayed;
   fetch(`/guesses/${seed}/${round}`).then(r => r.json()).then(data => {
     data.forEach(g => {
-      if (g.user !== currentUser) {
+      if (g.user !== _currentUser) {
         const score = calculateScore(g.distance);
         const color = getUserColor(g.user);
         L.circleMarker([g.lat, g.lng], {
@@ -615,6 +618,73 @@ function loadOtherGuesses() {
       }
     });
   });
+}
+
+async function fetchGames({ gameCategories, includePlayer, excludePlayer } = {}) {
+  const params = new URLSearchParams();
+
+  if (gameCategories && gameCategories.length > 0) {
+    params.append("gameCategory", gameCategories.join(","));
+  }
+  if (includePlayer) params.append("includePlayer", includePlayer);
+  if (excludePlayer) params.append("excludePlayer", excludePlayer);
+
+  let games = [];
+  try {
+    const res = await fetch(`/games?${params.toString()}`);
+    const data = await res.json();
+
+    if (!data.success) {
+      console.error("Error fetching games:", data.error || "Unknown error");
+      return [];
+    }
+
+    games = data.games;
+
+  } catch (err) {
+    console.error("Network error:", err);
+    return [];
+  }
+
+  // Get the recommended games data
+  if (gameCategories?.includes("Recommended")) {
+    const recommendedGameIDs = games
+      .filter(g => g.gameCategory === "Recommended")
+      .map(g => g.gameID);
+
+    if (recommendedGameIDs.length > 0) {
+      const query = new URLSearchParams({ gameIDs: recommendedGameIDs.join(",") });
+
+      try {
+        const res = await fetch(`/recommendedGames?${query.toString()}`);
+        const recommendedData = await res.json();
+
+        if (!recommendedData.success) {
+          console.error("Error fetching recommended games:", recommendedData.error || "Unknown error");
+        } else {
+          //Thus, send update games data with recommended data
+          const recommendedGames = recommendedData.recommended;
+
+          const recommendedMap = new Map(
+            recommendedGames.map(r => [r.gameID, r])
+          );
+
+          for (let game of games) {
+            if (recommendedMap.has(game.gameID)) {
+              const rec = recommendedMap.get(game.gameID);
+              game.name = rec.name;
+              game.recommendedBy = rec.recommendedBy;
+            }
+          }
+        }
+
+      } catch (err) {
+        console.error("Network error when fetching recommended games:", err);
+      }
+    }
+  }
+
+  return games;
 }
 
 /// === OTHER UI FUNCTIONS ===
@@ -733,28 +803,55 @@ function showSeedAnalysis(seed) {
   });
 }
 
-async function loadRecentGames() {
-  // Try to get the games from the server that are 'recent'
-  let result;
-  try {
-    const res = await fetch(`/games?gameCategory=${encodeURIComponent("Recent")}`);
-    result = await res.json();
-  }
-  catch (err) {
-    console.error("Error occured whilst fetching recent games: ", err);
-    return;
-  }
+// Game Tab can be "Played", "Recommended" or "Recent"
+async function gameTabUpdate(gameTab){
+  console.log("test");
 
-  let recentGames = result.games;
+  // Update the game tab UI
+  if (_selectedGamesTab){
+    _selectedGamesTab.classList.remove('selected');
+  } 
+  switch (gameTab){
+    case "Recent":
+      _selectedGamesTab = document.getElementById('recentGamesTabBtn');
+    break;
+    case "Recommended":
+      _selectedGamesTab = document.getElementById('recommendedGamesTabBtn');
+    break;
+    case "Played":
+      _selectedGamesTab = document.getElementById('playedGamesTabBtn');
+    break; 
+  }
+  _selectedGamesTab.classList.add('selected');
 
+  //TODO: Update the UI with 'loading...'
+
+  // Get the relevant games from database
+  let games;
+  switch (gameTab){
+    case "Recent":
+      games = await fetchGames({gameCategories: [gameTab], excludePlayer: _currentUser});
+    break;
+    case "Recommended":
+      games = await fetchGames({gameCategories: [gameTab], excludePlayer: _currentUser});
+    break;
+    case "Played":
+      games = await fetchGames({gameCategories: ["Recent", "Recommended"], includePlayer: _currentUser});
+    break;
+  }
+  
+  createGameList(games);
+}
+
+function createGameList(games) {
   // Sort by time first played
-  recentGames.sort((a, b) => {
+  games.sort((a, b) => {
     return new Date(b.timeCreated) - new Date(a.timeCreated);
   });
   
-  const container = document.getElementById('recentSeedsList');
+  const container = document.getElementById('gamesPanelList');
   container.innerHTML = '';
-  recentGames.forEach(game => {
+  games.forEach(game => {
     const div = document.createElement('div');
     div.classList.add('gamesPanelItem');
 
@@ -786,7 +883,7 @@ async function loadRecentGames() {
     }
 
     //Somewhat temporary
-    if (game.playedBy.includes(currentUser)){
+    if (game.playedBy.includes(_currentUser)){
       const strong = div.querySelector('strong'); 
       strong.style.color = "#ac0fccff";
     }
@@ -863,7 +960,7 @@ function showGameInfoPanel(game){
 
   // Setup the buttons
   html += `<div id="gameInfoButtons">`;
-  if (game !== _game && game.playedBy.includes(currentUser)){
+  if (game !== _game && game.playedBy.includes(_currentUser)){
     html += `<p>You have already played this game so select another or </p>`
   } else if (game !== _game){
     html += `<button class="blueButton" id="playGameBtn">Play this Game</button>
@@ -876,7 +973,7 @@ function showGameInfoPanel(game){
 
   infoPanel.innerHTML = html;
 
-  if (game !== _game && !game.playedBy.includes(currentUser)){
+  if (game !== _game && !game.playedBy.includes(_currentUser)){
     document.getElementById("playGameBtn").onclick = () => startNewGame(game);
   }
   document.getElementById("createNewGameBtn").onclick = showNewGamePanel;
@@ -1022,7 +1119,7 @@ async function OnNewGame(){
     seed: document.getElementById("newSeed").value,
     gameType: document.getElementById("newGameType").value,
     totalRounds: document.getElementById("newTotalRounds").value,
-    playedBy: [currentUser],
+    playedBy: [_currentUser],
     totalRounds: document.getElementById("newTotalRounds").value,
     zoom: document.getElementById("newZoom").value,
     timerDuration: document.getElementById("newTimerDuration").value
@@ -1085,7 +1182,7 @@ async function showChangelogs() {
 
 async function enterNewUsername(){
     const name = prompt("Enter your username:", "e.g. James") || "Player";
-    currentUser = name;
+    _currentUser = name;
     localStorage.setItem("topoguesser_player", name);
     document.getElementById('userInfo').innerHTML = `🎮 Player: <b>${name}</b>`;
 }

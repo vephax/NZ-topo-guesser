@@ -256,22 +256,60 @@ app.post('/games/:gameID/players', async (req, res) => {
 });
 
 app.get('/games', async (req, res) => {
-  const { gameCategory } = req.query;
+  // Get the parameters
+  let { gameCategory, includePlayer, excludePlayer } = req.query;
 
   let query = supabase
     .from('games')
     .select('gameID, gameCategory, seed, gameType, playedBy, zoom, timerDuration, totalRounds, timeCreated');
-    
+
+  // Check if game mets the necessary requirements
   if (gameCategory) {
-    query = query.eq('gameCategory', gameCategory);
+    const categories = gameCategory.split(','); 
+    query = query.in('gameCategory', categories);
   }
 
+  if (includePlayer) {
+    query = query.contains('playedBy', [includePlayer]);
+  }
+
+  if (excludePlayer) {
+    query = query.not('playedBy', 'cs', [excludePlayer]);
+  }
+
+  // Send result to client
   const { data, error } = await query;
 
   if (error) {
     console.error("Supabase error:", error);
-    return res.status(500).json({ success: false });
+    return res.status(500).json({ success: false, error: error.message });
   }
 
   res.json({ success: true, games: data });
+});
+
+app.get('/recommendedGames', async (req, res) => {
+  const { gameIDs } = req.query;
+
+  if (!gameIDs) {
+    return res.status(400).json({ success: false, error: "gameIDs query parameter is required" });
+  }
+
+  // Convert comma-separated string into array
+  const ids = gameIDs.split(',').map(id => id.trim());
+
+  try {
+    const { data, error } = await supabase
+      .from('recommendedGames')
+      .select('name, recommendedBy')
+      .in('gameID', ids);
+
+    if (error) {
+      return res.status(500).json({ success: false, error: error.message });
+    }
+
+    res.json({ success: true, names: data.map(row => row.name) });
+  } catch (err) {
+    res.status(500).json({ success: false, error: "Unexpected server error" });
+  }
 });

@@ -241,7 +241,7 @@ h1 {
   margin: 0 auto 30px; /* center horizontally, with bottom margin */
 }
 
-#recentSeedsPanel,
+#gamesPanel,
 #overallLeaderboard {
   flex: 1 1 50%; /* each takes half width, and can shrink/grow */
   max-height: 70vh;
@@ -254,29 +254,71 @@ h1 {
   position: static;
 }
 
-#recentSeedsPanel{
-  display:grid;
-}
-
-#recentSeedsHeader {
+#gamesPanelHeader {
   flex-shrink: 0; /* don’t shrink */
   background: white;
   position: sticky;
-  top: 0;
-  z-index: 1;
-  padding: 5px;
-  display: flex;
-  align-items: center; /* vertically align items */
-  gap: 10px;           /* spacing between them */
+  display: flex; 
+  flex-direction: column;
+  justify-content: end;
+  align-items: center;
 }
 
-#recentSeedsList {
+#gamesPanelHeader h3{
+  padding: 0;
+  margin: 0;
+}
+
+#gamesPanelHeader div{
+  position: relative;
+  border-bottom: 1px solid black;
+  display: flex;
+  flex-direction: row;   /* put buttons side by side */
+  flex-wrap: nowrap;
+  gap: 3px;
+}
+
+.gameCategoryButton{
+  flex-shrink: 0;
+  margin: 0;
+  padding: 10px 20px;
+  font-size: 1em;
+  background-color: rgb(216, 224, 235);
+  transition: background-color 0.3s, padding 0.3s ease;
+  text-shadow: 0.5px 0.5px #a4a4a4;
+  cursor: pointer;
+
+  border: none;
+  border-top: 1px solid black;
+  border-right: 1px solid black;
+  border-left: 1px solid black;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.gameCategoryButton:hover{
+  background-color: rgb(190, 210, 240);
+}
+
+.gameCategoryButton.selected{
+  text-shadow: none;
+  position: relative;
+  color: #0078d4;
+  font-weight: bold;
+  background-color:rgb(242, 242, 242);
+  bottom: -1px; /* Cover over the border */
+  z-index: 1;
+  cursor: default;
+}
+
+#gamesPanelList {
   overflow-y: auto; /* scroll only the list */
   border-bottom: 1px solid black;
-  border-top: 1px solid black;
+  background-color:rgb(242, 242, 242);
 }
 
-#overallLeaderboard h3{
+#overallLeaderboard h3,
+#gamesPanel h3{
   text-align: center;
   text-decoration: underline;
   font-size: 1.5em;
