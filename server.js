@@ -270,7 +270,7 @@ app.get('/games', async (req, res) => {
   }
 
   if (includePlayer) {
-    query = query.contains('playedBy', [includePlayer]);
+     query = query.filter('playedBy', 'cs', [includePlayer]);
   }
 
   if (excludePlayer) {
