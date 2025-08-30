@@ -270,8 +270,7 @@ app.get('/games', async (req, res) => {
   }
 
   if (includePlayer) {
-    const player = includePlayer.split(",").map(p => p.trim());
-    query = query.cs('playedBy', player);
+    query = query.contains('playedBy', [includePlayer]);
   }
 
   if (excludePlayer) {
