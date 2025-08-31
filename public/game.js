@@ -905,7 +905,7 @@ function createGameList(games) {
     }
     
     html += `<br/><small>${game.playedBy.length} player(s) • ${game.totalRounds} rounds • seed ${game.seed} </small></small>`;
-    div.innerHtml = html;
+    div.innerHTML = html;
 
     div.onclick = () => { 
       if (div === selectedPanelItem) return;
