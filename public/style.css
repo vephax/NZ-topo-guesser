@@ -254,9 +254,10 @@ h1 {
   position: static;
 }
 
-#gamesPanel{
-  display: grid;
-  align-content: baseline;
+#gamesPanel {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid black;
 }
 
 #gamesPanelHeader {
@@ -315,14 +316,18 @@ h1 {
 }
 
 #gamesPanelList {
+  flex: 1 1 auto;       /* take remaining space */
+  overflow-y: auto;     /* scroll only this area */
+  min-height: 0;        /* allow shrinking inside flex/grid parent */
   border-bottom: 1px solid black;
-  background-color:rgb(242, 242, 242);
-  overflow-y: auto;
+  background-color: rgb(242, 242, 242);
+  box-sizing: border-box;
 }
 
-#gamesPanelListData{
-  margin-top: 5px;
-  padding: 5px;
+/* Inner wrapper for padding inside scrollable area */
+#gamesPanelListData {
+  padding: 10px 5px;    /* top/bottom padding works now */
+  box-sizing: border-box;
 }
 
 #overallLeaderboard h3,
