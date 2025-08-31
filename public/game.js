@@ -895,11 +895,11 @@ function createGameList(games) {
     if (game.gameCategory === "Recommended"){
       html = `<strong>"${game.name}"</strong> - ${game.recommendedBy}</br>`;
     }
-    html += `<strong>${game.gameType}</strong>`
+    html += `<strong>${game.gameType}</strong>`;
 
     // If Custom Settings
     if (game.zoom !== 14 || game.timerDuration !== 30 || game.totalRounds !== 5){
-      html += ` - Custom Settings`
+      html += `<p color="#a000a0"> - Custom Settings</p>`;
     }
     
     html += `<br/><small>${game.playedBy.length} player(s) • ${game.totalRounds} rounds • seed ${game.seed} </small></small>`;
@@ -988,7 +988,7 @@ function showGameInfoPanel(game){
   // Setup the buttons
   html += `<div id="gameInfoButtons">`;
   if (game.playedBy.includes(_currentUser) && game.gameCategory !== "Recommended"){
-    html += `<p>Select another game,</p><button class="greenButton" id="recommendButton">Recommend</button><p>or</p>`
+    html += `<p>Select another game,</p><button class="greenButton" id="recommendButton">Recommend Game</button><p>or</p>`
   } else if (game !== _game && game.playedBy.includes(_currentUser)) {
     html += `<p>Select another game or</p>`;
 
