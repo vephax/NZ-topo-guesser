@@ -331,6 +331,10 @@ h1 {
   box-sizing: border-box;
 }
 
+#gamesPanelList div{
+  white-space: nowrap;
+}
+
 #overallLeaderboard h3,
 #gamesPanel h3{
   text-align: center;

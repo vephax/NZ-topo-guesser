@@ -890,16 +890,14 @@ function createGameList(games) {
         break;
     }
 
-    let html;
+    let html = ``;
     // Recommended
     if (game.gameCategory === "Recommended"){
-      html = `<strong>"${game.name}"</strong> - ${game.recommendedBy}</br>${game.gameType}`;
+      html = `<strong>"${game.name}"</strong> - ${game.recommendedBy}</br>`;
     }
-    else { // Recent
-      html = `<strong>${game.gameType}</strong>`
-    }
+    html += `<strong>${game.gameType}</strong>`
 
-    // Custom settings
+    // If Custom Settings
     if (game.zoom !== 14 || game.timerDuration !== 30 || game.totalRounds !== 5){
       html += ` - Custom Settings`
     }
