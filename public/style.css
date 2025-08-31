@@ -315,10 +315,11 @@ h1 {
 }
 
 #gamesPanelList {
-  overflow-y: auto; /* scroll only the list */
+  overflow-y: auto; 
   border-bottom: 1px solid black;
   background-color:rgb(242, 242, 242);
   padding: 5px;
+  min-height: 0; /* so padding works, idk know */
   box-sizing: border-box;  
 }
 
