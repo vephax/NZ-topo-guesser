@@ -890,19 +890,22 @@ function createGameList(games) {
         break;
     }
 
-    //If recommended game show the name
-    let html = ``;
+    let html;
+    // Recommended
     if (game.gameCategory === "Recommended"){
-      html = `<strong>${game.name}</strong><br>`;
+      html = `<strong>"${game.name}"</strong> - ${game.recommendedBy}</br>${game.gameType}`;
+    }
+    else { // Recent
+      html = `<strong>${game.gameType}</strong>`
     }
 
-    // Custom settings check
+    // Custom settings
     if (game.zoom !== 14 || game.timerDuration !== 30 || game.totalRounds !== 5){
-      div.innerHTML = html + `<strong>${game.gameType}</strong> - Custom Settings <br/><small>${game.playedBy.length} players • ${game.totalRounds} rounds • seed ${game.seed} </small>`;
+      html += ` - Custom Settings`
     }
-    else {
-      div.innerHTML = html + `<strong>${game.gameType}</strong><br/><small>${game.playedBy.length} player(s) • ${game.totalRounds} rounds • seed ${game.seed} </small></small>`;
-    }
+    
+    html += `<br/><small>${game.playedBy.length} player(s) • ${game.totalRounds} rounds • seed ${game.seed} </small></small>`;
+    div.innerHtml = html;
 
     div.onclick = () => { 
       if (div === selectedPanelItem) return;
