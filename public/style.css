@@ -84,6 +84,11 @@ h1 {
   text-align: left;
 }
 
+.customSetting {
+  color: #a000a0;
+  font-weight: bold;
+}
+
 #gameLeaderboardPanel{
   overflow-x: scroll;
   justify-content: center;

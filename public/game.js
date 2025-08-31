@@ -963,7 +963,7 @@ function showGameInfoPanel(game){
   // Setup the left 'settings' panel
   let html = '<div id="gameInfoTopPanels"><div id="gameInfoPanelLeft">';
 
-  // Setup the header
+  // Setup the header 
   if (game.gameCategory === "Recommended"){
     html += `<h3>${game.gameType} - ${game.name}</h3>`;
   }
@@ -972,18 +972,14 @@ function showGameInfoPanel(game){
   }
 
   // Setup the settings
-  html += `
-    <p> Seed: ${game.seed}</p>
-    <p> Rounds: ${game.totalRounds}</p>
-    <p> Difficulty (zoom): ${game.zoom}</p>
-    <p> Timer Duration: ${game.timerDuration}</p>
-    <p> First played by: ${game.playedBy[0]}</p>
-  `;
-
+  html += `<p> Seed: ${game.seed}</p>`;
+  html += (game.totalRounds === 5)? `<p> Rounds: ${game.totalRounds}</p>` : `<p class="customSetting"> Rounds: ${game.totalRounds}</p>`;
+  html += (game.zoom === 14)? `<p> Difficulty (zoom): ${game.zoom}</p>` : `<p class="customSetting"> Difficulty (zoom): ${game.zoom}</p>`;
+  html += (game.timerDuration === 30)? `<p> Timer Duration: ${game.timerDuration}</p>` : `<p class="customSetting"> Timer Duration: ${game.timerDuration}</p>`;
+  html += `<p> First played by: ${game.playedBy[0]}</p>`;
   if (game.gameCategory === "Recommended"){
     html += `<p> Recommended by: ${game.recommendedBy}</p>`
   }
-
   html += `</div>`;
 
   // Setup the game leaderboard panel
