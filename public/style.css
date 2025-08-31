@@ -152,11 +152,11 @@ h1 {
 }
 
 .greenButton{
-  background: #00d431;
+  background: #00be2c;
 }
 
 .greenButton:hover{
-  background: #00a110;
+  background: #008f0e;
 }
 
 .blueButton:disabled {

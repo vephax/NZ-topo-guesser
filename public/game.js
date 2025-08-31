@@ -988,9 +988,9 @@ function showGameInfoPanel(game){
   // Setup the buttons
   html += `<div id="gameInfoButtons">`;
   if (game.playedBy.includes(_currentUser) && game.gameCategory !== "Recommended"){
-    html += `<p>You have played this game so select another, </p><button class="greenButton" id="recommendButton">Recommend Game</button><p> or </p>`
+    html += `<p>Select another game,</p><button class="greenButton" id="recommendButton">Recommend</button><p>or</p>`
   } else if (game !== _game && game.playedBy.includes(_currentUser)) {
-    html += `<p>You have played this game so select another or</p>`;
+    html += `<p>Select another game or</p>`;
 
   } else if (game !== _game){
     html += `<button class="blueButton" id="playGameBtn">Play this Game</button>
