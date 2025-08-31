@@ -825,7 +825,7 @@ async function gameTabUpdate(gameTab){
   const container = document.getElementById('gamesPanelList');
   container.innerHTML = `<p>Loading...</p>`
 
-  // Get the relevant games from database
+  // Get the relevant games from the database
   let games;
   switch (gameTab){
     case "Recent":
@@ -840,9 +840,21 @@ async function gameTabUpdate(gameTab){
   }
 
   if (games.length !== 0){
+    // Create the neat list
     createGameList(games);
-  } else{
-    container.innerHTML = `<p>You have played all of the "${gameTab}" games`
+
+  } else{ // There are no games in this tab, so tell the user
+    switch (gameTab){
+      case "Recent":
+        container.innerHTML = `<p>There are no recent games you have not already played.`
+      break;
+      case "Recommended":
+        container.innerHTML = `<p>There are no recommended games you have not already played.`
+      break;
+      case "Played":
+        container.innerHTML = `<p>You have not played any games yet. Go play some!`
+      break;
+    }
   }
 }
 
