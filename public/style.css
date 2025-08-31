@@ -257,6 +257,7 @@ h1 {
 #gamesPanel {
   display: grid;
   border: 1px solid black;
+  align-content: start;
 }
 
 #gamesPanelHeader {
@@ -280,14 +281,13 @@ h1 {
   flex-direction: row;  
   flex-wrap: nowrap;
   gap: 3px;
-  padding-bottom: 5px;
 }
 
 #gamesPanelButtonsPadding{
-  background-color: rgb(190, 210, 240);
-  margin: 0;
-  padding-top: 5px;
   background-color: rgb(242, 242, 242);
+  margin: 0;
+  height: 5px;
+  padding: 5px;
 }
 
 .gameCategoryButton{
