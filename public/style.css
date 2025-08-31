@@ -273,13 +273,20 @@ h1 {
   margin: 0;
 }
 
-#gamesPanelHeader div{
+#gamesPanelButtons{
   position: relative;
   border-bottom: 1px solid black;
   display: flex;
   flex-direction: row;  
   flex-wrap: nowrap;
   gap: 3px;
+  padding-bottom: 5px;
+}
+
+#gamesPanelButtons div{
+  background-color: rgb(190, 210, 240);
+  margin: 0;
+  padding-top: 5px;
 }
 
 .gameCategoryButton{
