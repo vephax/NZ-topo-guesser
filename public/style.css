@@ -131,8 +131,8 @@ h1 {
   text-align: right;
 }
 
-.blueButton{
-  background: #0078d4;
+.blueButton,
+.greenButton{
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -143,8 +143,20 @@ h1 {
   margin: 8px 10px 5px 5px;
 }
 
+.blueButton{
+  background: #0078d4;
+}
+
 .blueButton:hover{
   background: #005ba1;
+}
+
+.greenButton{
+  background: #00d431;
+}
+
+.greenButton:hover{
+  background: #00a110;
 }
 
 .blueButton:disabled {
@@ -336,10 +348,6 @@ h1 {
   box-sizing: border-box;
 }
 
-#gamesPanelList div{
-  white-space: nowrap;
-}
-
 #overallLeaderboard h3,
 #gamesPanel h3{
   text-align: center;
@@ -390,6 +398,7 @@ h1 {
 }
 
 .gamesPanelItem {
+  white-space: nowrap;
   padding: 10px;
   margin: 8px 0;
   border: 1px solid rgb(78, 78, 78);
