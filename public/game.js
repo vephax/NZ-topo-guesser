@@ -822,7 +822,7 @@ async function gameTabUpdate(gameTab){
   }
   _selectedGamesTab.classList.add('selected');
 
-  const container = document.getElementById('gamesPanelListData');
+  const container = document.getElementById('gamesPanelList');
   container.innerHTML = `<p>Loading...</p>`
 
   // Get the relevant games from the database
@@ -859,7 +859,7 @@ async function gameTabUpdate(gameTab){
 }
 
 function createGameList(games) {
-  const container = document.getElementById('gamesPanelListData');
+  const container = document.getElementById('gamesPanelList');
 
   // Sort by time first played
   games.sort((a, b) => {
