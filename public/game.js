@@ -822,7 +822,7 @@ async function gameTabUpdate(gameTab){
   }
   _selectedGamesTab.classList.add('selected');
 
-  const container = document.getElementById('gamesPanelList');
+  const container = document.getElementById('gamesPanelListData');
   container.innerHTML = `<p>Loading...</p>`
 
   // Get the relevant games from the database
@@ -840,7 +840,7 @@ async function gameTabUpdate(gameTab){
   }
 
   if (games.length !== 0){
-    
+
     createGameList(games);
 
   } else{ // There are no games in this tab, so tell the user
@@ -859,7 +859,7 @@ async function gameTabUpdate(gameTab){
 }
 
 function createGameList(games) {
-  const container = document.getElementById('gamesPanelList');
+  const container = document.getElementById('gamesPanelListData');
 
   // Sort by time first played
   games.sort((a, b) => {
