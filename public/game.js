@@ -840,7 +840,7 @@ async function gameTabUpdate(gameTab){
   }
 
   if (games.length !== 0){
-    // Create the neat list
+    
     createGameList(games);
 
   } else{ // There are no games in this tab, so tell the user
