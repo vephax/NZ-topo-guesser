@@ -295,20 +295,19 @@ app.get('/recommendedGames', async (req, res) => {
     return res.status(400).json({ success: false, error: "gameIDs query parameter is required" });
   }
 
-  // Convert comma-separated string into array
   const ids = gameIDs.split(',').map(id => id.trim());
 
   try {
     const { data, error } = await supabase
       .from('recommendedGames')
-      .select('name, recommendedBy')
+      .select('gameID, name, recommendedBy')
       .in('gameID', ids);
 
     if (error) {
       return res.status(500).json({ success: false, error: error.message });
     }
 
-    res.json({ success: true, names: data.map(row => row.name) });
+    res.json({ success: true, recommended: data }); 
   } catch (err) {
     res.status(500).json({ success: false, error: "Unexpected server error" });
   }
