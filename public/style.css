@@ -254,6 +254,10 @@ h1 {
   position: static;
 }
 
+#gamesPanel{
+  display: grid;
+}
+
 #gamesPanelHeader {
   flex-shrink: 0; /* don’t shrink */
   background: white;
@@ -267,6 +271,12 @@ h1 {
 #gamesPanelHeader h3{
   padding: 0;
   margin: 0;
+}
+
+#gamesPanelHeader p{
+  font-size: 0.8em;
+  padding-bottom: 10px;
+  text-align: center;
 }
 
 #gamesPanelHeader div{
