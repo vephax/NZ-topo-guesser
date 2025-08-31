@@ -890,18 +890,18 @@ function createGameList(games) {
         break;
     }
 
-    // Custom settings check
-    if (game.zoom !== 14 || game.timerDuration !== 30 || game.totalRounds !== 5){
-      div.innerHTML = `<strong>${game.gameType}</strong> - Custom Settings <br/><small>${game.playedBy.length} players • ${game.totalRounds} rounds • seed ${game.seed} </small>`;
-    }
-    else {
-      div.innerHTML = `<strong>${game.gameType}</strong><br/><small>${game.playedBy.length} player(s) • ${game.totalRounds} rounds • seed ${game.seed} </small></small>`;
+    //If recommended game show the name
+    let html = ``;
+    if (game.gameCategory === "Recommended"){
+      html = `<strong>${game.name}</strong><br>`;
     }
 
-    //Somewhat temporary
-    if (game.playedBy.includes(_currentUser)){
-      const strong = div.querySelector('strong'); 
-      strong.style.color = "#ac0fccff";
+    // Custom settings check
+    if (game.zoom !== 14 || game.timerDuration !== 30 || game.totalRounds !== 5){
+      div.innerHTML = html + `<strong>${game.gameType}</strong> - Custom Settings <br/><small>${game.playedBy.length} players • ${game.totalRounds} rounds • seed ${game.seed} </small>`;
+    }
+    else {
+      div.innerHTML = html + `<strong>${game.gameType}</strong><br/><small>${game.playedBy.length} player(s) • ${game.totalRounds} rounds • seed ${game.seed} </small></small>`;
     }
 
     div.onclick = () => { 
