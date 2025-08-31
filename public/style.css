@@ -317,11 +317,9 @@ h1 {
 #gamesPanelList {
   border-bottom: 1px solid black;
   background-color:rgb(242, 242, 242);
-  overflow-y: auto; 
-}
-
-#gamesPanelData{ 
+  overflow-y: auto;
   padding: 5px;
+  margin-top: 5px; 
 }
 
 #overallLeaderboard h3,
