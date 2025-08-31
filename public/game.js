@@ -628,6 +628,7 @@ async function fetchGames({ gameCategories, includePlayer, excludePlayer } = {})
   }
   if (includePlayer) params.append("includePlayer", includePlayer);
   if (excludePlayer) params.append("excludePlayer", excludePlayer);
+  console.log(params);
 
   let games = [];
   try {
