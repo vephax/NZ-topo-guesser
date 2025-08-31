@@ -822,7 +822,8 @@ async function gameTabUpdate(gameTab){
   }
   _selectedGamesTab.classList.add('selected');
 
-  //TODO: Update the UI with 'loading...'
+  const container = document.getElementById('gamesPanelList');
+  container.innerHTML = `<p>Loading...</p>`
 
   // Get the relevant games from database
   let games;
@@ -837,17 +838,22 @@ async function gameTabUpdate(gameTab){
       games = await fetchGames({gameCategories: ["Recent", "Recommended"], includePlayer: _currentUser});
     break;
   }
-  
-  createGameList(games);
+
+  if (games.length !== 0){
+    createGameList(games);
+  } else{
+    container.innerHTML = `<p>You have played all of the "${gameTab}" games`
+  }
 }
 
 function createGameList(games) {
+  const container = document.getElementById('gamesPanelList');
+
   // Sort by time first played
   games.sort((a, b) => {
     return new Date(b.timeCreated) - new Date(a.timeCreated);
   });
   
-  const container = document.getElementById('gamesPanelList');
   container.innerHTML = '';
   games.forEach(game => {
     const div = document.createElement('div');
