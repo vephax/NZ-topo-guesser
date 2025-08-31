@@ -270,11 +270,11 @@ app.get('/games', async (req, res) => {
   }
 
   if (includePlayer) {
-    query = query.filter('playedBy', 'cs', `{${includePlayer}}`);
+    query = query.contains('playedBy', [includePlayer]);
   }
 
   if (excludePlayer) {
-    query = query.not('playedBy', 'cs', [excludePlayer]);
+    query = query.not('playedBy', 'cs', `{${includePlayer}}`);
   }
 
   // Send result to client
