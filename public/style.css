@@ -276,7 +276,7 @@ h1 {
 
 #gamesPanelButtons{
   position: relative;
-  border-bottom: 1px solid black;
+  border-bottom: 2px solid black;
   display: flex;
   flex-direction: row;  
   flex-wrap: nowrap;
@@ -286,7 +286,7 @@ h1 {
 #gamesPanelButtonsPadding{
   background-color: rgb(242, 242, 242);
   margin: 0;
-  padding: 5px 100%;
+  padding: 5px 170px;
 }
 
 .gameCategoryButton{
@@ -326,6 +326,7 @@ h1 {
   overflow-y: auto;    
   min-height: 0;     
   border-bottom: 1px solid black;
+  border-top: 1px solid black;
   background-color: rgb(242, 242, 242);
   box-sizing: border-box;
 }
