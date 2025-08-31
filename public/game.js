@@ -959,18 +959,32 @@ function showGameInfoPanel(game){
       infoPanel.style.backgroundColor = "#ffeddfff";
       break;
   }
-
-  let html = '<div id="gameInfoTopPanels">';
-
+  
   // Setup the left 'settings' panel
-  html += ` <div id="gameInfoPanelLeft">
-    <h3>${game.gameType}</h3>
+  let html = '<div id="gameInfoTopPanels"><div id="gameInfoPanelLeft">';
+
+  // Setup the header
+  if (game.gameCategory === "Recommended"){
+    html += `<h3>${game.gameType} - ${game.name}</h3>`;
+  }
+  else { // i.e. Recent
+    html += `<h3>${game.gameType}</h3>`;
+  }
+
+  // Setup the settings
+  html += `
     <p> Seed: ${game.seed}</p>
     <p> Rounds: ${game.totalRounds}</p>
     <p> Difficulty (zoom): ${game.zoom}</p>
     <p> Timer Duration: ${game.timerDuration}</p>
     <p> First played by: ${game.playedBy[0]}</p>
-  </div>`;
+  `;
+
+  if (game.gameCategory === "Recommended"){
+    html += `<p> Recommended by: ${game.recommendedBy}</p>`
+  }
+
+  html += `</div>`;
 
   // Setup the game leaderboard panel
   html += `<div><h3>Game Leaderboard</h3><div id="gameLeaderboardPanel">Loading...</div></div></div>`;
