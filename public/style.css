@@ -133,7 +133,7 @@ h1 {
 
 .blueButton,
 .greenButton,
-.grayButton{
+.redButton{
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -160,12 +160,12 @@ h1 {
   background: #00760c;
 }
 
-.grayButton{
-  background: #d3d3d3;
+.redButton{
+  background: #ec5c5c;
 }
 
-.grayButton:hover{
-  background: #cdcdcd;
+.redButton:hover{
+  background: #ba3d3d;
 }
 
 .blueButton:disabled {
@@ -484,9 +484,9 @@ h1 {
 
 #recommendedModal div{
   text-align: center;
-  gap: 5px;
 }
 
-#recommendModal input{
+#recommendedModal input{
   padding: 5px;
+  margin: 5px
 }
