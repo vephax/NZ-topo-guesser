@@ -484,6 +484,9 @@ h1 {
 
 #recommendedModal div{
   text-align: center;
-  justify-content: center;
-  align-items: center;
+  gap: 5px;
+}
+
+#recommendModal input{
+  padding: 5px;
 }
