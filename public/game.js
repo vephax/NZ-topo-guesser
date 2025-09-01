@@ -195,12 +195,31 @@ window.onload = async () => {
 
   // Setup Modal buttons
   document.getElementById("recommendModalCloseBtn").onclick = () => {
-    document.getElementById("recommendedModal").style.display = "none";
+    let container = document.getElementById("recommendedModal");
+    container.style.display = "none";
+    container.innerHTML = `
+    <h3>Recommend Game</h3>
+    <label>Name:
+      <input type="text" id="recommendedName" placeholder="e.g. 'Lots of Chathams'"></input>
+    </label></br>
+    <button id="recommendModalCloseBtn" class="redButton">Close</button>
+    <button id="recommendModalRecommendBtn" class="greenButton">Recommend</button>`;
   }
 
   document.getElementById("recommendModalRecommendBtn").onclick = () => {
-    // TODO: Recommend the game, check if name is not null/empty
-    document.getElementById("recommendedModal").style.display = "none";
+    const name = document.getElementById("recommendedName").value;
+    if (name === ""){
+      return;
+    }
+
+    recommendGame(_game.gameID, name);
+    _game.recommendedBy = _currentUser;
+    _game.name = name;
+    
+    document.getElementById("recommendedModal").innerHTML = `
+    <h3>Recommend Game</h3>
+    <>p>Recommending...</p></br>
+    <button id="recommendModalCloseBtn" class="redButton">Close</button>`;
   }
 };
 
@@ -341,7 +360,7 @@ function submitGuess() {
       <button id="submitBtn" class="blueButton" disabled>Submit Guess</button>
     `;
 
-    // Are we in normal mode?
+    // Are we in 'normal' mode?
     if (Number(_game.timerDuration) === 30 && Number(_game.zoom) === 14 && Number(_game.totalRounds) === 5) {
       sendScoreForOverallLeaderboardToServer(_totalScore, _game.gameType);
     }
@@ -605,6 +624,28 @@ function sendGuessToServer(lat, lng, distance) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   })
+}
+
+async function recommendGame({ gameID, name }) {
+  try {
+    await fetch("/recommendGame", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ gameID, recommendedBy: _currentUser, name }),
+    });
+
+    
+    document.getElementById("recommendedModal").innerHTML = `
+    <h3>Recommend Game</h3>
+    <>p>Game successfully recommended.</p></br>
+    <button id="recommendModalCloseBtn" class="redButton">Close</button>`;
+
+  } catch (err) {
+    console.error("Network error occured whilst recommending game:", err.message);
+    throw err;
+  }
 }
 
 function loadOtherGuesses() {

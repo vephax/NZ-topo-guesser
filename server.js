@@ -288,6 +288,40 @@ app.get('/games', async (req, res) => {
   res.json({ success: true, games: data });
 });
 
+app.post("/recommendGame", async (req, res) => {
+  const { gameID, recommendedBy, name } = req.body;
+
+  if (!gameID || !recommendedBy || !name) {
+    return res.status(400).json({ success: false, error: "Missing parameters" });
+  }
+
+  try {
+    // Update games table
+    const { error: updateError } = await supabase
+      .from("games")
+      .update({ gameCategory: "Recommended" })
+      .eq("gameID", gameID);
+
+    if (updateError) {
+      return res.status(500).json({ success: false, error: updateError.message });
+    }
+
+    // Insert into recommendedGames
+    const { error: insertError } = await supabase
+      .from("recommendedGames")
+      .insert([{ gameID, recommendedBy, name }]);
+
+    if (insertError) {
+      return res.status(500).json({ success: false, error: insertError.message });
+    }
+
+    return res.json({ success: true, message: "Game recommended successfully" });
+
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 app.get('/recommendedGames', async (req, res) => {
   const { gameIDs } = req.query;
 
