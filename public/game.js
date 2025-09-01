@@ -199,7 +199,7 @@ window.onload = async () => {
   }
 
   document.getElementById("recommendModalRecommendBtn").onclick = () => {
-    // TODO: Recommend the game
+    // TODO: Recommend the game, check if name is not null/empty
     document.getElementById("recommendedModal").style.display = "none";
   }
 };
