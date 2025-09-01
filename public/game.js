@@ -195,33 +195,13 @@ window.onload = async () => {
 
   // Setup Modal buttons
   document.getElementById("recommendModalCloseBtn").onclick = () => {
-    let container = document.getElementById("recommendedModal");
-    container.style.display = "none";
-    container.innerHTML = `
-    <h3>Recommend Game</h3>
-    <label>Name:
-      <input type="text" id="recommendedName" placeholder="e.g. 'Lots of Chathams'"></input>
-    </label></br>
-    <button id="recommendModalCloseBtn" class="redButton">Close</button>
-    <button id="recommendModalRecommendBtn" class="greenButton">Recommend</button>`;
+    closeRecommendedModal();
   }
 
   document.getElementById("recommendModalRecommendBtn").onclick = () => {
-    const name = document.getElementById("recommendedName").value;
-    if (name === ""){
-      return;
-    }
-
-    recommendGame(_game.gameID, name);
-    _game.recommendedBy = _currentUser;
-    _game.name = name;
-    
-    document.getElementById("recommendedModal").innerHTML = `
-    <h3>Recommend Game</h3>
-    <p>Recommending...</p></br>
-    <button id="recommendModalCloseBtn" class="redButton">Close</button>`;
-  }
-};
+    recommendModalOnRecommend();
+  };
+}
 
 function startNewGame(game) {
   _game = game;
@@ -642,8 +622,9 @@ async function recommendGame( gameID, name ) {
     
     document.getElementById("recommendedModal").innerHTML = `
     <h3>Recommend Game</h3>
-    <>p>Game successfully recommended.</p></br>
+    <p>Game successfully recommended.</p></br>
     <button id="recommendModalCloseBtn" class="redButton">Close</button>`;
+    document.getElementById("recommendedModal").onclick = closeRecommendedModal();
 
   } catch (err) {
     console.error("Network error occured whilst recommending game:", err.message);
@@ -1276,6 +1257,39 @@ async function enterNewUsername(){
     _currentUser = name;
     localStorage.setItem("topoguesser_player", name);
     document.getElementById('userInfo').innerHTML = `🎮 Player: <b>${name}</b>`;
+}
+
+function closeRecommendedModal(){
+  let container = document.getElementById("recommendedModal");
+  container.style.display = "none";
+  container.innerHTML = `
+  <h3>Recommend Game</h3>
+  <label>Name:
+    <input type="text" id="recommendedName" placeholder="e.g. 'Lots of Chathams'"></input>
+  </label></br>
+  <button id="recommendModalCloseBtn" class="redButton">Close</button>
+  <button id="recommendModalRecommendBtn" class="greenButton">Recommend</button>`;
+
+  document.getElementById("recommendModalRecommendBtn").onclick = recommendModalOnRecommend();
+  document.getElementById('recommendModalCloseBtn').onclick = closeRecommendedModal();
+}
+
+function recommendModalOnRecommend(){
+
+  const name = document.getElementById("recommendedName").value;
+  if (name === ""){
+    return;
+  }
+
+  recommendGame(_game.gameID, name);
+  _game.recommendedBy = _currentUser;
+  _game.name = name;
+    
+  document.getElementById("recommendedModal").innerHTML = `
+  <h3>Recommend Game</h3>
+  <p>Recommending...</p></br>
+  <button id="recommendModalCloseBtn" class="redButton">Close</button>`;
+  document.getElementById("recommendedModal").onclick = closeRecommendedModal(); 
 }
 
 /// === HELPER FUNCTIONS ===
