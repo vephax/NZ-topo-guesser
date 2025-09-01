@@ -1063,6 +1063,7 @@ function showGameInfoPanel(game){
 
   if (game.playedBy.includes(_currentUser) && game.gameCategory !== "Recommended") document.getElementById("recommendButton").onclick = () =>{
     document.getElementById("recommendedModal").style.display = 'flex';
+    _game = game;
   }
 
   createGameLeaderboardHTML(game.gameID).then(html => {
