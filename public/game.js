@@ -192,6 +192,16 @@ window.onload = async () => {
   document.getElementById('leafletMap').style.pointerEvents = 'none';
 
   gameTabUpdate("Recommended")
+
+  // Setup Modal buttons
+  document.getElementById("recommendModalCloseBtn").onclick = () => {
+    document.getElementById("recommendedModal").style.display = "none";
+  }
+
+  document.getElementById("recommendModalRecommendBtn").onclick = () => {
+    // TODO: Recommend the game
+    document.getElementById("recommendedModal").style.display = "none";
+  }
 };
 
 function startNewGame(game) {
@@ -899,7 +909,7 @@ function createGameList(games) {
 
     // If Custom Settings
     if (game.zoom !== 14 || game.timerDuration !== 30 || game.totalRounds !== 5){
-      html += `<p color="#a000a0"> - Custom Settings</p>`;
+      html += `- Custom Settings`;
     }
     
     html += `<br/><small>${game.playedBy.length} player(s) • ${game.totalRounds} rounds • seed ${game.seed} </small></small>`;
@@ -976,7 +986,7 @@ function showGameInfoPanel(game){
   html += (game.totalRounds === 5)? `<p> Rounds: ${game.totalRounds}</p>` : `<p class="customSetting"> Rounds: ${game.totalRounds}</p>`;
   html += (game.zoom === 14)? `<p> Difficulty (zoom): ${game.zoom}</p>` : `<p class="customSetting"> Difficulty (zoom): ${game.zoom}</p>`;
   html += (game.timerDuration === 30)? `<p> Timer Duration: ${game.timerDuration}</p>` : `<p class="customSetting"> Timer Duration: ${game.timerDuration}</p>`;
-  html += `<p> First played by: ${game.playedBy[0]}</p>`;
+  html += `<p> Created by: ${game.playedBy[0]}</p>`;
   if (game.gameCategory === "Recommended"){
     html += `<p> Recommended by: ${game.recommendedBy}</p>`
   }
@@ -985,7 +995,7 @@ function showGameInfoPanel(game){
   // Setup the game leaderboard panel
   html += `<div><h3>Game Leaderboard</h3><div id="gameLeaderboardPanel">Loading...</div></div></div>`;
 
-  // Setup the buttons
+  // Show the buttons
   html += `<div id="gameInfoButtons">`;
   if (game.playedBy.includes(_currentUser) && game.gameCategory !== "Recommended"){
     html += `<p>Select another game,</p><button class="greenButton" id="recommendButton">Recommend Game</button><p>or</p>`
@@ -1004,10 +1014,15 @@ function showGameInfoPanel(game){
 
   infoPanel.innerHTML = html;
 
+  // Give the buttons functionality
   if (game !== _game && !game.playedBy.includes(_currentUser)){
     document.getElementById("playGameBtn").onclick = () => startNewGame(game);
   }
   document.getElementById("createNewGameBtn").onclick = showNewGamePanel;
+
+  if (game.playedBy.includes(_currentUser) && game.gameCategory !== "Recommended") document.getElementById("recommendButton").onclick = () =>{
+    document.getElementByID("recommendedModal").style.display = 'flex';
+  }
 
   createGameLeaderboardHTML(game.gameID).then(html => {
     document.getElementById("gameLeaderboardPanel").innerHTML = html;
