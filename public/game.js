@@ -218,7 +218,7 @@ window.onload = async () => {
     
     document.getElementById("recommendedModal").innerHTML = `
     <h3>Recommend Game</h3>
-    <>p>Recommending...</p></br>
+    <p>Recommending...</p></br>
     <button id="recommendModalCloseBtn" class="redButton">Close</button>`;
   }
 };
@@ -627,6 +627,9 @@ function sendGuessToServer(lat, lng, distance) {
 }
 
 async function recommendGame({ gameID, name }) {
+  console.log(gameID);
+  console.log(_currentUser);
+  console.log(name);
   try {
     await fetch("/recommendGame", {
       method: "POST",
