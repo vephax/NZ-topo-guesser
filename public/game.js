@@ -626,7 +626,7 @@ function sendGuessToServer(lat, lng, distance) {
   })
 }
 
-async function recommendGame({ gameID, name }) {
+async function recommendGame( gameID, name ) {
   console.log(gameID);
   console.log(_currentUser);
   console.log(name);
