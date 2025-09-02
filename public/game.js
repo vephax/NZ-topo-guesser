@@ -1287,7 +1287,7 @@ function recommendModalOnRecommend(){
     <p>Recommending...</p></br>
     <button id="recommendModalCloseBtn" class="redButton">Close</button>
   </div>`;
-  document.getElementById("recommendedModal").onclick = closeRecommendedModal(); 
+  document.getElementById("recommendedModal").onclick = () => closeRecommendedModal(); 
 
   recommendGame(_game.gameID, name);
   _game.recommendedBy = _currentUser;
