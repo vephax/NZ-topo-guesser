@@ -44,19 +44,56 @@ app.post('/answers', async (req, res) => {
 });
 */
 
-/*
-// GET guesses for a specific seed and round
-app.get('/guesses/:seed/:round', async (req, res) => {
-  const { seed, round } = req.params;
-  const { data, error } = await supabase
-    .from('guesses')
-    .select('*')
-    .eq('seed', Number(seed))
-    .eq('round', Number(round));
-  if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
+app.get('/guesses/all/:gameID', async (req, res) => {
+  const { gameID } = req.params;
+
+  if (!gameID) {
+    return res.status(400).json({ error: 'gameID is required' });
+  }
+
+  try {
+    // Fetch all guesses
+    const { data: guessesData, error: guessesError } = await supabase
+      .from('guesses')
+      .select('user, round, latitude, longitude, distance')
+      .eq('gameID', gameID)
+      .order('round', { ascending: true });
+
+    if (guessesError) throw guessesError;
+
+    // Group guesses by round
+    const roundData = {};
+    guessesData.forEach(g => {
+      if (!roundData[g.round]) roundData[g.round] = [];
+      roundData[g.round].push({
+        user: g.user,
+        lat: g.latitude,
+        lng: g.longitude,
+        distance: g.distance
+      });
+    });
+
+    // Fetch all answers
+    const { data: answersData, error: answersError } = await supabase
+      .from('answers')
+      .select('round, latitude, longitude')
+      .eq('gameID', gameID);
+
+    if (answersError) throw answersError;
+
+    // Convert answers to a map by round
+    const answers = {};
+    answersData.forEach(a => {
+      answers[a.round] = { lat: a.latitude, lng: a.longitude };
+    });
+
+    // Return combined data
+    res.json({ roundData, answers });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch game data' });
+  }
 });
-*/
 
 // GET distances for a specific game (for leaderboards)
 app.get('/guesses/:gameID/userDistances', async (req, res) => {

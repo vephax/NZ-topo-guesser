@@ -811,28 +811,55 @@ async function updateOverallLeaderboard() {
   }
 }
 
-function showSeedAnalysis(seed) {
-  fetch(`/seed-analysis/${seed}`).then(r => r.json()).then(data => {
-    const content = document.getElementById('analysisContent');
-    let html = `<strong>Seed ${seed}</strong><hr>`;
-    Object.keys(data.roundData || {}).sort().forEach(round => {
-      const guesses = data.roundData[round];
-      const answer = data.answers?.[round];
-      html += `<div class="round-analysis"><strong>Round ${round}</strong>`;
-      if (answer) {
-        html += ` 📍 Ans: ${answer.lat.toFixed(4)}, ${answer.lng.toFixed(4)}`;
-      }
-      html += `<br>`;
-      guesses.forEach((g, i) => {
-        const score = caluclateScore(g.distance);
-        const color = getUserColor(g.user);
-        html += `${i+1}. <b style="color:${color}">${g.user}</b>: ${score} pts (${g.distance.toFixed(2)}km)<br>`;
-      });
-      html += "<hr>";
-    });
-    content.innerHTML = html;
-    document.getElementById('analysisPanel').style.display = 'block';
+async function showGameAnalysis(game) {
+  const res = await fetch(`/guesses/all/${game.gameID}`);
+  const data = await res.json();
+
+  const content = document.getElementById('analysisContent');
+  let html = `<strong>${game.gameType}</strong><hr>`;
+
+  const rounds = Object.keys(data.roundData || {}).sort();
+
+  rounds.forEach(round => {
+    const guesses = data.roundData[round];
+    const answer = data.answers?.[round];
+
+    // Round panel clickable
+    html += `
+      <div class="round-panel" onclick='showRoundAnalysis(${JSON.stringify(guesses)}, ${JSON.stringify(answer)})'>
+        <strong>Round ${round}</strong>
+        <table class="round-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Placement</th>
+              <th>Score</th>
+              <th>Distance</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${guesses
+              .map((g, i) => {
+                const score = caluclateScore(g.distance);
+                return `
+                  <tr>
+                    <td>${g.user}</td>
+                    <td>${i + 1}</td>
+                    <td>${score}</td>
+                    <td>${g.distance.toFixed(2)} km</td>
+                  </tr>
+                `;
+              })
+              .join('')}
+          </tbody>
+        </table>
+      </div>
+      <hr>
+    `;
   });
+
+  content.innerHTML = html;
+  document.getElementById('analysisPanel').style.display = 'block';
 }
 
 // Game Tab can be "Played", "Recommended" or "Recent"
@@ -1287,7 +1314,7 @@ function recommendModalOnRecommend(){
     <p>Recommending...</p></br>
     <button id="recommendModalCloseBtn" class="redButton">Close</button>
   </div>`;
-  document.getElementById("recommendedModal").onclick = () => closeRecommendedModal(); 
+  document.getElementById("recommendModalCloseBtn").onclick = () => closeRecommendedModal(); 
 
   recommendGame(_game.gameID, name);
   _game.recommendedBy = _currentUser;
