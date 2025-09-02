@@ -1417,7 +1417,6 @@ async function OnNewGame(){
     timerDuration: document.getElementById("newTimerDuration").value
   };
 
-  /* TEMP
   const res = await fetch(`/games`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -1431,7 +1430,6 @@ async function OnNewGame(){
   }
 
   game.gameID = result.gameID;
-  */
 
   startNewGame(game);
 }
