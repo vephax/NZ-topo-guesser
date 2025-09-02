@@ -1263,15 +1263,17 @@ function closeRecommendedModal(){
   let container = document.getElementById("recommendedModal");
   container.style.display = "none";
   container.innerHTML = `
-  <h3>Recommend Game</h3>
-  <label>Name:
-    <input type="text" id="recommendedName" placeholder="e.g. 'Lots of Chathams'"></input>
-  </label></br>
-  <button id="recommendModalCloseBtn" class="redButton">Close</button>
-  <button id="recommendModalRecommendBtn" class="greenButton">Recommend</button>`;
+  <div style="background: white; width: 90%; max-width: 600px; border-radius: 12px; padding: 20px; max-height: 400px;">
+    <h3>Recommend Game</h3>
+    <label>Name:
+      <input type="text" id="recommendedName" placeholder="e.g. 'Lots of Chathams'"></input>
+    </label></br>
+    <button id="recommendModalCloseBtn" class="redButton">Close</button>
+    <button id="recommendModalRecommendBtn" class="greenButton">Recommend</button>
+  </div>`;
 
-  document.getElementById("recommendModalRecommendBtn").onclick = recommendModalOnRecommend();
-  document.getElementById('recommendModalCloseBtn').onclick = closeRecommendedModal();
+  document.getElementById("recommendModalRecommendBtn").onclick = () => recommendModalOnRecommend();
+  document.getElementById('recommendModalCloseBtn').onclick = () => closeRecommendedModal();
 }
 
 function recommendModalOnRecommend(){
@@ -1286,9 +1288,11 @@ function recommendModalOnRecommend(){
   _game.name = name;
     
   document.getElementById("recommendedModal").innerHTML = `
-  <h3>Recommend Game</h3>
-  <p>Recommending...</p></br>
-  <button id="recommendModalCloseBtn" class="redButton">Close</button>`;
+  <div style="background: white; width: 90%; max-width: 600px; border-radius: 12px; padding: 20px; max-height: 400px;">
+    <h3>Recommend Game</h3>
+    <p>Recommending...</p></br>
+    <button id="recommendModalCloseBtn" class="redButton">Close</button>
+  </div>`;
   document.getElementById("recommendedModal").onclick = closeRecommendedModal(); 
 }
 
