@@ -4,19 +4,10 @@ let hasGuessed = false, timerInt = null, roundsPlayed = 0, totalRounds = 0, _tot
 let guessMap, guessMarker;
 let _currentUser = null;
 let guessMapBasemapLayer = null;
-const currentVersion = "10.0";
+const currentVersion = "10.1";
 
 const versions = [
-  { version: "9.2", changelog: "8/8/2025 \n The server works now. It only took 6 hours. No more AI slop is here. Leaderboards and seed analysis now work due to an actual game data system. A server. Not what was here before, aka a link." },
-  { version: "9.3", changelog: "9/8/2025 \n This is update does not add much, still just a lot of fixes from AI slops. A few new features but most new features will come out on Sunday. \n \n - Added an overall leaderboard system (took way too long) \n - Moved recent seeds panel to a more convenient location \n - The current player system now works and is objectively better. (google sign in is gone, due to Arya's request) \n Brought back audio (lost due to AI Slop). No new audio clips yet (coming soon) \n - Removed urban mode temporarily due to being broken. Will be back working on Sunday and much better and faster. \n - Added a version control system (this) \n - Added a dev mode \n - Numerous bug fixes related to AI slops or being able to submit a guess before a game starts resulting in (0, 0) \n - Banned Max from doing brain rot AI slops \n \n For more information regarding the development, leaving feedback and answering a few poles, etc, please see the google doc. \n - Menno" },
-  { version: "9.3.1", changelog: "10/8/2025 \n - Fixes a bug where new players would not see version prompts and recents/leaderboard panels would not load."},
-  { version: "9.4", changelog: "11/8/2025 \n\n - Changed the beach mode system so that you know choose a game type. Defaults to everywhere. \n\n - Brought back urban mode which is now a gametype and much much faster especially on good internet connections. The relative probabilities are not perfect (e.g. Dunedin) so if you notice any urban locations that are too common or too uncommon, let me know.\n\n - Made recent seeds panel have the header and buttons fixed at the top instead of scrolling with the menu. \n\n - Added average to overall leaderboard \n\n - Added state highway mode which places you somewhere on the stateway system. \n\n - Menno"},
-  { version: "9.4.1", changelog: "11/8/2025 \n\n - Changed scoring system to now have a better function.\n if you get anywhere on the screen you will get maximum points \n\n - now rounds score, for average etc \n\n - rainbow buttons \n\n - boxes next to eachother \n\n - lowered chathams chance \n\n - Max 😁"},
-  { version: "9.5", changelog: "12/8/2025 \n\n - Holy Guacamole, we're diversifying, \n now able to play study and practice studying \n with great functionality for all involved \n just scroll to the bottom to see the diversification \n most are prettttty acurate \n not liable for any problems you may have. "},
-  { version: "9.6", changelog: "14/8/2025 \n\n This one is for Arya \n \n - Added Bush Mode (experimental) :D \n\n - Edited and added new audio clips. There are now 13 good and 13 bad. \n\n - Menno"},
-  { version: "9.6.1", changelog: "14/8/2025 \n\n Holy Guacamole, we're diversifying, \n reaction schemer now exists \n with great functionality for all involved \n 🥰🥰🥰"},
-  { version: "9.6.2", changelog: "15/8/2025 \n\n The trash has been removed due to Max's defeat in an art competition. You are welcome for my service. \n\n - Removed Chem Schemer PERMENANTLY! \n\n - Menno"},
-  { version: "10.0", changelog: "26/08/25 \n Whilst this update does not add much actual new content, this is by far the biggest update Topo Guesser has ever received. A brief overview is that the recent seeds panel has had a complete overhaul and you can now play other peoples seeds by game type and the overall leaderboard can now be differed by different game types. The highly requested 'Recommended Seeds' and 'Custom Seeds' are coming out next, this updates purpose was major game/seed system changes to support that.\n\n Please report any bugs you find (there will be many) on the google log doc. \n\n A full changelog can also be found on the google doc. \n - Menno \n\n p.s. This update was brought to you with minimal litres of water consumed."}
+  { version: "10.1", changelog: `3/9/2025 \n\n - Added the ability to recommend games and play said games. \n - Added a famous locations game type. There are some hard locations and there is Auckland CBD. Since this is quite easy, it may be made harder in the future (e.g. always hard mode.). There are over 150, quite unique famous locations. \n - Reworked 'played' seeds to no longer be 'purple' and now appear on their own tab similar to now recent and recommended. \n - Custom Settings are now purple to make it easier to understand what is custom in the 'Game Info' panel. \n - A few interface and text changes that I did not like regarding the new 10.0 interfaces \n - Fixed a bug where the leaderboard would only show 4 rounds on game completion.` } 
 ];
 
 // === REGION DATA ===
@@ -125,6 +116,157 @@ const URBAN_TOWNS = [
   {lat: -43.952308, lng: -176.558232}
 ];
 
+// === FAMOUS LOCATIONS DATA ===
+const FAMOUS_LOCATIONS = [
+  { name: "Sutherland Falls", description: "At 580m, Sutherland Falls is New Zealand’s tallest waterfall and one of the tallest in the world.", lat: -44.80037, lng: 167.728701 },
+  { name: "Kepler Track", description: "A 60km Great Walk through Fiordland National Park’s alpine environment.", lat: -45.3862, lng: 167.607164 },
+  { name: "Raikura Track", description: "A Great Walk on Stewart Island with coastal scenery.", lat: -46.865539, lng: 167.758012 },
+  { name: "Routeburn Track", description: "A popular Great Walk linking Fiordland and Mt Aspiring National Parks.", lat: -44.727269, lng: 168.209138 },
+  { name: "Heaphy Track", description: "A 78km Great Walk known for diverse landscapes and nikau palms.", lat: -40.885505, lng: 172.311416 },
+  { name: "Paparoa Track", description: "A West Coast Great Walk combining forest and coastline.", lat: -42.195917, lng: 171.450448 },
+  { name: "Abel Tasman Coast Track", description: "A coastal Great Walk famed for its stunning golden beaches.", lat: -40.856881, lng: 173.012867 },
+  { name: "Tongariro Crossing", description: "A day hike across volcanic terrain and emerald lakes.", lat: -39.14093, lng: 175.612206 },
+  { name: "Round the Mountain Track", description: "A 66km circuit tramp around Mount Ruapehu.", lat: -39.342048, lng: 175.538135 },
+  { name: "Lake Waikaremoana Track", description: "A Great Walk circumnavigating Lake Waikaremoana.", lat: -38.748373, lng: 177.027254 },
+  { name: "Milford Track", description: "The 53km Great Walk through Milford Sound is New Zealand’s most famous Great Walk.", lat: -44.917937, lng: 167.92624 },
+  { name: "Hump Ridge Track", description: "A southern coastal track with dramatic cliffs and vistas, often referred to as New Zealand’s toughest Great Walk.", lat: -46.192798, lng: 167.310834 },
+  { name: "Fanthams Peak (Mt. Taranaki)", description: "A subsidiary peak on the slopes of Mount Taranaki.", lat: -39.31041, lng: 174.067984 },
+  { name: "Mt Taranaki", description: "A near-perfect volcanic cone and iconic Taranaki landmark.", lat: -39.295871, lng: 174.061975 },
+  { name: "Mount Ruapehu", description: "An 2,797m tall active volcano and major North Island ski destination.", lat: -39.275269, lng: 175.56942 },
+  { name: "Mount Ngauruhoe", description: "A 2,291m tall symmetrical volcanic cone featured in major films such as the Lord of the Rings as Mount Doom.", lat: -39.158337, lng: 175.633535 },
+  { name: "Mount Tongaririo", description: "A 1,978m tall volcano in Tongariro National Park with the most active vents.", lat: -39.124786, lng: 175.652504 },
+  { name: "Cape Egmont Lighthouse", description: "A 19th-century lighthouse on Taranaki’s western most point.", lat: -39.275273, lng: 173.753972 },
+  { name: "East Cape", description: "The easternmost point of mainland New Zealand.", lat: -37.689731, lng: 178.547054 },
+  { name: "Bread Capital of New Zealand", description: "The town of Manaia is known as the bread capital of NZ because of its thriving bakery industry, primarily through Yarrows Family Bakers. ", lat: -39.552323, lng: 174.124589 },
+  { name: "Farewell Spit", description: "A 35km long sand spit and internationally important bird habitat.", lat: -40.555006, lng: 173.024025 },
+  { name: "Waitomo Caves", description: "Most popular NZ limestone caves famous for glowworms and cave tours.", lat: -38.260812, lng: 175.108509 },
+  { name: "Kapiti Island", description: "A predator-free island nature reserve and bird sanctuary.", lat: -40.852078, lng: 174.926634 },
+  { name: "Putangirua Pinnacles", description: "Eroded earth pillars famous as a film location for Lord of the Rings", lat: -41.447818, lng: 175.248742 },
+  { name: "Milford Sound", description: "A dramatic Fiordland sound known for sheer cliffs and waterfalls.", lat: -44.671477, lng: 167.925854 },
+  { name: "A famous oxbow lake #1", description: "A curved lake formed from by river cut-off processes.", lat: -40.23569, lng: 176.114273 },
+  { name: "A famous oxbow lake #2", description: "A curved lake formed from by river cut-off processes.", lat: -40.368765, lng: 175.63139 },
+  { name: "A famous oxbow lake #3", description: "A curved lake formed from by river cut-off processes.", lat: -45.945133, lng: 167.691194 },
+  { name: "A famous oxbow lake #4", description: "A curved lake formed from by river cut-off processes.", lat: -41.473907, lng: 173.981638 },
+  { name: "Bell Rock", description: "A prominent rocky outcrop and local viewpoint in Hawke’s Bay.", lat: -39.100277, lng: 176.789889 },
+  { name: "Waiotapu", description: "A geothermal park renowned for colorful hot springs and geothermal features.", lat: -38.340899, lng: 176.363826 },
+  { name: "Waimangu", description: "A geothermal valley created by the 1886 Tarawera eruption.", lat: -38.284998, lng: 176.392021 },
+  { name: "Spaghetti Junction", description: "New Zealand’s largest road interchange.", lat: -36.860618, lng: 174.760208 },
+  { name: "Three Kings Islands", description: "Remote islands being an exceptional destination for big game fishing and diving.", lat: -34.157644, lng: 172.14499 },
+  { name: "Rocket Lab / Mahia", description: "Where New Zealand launches its rockets.", lat: -39.261614, lng: 177.864919 },
+  { name: "Lake Onslow", description: "The proposed site for New Zealand’s largest hydroelectric storage scheme.", lat: -45.546409, lng: 169.639549 },
+  { name: "Captain Cook's Landing Place", description: "Historic site where James Cook first set foot in New Zealand.", lat: -38.381197, lng: 178.334713 },
+  { name: "Gloriavale", description: "A small and isolated Christian cult with a population of ~468.", lat: -42.561279, lng: 171.808619 },
+  { name: "Ernest Rutherford Birthplace", description: "Location of birthplace and now memorial of physicist Ernest Rutherford.", lat: -41.377244, lng: 173.101144 },
+  { name: "Ward Beach Boulders", description: "Large spherical boulders exposed on a Marlborough shoreline.", lat: -41.843882, lng: 174.184585 },
+  { name: "The Beehive", description: "New Zealand’s Parliament Building.", lat: -41.278011, lng: 174.775658 },
+  { name: "Moeraki Boulders", description: "Large spherical concretions scattered along Moeraki Beach.", lat: -45.347909, lng: 170.82912 },
+  { name: "Arthur's Pass", description: "A mountain pass and village connecting Christchurch to the West Coast.", lat: -42.944874, lng: 171.566534 },
+  { name: "Haast Pass", description: "A mountain pass connecting Otago and the West Coast.", lat: -44.106378, lng: 169.353948 },
+  { name: "Lewis Pass", description: "A mountain pass connecting Northern Canterbury to the West Coast.", lat: -42.378598, lng: 172.399349 },
+  { name: "Cape Kidnappers", description: "The home of one of the largest gannet colonies in the world.", lat: -39.643259, lng: 177.080641 },
+  { name: "Picton Ferry Terminal", description: "One of the ferry terminals connecting the North and South Island.", lat: -41.285014, lng: 174.005628 },
+  { name: "Mt Cook", description: "Aoraki, Mount Cook is New Zealand’s highest mountain at 3,724m located in the Southern Alps.", lat: -43.595267, lng: 170.142989 },
+  { name: "Mt Aspiring", description: "Tititea, Mount Aspiring is New Zealand’s highest mountain outside of Mt Cook National Park at 3,033m", lat:-44.384284, lng: 168.72807 }, 
+  { name: "West Cape", description: "The westernmost point of New Zealand", lat: -45.903883, lng: 166.427207 },
+  { name: "North Cape", description: "The northernmost point of mainland New Zealand.", lat: -34.394818, lng: 173.013897 },
+  { name: "Cape Reinga Lighthouse/Cape", description: "A lighthouse at the northern tip where the two oceans meet.", lat: -34.423076, lng: 172.678256 },
+  { name: "Bluff", description: "A southern port town known as the gateway to Stewart Island.", lat: -46.615001, lng: 168.338957 },
+  { name: "Tiwai Point Aluminium Smelter", description: "An aluminium smelter which uses 13% of NZ’s electricity demand and producing 10% of Southland’s GDP..", lat: -46.589526, lng: 168.383203 },
+  { name: "Slope Point", description: "The southernmost point of the South Island.", lat: -46.671335, lng: 169.010925 },
+  { name: "South Cape", description: "The southernmost point of Stewart Island / Rakiura.", lat: -47.286523, lng: 167.539616 },
+  { name: "Northern Most Glacier in the South Island", description: "The northernmost permanent glacier on the South Island part and the only glacier in the Kaikoura Ranges.", lat: -42.219698, lng: 172.587104 },
+  { name: "Fox Glacier", description: "A large West Coast glacier accessible from the highway.", lat: -43.50413, lng: 170.087972 },
+  { name: "Baldwin Street", description: "A steep residential street once listed as the world’s steepest.", lat: -45.848548, lng: 170.533862 },
+  { name: "Abel Tasman Landing Point", description: "The location where the first European anchored at New Zealand although he never set shore.", lat: -40.820058, lng: 172.90206 },
+  { name: "Lake Wakatipu", description: "A long glacial lake beside Queenstown with scenic shores.", lat: -44.908274, lng: 168.390112 },
+  { name: "Lake Wanaka", description: "A large southern lake popular for recreation and mountain views.", lat: -44.553289, lng: 169.082294 },
+  { name: "Auckland CBD and Sky Tower", description: "The Sky Tower is a prominent part of the Auckland Skyline which has been named as one of the most beautiful in the world.", lat: -36.848807, lng: 174.762311 },
+  { name: "Rainbow's End", description: "New Zealand’s most popular amusement park.", lat: -36.993218, lng: 174.883822 },
+  { name: "Waikato River Delta", description: "The tidal delta region where the Waikato River - New Zealand’s longest river - meets the sea.", lat: -37.330464, lng: 174.771409 },
+  { name: "Pic's Peanut Butter Factory", description: "The manufacturing site of Pic’s famous natural peanut butter.", lat: -41.321502, lng: 173.214355 },
+  { name: "Whittaker's Chocolate Factory", description: "New Zealand’s most popular chocolate brand’s chocolate factory and visitor attraction in Porirua.", lat: -41.132367, lng: 174.83192 },
+  { name: "Hobbiton", description: "The reconstructed film set used in the Hobbit and LOTR movies.", lat: -37.871791, lng: 175.683789 },
+  { name: "Mangatainoka Hot Springs", description: "Thermal pools historically used for bathing and relaxation. A popular destination for Hawke’s Bay locals.", lat: -39.16592, lng: 176.397085 },
+  { name: "Mt Tarawera", description: "A volcano famous for its catastrophic 1886 eruption.", lat: -38.226703, lng: 176.505661 },
+  { name: "Believed Location of the Pink and White Terraces", description: "The submerged and partially lost, treasured silica terraces.", lat: -38.190924, lng: 176.43043 },
+  { name: "Motutaiko Island", description: "An island site featuring a notable Māori rock carving.", lat: -38.853894, lng: 175.944114 },
+  { name: "Kaimanawa Wall", description: "Rock formations that serve as potential evidence of an ancient NZ civilisation in the Kaimanawa Range.", lat: -38.949189, lng: 176.188645 },
+  { name: "Cape Brett", description: "A rugged peninsula forming the eastern boundary of the Bay of Islands.", lat: -35.171477, lng: 174.330583 },
+  { name: "Motuarohia Island and Captain Cook’s Anchorage", description: "A small island and historic anchorage near the Bay of Islands.", lat: -35.23421, lng: 174.169822 },
+  { name: "White Island", description: "An active marine volcano known for geothermal activity and tours with the last eruption in 2019.", lat: -37.520232, lng: 177.185612 },
+  { name: "Clyde Dam", description: "A large hydroelectric dam on the Clutha River.", lat: -45.178905, lng: 169.306526 },
+  { name: "Tapuae-O-Uenuku", description: "The largest peak in the Inland Kaikōura Range at 2,885m.", lat: -41.995557, lng: 173.663678 },
+  { name: "Cape Foulwind", description: "A coastal headland with a seal colony and coastal walks that has quite the foul wind.", lat: -41.745495, lng: 171.468043 },
+  { name: "Blue Lake", description: "The clearest lake in the world.", lat: -42.059377, lng: 172.658386 },
+  { name: "Archway Islands", description: "Iconic sea statues which were the default lockscreen on the Windows 10 operating system..", lat: -40.499924, lng: 172.67272 },
+  { name: "Te Waikoropupu Springs", description: "One of the world’s largest and clearest freshwater springs.", lat: -40.848506, lng: 172.770739 },
+  { name: "Bridge to Nowhere", description: "A remote concrete bridge built for a failed settlement project.", lat: -39.270587, lng: 174.97354 },
+  { name: "Whananaki Inlet Foot Bridge", description: "The longest footbridge in the Southern Hemisphere spanning the Whananaki Inlet.", lat: -35.515686, lng: 174.451904 },
+  { name: "Kaipara Harbour", description: "New Zealand’s largest enclosed harbour spanning 800km of coastline.", lat: -36.414601, lng: 174.166989 },
+  { name: "Ninety Mile Beach", description: "It’s actually 55 miles.", lat: -34.997704, lng: 173.151269 },
+  { name: "Te Paki Sand Dunes", description: "Large coastal sand dunes used for boarding and scenic views.", lat: -34.525778, lng: 172.752457 },
+  { name: "Hikurangi", description: "The tallest hill in the Gisborne region at 1,752m.", lat: -37.918894, lng: 178.061643 },
+  { name: "Kaweka", description: "The tallest point in the Kaweka Ranges at 1,724m", lat: -39.282745, lng: 176.380606 },
+  { name: "Waiouru", description: "A central North Island town known as the military training area and Army Museum.", lat: -39.471402, lng: 175.679154 },
+  { name: "Tangiwai Rail Disaster", description: "Site of New Zealand’s worst rail disaster in 1953.", lat: -39.465403, lng: 175.576115 },
+  { name: "Stephen's Island", description: "An island in Cook Strait known for its lighthouse and wildlife history.", lat: -40.670304, lng: 173.997431 },
+  { name: "Te Puke Kiwifruit", description: "A region renowned for commercial kiwifruit orchards.", lat: -37.782569, lng: 176.320481 },
+  { name: "Christchurch Cathedral", description: "The historic Anglican cathedral in central Christchurch.", lat: -43.530644, lng: 172.636929 },
+  { name: "Whangamomona", description: "A small town famous for declaring itself a republic as a tourist stunt.", lat: -39.144324, lng: 174.737549 },
+  { name: "Palliser Lighthouse", description: "A lighthouse marking the entrance to Wellington Harbour from the south.", lat: -41.611417, lng: 175.289483 },
+  { name: "Pike River Mine", description: "Site of a coal mine and the tragic 2010 mining disaster.", lat: -42.20638, lng: 171.483793 },
+  { name: "Cheese Capital of New Zealand", description: "Nickname for Eltham known historically for dairy and cheese production.", lat: -39.42789, lng: 174.297452 },
+  { name: "New Zealand's French Town", description: "Nickname for Akaroa, a town with strong French colonial history.", lat: -43.805466, lng: 172.971411 },
+  { name: "New Zealand's Norwegian Town", description: "Nickname for Norsewood, a town with historical Norwegian settler links.", lat: -40.069156, lng: 176.216455 },
+  { name: "New Zealand's Viking Town", description: "A nickname for Dannevirke, a town strongly linked to Scandinavian settlers.", lat: -40.209705, lng: 176.096764 },
+  { name: "Lake Rotopounamu", description: "A small southern lake popular with local anglers and walkers formed by a landslide 10,000 years ago.", lat: -39.025933, lng: 175.737863 },
+  { name: "Hauraki Marsh", description: "A wetland area of ecological importance in the Hauraki region.", lat: -37.410441, lng: 175.548306 },
+  { name: "New Zealand's Original Capital", description: "This was New Zealand’s original capital before Auckland and later Wellington.", lat: -35.304322, lng: 174.120855 },
+  { name: "Kokota Sand Spit", description: "A 10-kilometre-long barrier spit of pure, high-quality silica sand", lat: -34.547127, lng: 172.976818 },
+  { name: "Rere Rocks", description: "Natural stepped rock formations and waterfall, popular for scenic walks and swimming.", lat: -38.539757, lng: 177.590475 },
+  { name: "Franz Josef Glacier", description: "A fast-flowing, 12km long glacier accessible via guided walks.", lat: -43.46991, lng: 170.193028 },
+  { name: "Wellington Cable Car", description: "A historic funicular linking central Wellington with Kelburn and the botanic garden.", lat: -41.284986, lng: 174.770594 },
+  { name: "Solomon Statue", description: "Tommy Soloman was one of the most successful farmers in the Chatham Islands.", lat: -44.033199, lng: -176.337776 },
+  { name: "Split Apple Rock", description: "A granite rock somehow split into two.", lat: -41.01917, lng: 173.023767 },
+  { name: "Pancake Rocks", description: "Limestone formations at Punakaiki with distinctive layered shapes and blowholes.", lat: -42.11384, lng: 171.326594 },
+  { name: "Coal River", description: "The most isolated point in all of New Zealand", lat: -45.498871, lng: 166.728387 },
+  { name: "Manapiri Power Station", description: "At 854 MW installed capacity, it is New Zealand’s largest hydroelectric power station.", lat: -45.521849, lng: 167.277145 },
+  { name: "Table Mountain", description: "A flat-topped hill providing panoramic views in the skyline", lat: -37.044987, lng: 175.659113 },
+  { name: "Treaty of Waitangi Signage Location", description: "A site marked to commemorate the signing of the Treaty of Waitangi.", lat: -35.266419, lng: 174.082961 },
+  { name: "Ohakune Carrot", description: "A large roadside carrot monument celebrating Ohakune’s carrot-growing history.", lat: -39.419768, lng: 175.402179 },
+  { name: "Zealandia", description: "A large urban ecosanctuary in Wellington protecting native species.", lat: -41.303713, lng: 174.742827 },
+  { name: "Auckland Zoo", description: "New Zealand’s largest zoo which used to have the nation’s elephants until November 2024. (They went to Australia)", lat: -36.864018, lng: 174.723601 },
+  { name: "Te Mata Peak", description: "A scenic hill overlooking Havelock North and Hawke’s Bay.", lat: -39.701614, lng: 176.908207 },
+  { name: "Wanaka Tree", description: "A lone willow tree in Lake Wanaka; a widely photographed landmark.", lat: -44.696557, lng: 169.117699 },
+  { name: "The Longest Place Name in the World", description: "Location marked by the famously long Māori place name, the longest place name in the world'.", lat: -40.346495, lng: 176.544199 },
+  { name: "Cathedral Cove", description: "A coastal cove with a natural rock arch; a popular tourist attraction.", lat: -36.828301, lng: 175.790262 },
+  { name: "Hot Water Beach", description: "A beach where visitors can dig their own hot pools in the sand at low tide.", lat: -36.879057, lng: 175.81953 },
+  { name: "One Tree Hill", description: "A volcanic cone and historic site in Auckland. Although the tree is now gone.", lat: -36.900813, lng: 174.781966 },
+  { name: "Hanmer Springs", description: "Natural hot pools and alpine scenery. Although it is in the middle of nowhere", lat: -42.523783, lng: 172.825584 },
+  { name: "Kaikoura", description: "Renowned for whale watching and fresh crayfish, where the mountains meet the Pacific Ocean.", lat: -42.416281, lng: 173.704233 },
+  { name: "Pukeamoamo", description: "The tallest peak in the Tararua Ranges at 1,571m.", lat: -40.798459, lng: 175.457325 },
+  { name: "Mitre Peak", description: "New Zealand’s most photographed mountain due to its distinct shape.", lat: -44.632796, lng: 167.857575 },
+  { name: "Cape Farewell", description: "The northernmost point of the South Island, known for dramatic cliffs and coastal hikes. Named as ‘farewell’ due to being Cook’s first departing place from New Zealand.", lat: -40.498194, lng: 172.690487 },
+  { name: "Tama Lakes", description: "Two crater lakes on the Tongariro Alpine Crossing, offering stunning volcanic scenery.", lat: -39.201282, lng: 175.607615 },
+  { name: "Lake Grassmere", description: "A coastal lake used for large-scale salt production, creating striking pink water in the summer.", lat: -41.722948, lng: 174.163857 },
+  { name: "Huka Falls", description: "A powerful set of waterfalls on the Waikato River, drawing thousands of visitors each year.", lat: -38.649372, lng: 176.089039 },
+  { name: "Homer Tunnel", description: "A famous one-kilometre tunnel leading to Milford Sound, surrounded by dramatic alpine scenery.", lat: -44.764242, lng: 167.980742 },
+  { name: "Parihaka", description: "A historic Pā, remembered for its 19th-century nonviolent resistance against land confiscations.", lat: -39.289088, lng: 173.840017 },
+  { name: "Auckland Harbour Bridge", description: "A landmark bridge connecting central Auckland with the North Shore.", lat: -36.832627, lng: 174.744329 },
+  { name: "Art Deco Napier", description: "Known worldwide for its Art Deco architecture, rebuilt after the 1931 Hawke’s Bay earthquake.", lat: -39.491208, lng: 176.912155 },
+  { name: "Lake Te Anau", description: "The largest lake in the South Island, gateway to Fiordland National Park and the Milford Track.", lat: -44.941216, lng: 167.906799 },
+  { name: "Rotorua Redwoods", description: "A towering Californian redwood forest with popular walking and mountain biking trails.", lat: -38.155735, lng: 176.27718 },
+  { name: "Hauraki Rail Trail", description: "A scenic cycle trail through historic gold mining towns, farmland, and river gorges.", lat: -37.4148, lng: 175.783482 },
+  { name: "Blue Pools", description: "Where glacial waters form brilliantly clear blue pools.", lat: -44.160792, lng: 169.267688 },
+  { name: "Kerosene Creek", description: "A natural hot stream near Rotorua where visitors can soak in geothermal-heated waters that reach up to 38 degrees celsius.", lat: -38.328511, lng: 176.377172 },
+  { name: "Castle Point", description: "A rugged Wairarapa coastline with a striking lighthouse and fossil-rich limestone reef.", lat: -40.899258, lng: 176.223578 },
+  { name: "Steampunk HQ", description: "A famous, quirky art gallery in Oamaru celebrating steampunk culture with interactive exhibits.", lat: -45.101149, lng: 170.969977 }
+];
+let curGameFamousLocations = [];
+let famousLocation;
+
+
+
 //Game values that are constant per game.
 let _game;
 
@@ -189,7 +331,7 @@ window.onload = async () => {
   document.getElementById('submitBtn').disabled = true;
   document.getElementById('leafletMap').style.pointerEvents = 'none';
 
-  gameTabUpdate("Recommended")
+  gameTabUpdate("Recent")
 
   // Setup Modal buttons
   document.getElementById("recommendModalCloseBtn").onclick = () => {
@@ -224,20 +366,17 @@ function startNewGame(game) {
     }
   });
 
-  document.getElementById("controls").innerHTML = `
-    <div id="roundInfo">Please select or create a new game</div>
-    <div id="totalScore"></div>
-    <div id="result"></div>
-    <button id="nextRoundBtn" class="blueButton" disabled>Next Round</button>
-    <button id="submitBtn" class="blueButton" disabled>Submit Guess</button>
-  `;
-
   document.getElementById('nextRoundBtn').onclick = () => {
     document.getElementById('nextRoundBtn').disabled = true;
     nextRound();
   };
 
   document.getElementById('submitBtn').onclick = submitGuess;
+
+  // Clear famous locations data to not get repeats
+  if (game.gameType === "Famous Locations"){
+    curGameFamousLocations = [];
+  }
 
   nextRound();
 
@@ -258,6 +397,13 @@ async function nextRound(){
   
   roundsPlayed++;
   updateGameFeedbackUI();
+
+  // Remove the famous locations if it was present
+  const el = document.getElementById("famousLocationText");
+  if (el) {
+    el.remove();
+  }
+  
   
   document.getElementById("mapFrame").scrollIntoView({
     behavior: "smooth",
@@ -330,23 +476,25 @@ function submitGuess() {
 
   // If this is the final round
   if (roundsPlayed >= _game.totalRounds) {
-    // Reset controls tab
-    document.getElementById('controls').innerHTML = `
-      <div id="totalScore"><strong>Game Completed with a Total Score of: ${_totalScore}</strong></div>
-      <div id="result"></div>
-      <button id="nextRoundBtn" class="blueButton" disabled>Next Round</button>
-      <button id="submitBtn" class="blueButton" disabled>Submit Guess</button>
-    `;
 
     // Are we in 'normal' mode?
     if (Number(_game.timerDuration) === 30 && Number(_game.zoom) === 14 && Number(_game.totalRounds) === 5) {
       sendScoreForOverallLeaderboardToServer(_totalScore, _game.gameType);
     }
+  }
+  
+  updateGameFeedbackUI(); 
 
-    showGameInfoPanel(_game);
-  } else{
-    // This is not the final round
-    updateGameFeedbackUI();
+  if (_game.gameType === "Famous Locations"){
+    const newEl = document.createElement("div");  
+    newEl.id = "famousLocationText";
+    newEl.innerHTML = `<p><strong>Famous Location:</strong> <u>${famousLocation.name}</u> - "${famousLocation.description}"</p>`;
+    
+    const controls = document.getElementById("controls");
+    const nextRoundBtn = document.getElementById("nextRoundBtn");
+
+    // Insert before nextRoundBtn (so it comes after #resultBtn)
+    controls.insertBefore(newEl, nextRoundBtn);
   }
 }
 
@@ -364,6 +512,8 @@ async function getValidLocation() {
 
   if (_game.gameType === "Urban"){
     return await getValidUrbanLocation();
+  } else if (_game.gameType === "Famous Locations"){
+    return getValidFamousLocation();
   }
 
   for (let i = 0; i < 500; i++) {
@@ -506,6 +656,39 @@ async function getValidUrbanLocation(){
   return town;
 }
 
+function getValidFamousLocation(){
+
+  let location;
+  if (totalRounds <= 100){
+    let i = Math.floor(seededRandom() * FAMOUS_LOCATIONS.length)
+    // Check to make sure this locations has not been done this game
+    while (curGameFamousLocations.includes(i)){
+      i = Math.floor(seededRandom() * FAMOUS_LOCATIONS.length)
+    }
+
+    curGameFamousLocations.push(i);
+    location = { ...FAMOUS_LOCATIONS[i] };
+  } else {
+    location = { ...FAMOUS_LOCATIONS[Math.floor(seededRandom() * FAMOUS_LOCATIONS.length)]};
+  }
+
+  if (0.5 <= seededRandom()){
+    location.lat += 0.01 * seededRandom();
+  }
+  else {
+    location.lat += -0.01 * seededRandom();
+  }
+  if (0.5 <= seededRandom()){
+    location.lng += 0.01 * seededRandom();
+  }
+  else {
+    location.lng += -0.01 * seededRandom();
+  }
+  console.log(location);
+  famousLocation = location;
+  return (location);
+}
+
 async function tileHasEnoughUrban(lat, lng) {
   const x = longitudeToTileX(lng), y = latitudeToTileY(lat);
   const url = `https://basemaps.linz.govt.nz/v1/tiles/topo-raster/WebMercatorQuad/${_game.zoom}/${x}/${y}.webp?api=c01k1w81j8nbj00y7gy7x4b17j6`;
@@ -571,6 +754,7 @@ function initMap() {
 function updateGameFeedbackUI() {
   document.getElementById('roundInfo').textContent = `Round ${roundsPlayed} of ${totalRounds}`;
   document.getElementById('totalScore').textContent = `Total Score: ${_totalScore}`;
+
 }
 
 /// === SERVER DATA SENDERS AND RECEIVERS ===
@@ -593,15 +777,18 @@ async function sendScoreForOverallLeaderboardToServer(scoreValue, gameType) {
   if (!result.success) console.error("An error occured when fetching overall leaderboard: \n" + result.message);
 }
 
-function sendGuessToServer(lat, lng, distance) {
+async function sendGuessToServer(lat, lng, distance) {
   if (!_currentUser) return;
   const payload = { gameID: _game.gameID, round: roundsPlayed, user: _currentUser, lat, lng, distance };
   
-  fetch("/guesses", {
+  await fetch("/guesses", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   })
+
+  // Update the leaderboard
+  showGameInfoPanel(_game);
 }
 
 async function recommendGame( gameID, name ) {
@@ -617,11 +804,13 @@ async function recommendGame( gameID, name ) {
 
     document.getElementById("recommendedModal").innerHTML = `
     <div style="background: white; width: 90%; max-width: 600px; border-radius: 12px; padding: 20px; max-height: 400px;">
-      <h3>Game Successfully Recommended</h3>
-      <p>Recommending...</p></br>
+      <h3>Recommend Game</h3>
+      <p>Game successfully recommended.</p></br>
       <button id="recommendModalCloseBtn" class="redButton">Close</button>
     </div>`;
     document.getElementById("recommendedModal").onclick = () => closeRecommendedModal(); 
+
+    gameTabUpdate("Played");
 
   } catch (err) {
     console.error("Network error occured whilst recommending a game:", err.message);
@@ -947,6 +1136,9 @@ function createGameList(games) {
       case "Urban":
         div.style.backgroundColor = "#f1b78aff";
         break;
+      case "Famous Locations":
+        div.style.backgroundColor = "#e794edff";
+        break;
     }
 
     let html = ``;
@@ -1016,6 +1208,9 @@ function showGameInfoPanel(game){
       break;
     case "Urban":
       infoPanel.style.backgroundColor = "#ffeddfff";
+      break;
+    case "Famous Locations":
+      infoPanel.style.backgroundColor = "#ffdfdfff";
       break;
   }
   
@@ -1166,6 +1361,7 @@ function showNewGamePanel(){
           <option value="Urban">Urban</option>
           <option value="State Highway">State Highway</option>
           <option value="Bush">Bush</option>
+          <option value="Famous Locations">Famous Locations</option>
         </select></br>
     </div>
     <div class="newGameSetting">
@@ -1221,6 +1417,7 @@ async function OnNewGame(){
     timerDuration: document.getElementById("newTimerDuration").value
   };
 
+  /* TEMP
   const res = await fetch(`/games`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -1234,6 +1431,7 @@ async function OnNewGame(){
   }
 
   game.gameID = result.gameID;
+  */
 
   startNewGame(game);
 }

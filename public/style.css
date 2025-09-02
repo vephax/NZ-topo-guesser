@@ -219,6 +219,10 @@ h1 {
   font-weight: 500;
 }
 
+#famousLocationText{
+  margin: 20px 0px;
+}
+
 #result {
   margin-top: 15px;
   font-size: 1.1rem;
