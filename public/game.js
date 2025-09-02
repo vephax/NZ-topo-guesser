@@ -607,9 +607,7 @@ function sendGuessToServer(lat, lng, distance) {
 }
 
 async function recommendGame( gameID, name ) {
-  console.log(gameID);
-  console.log(_currentUser);
-  console.log(name);
+
   try {
     await fetch("/recommendGame", {
       method: "POST",
@@ -619,15 +617,16 @@ async function recommendGame( gameID, name ) {
       body: JSON.stringify({ gameID, recommendedBy: _currentUser, name }),
     });
 
-    
     document.getElementById("recommendedModal").innerHTML = `
-    <h3>Recommend Game</h3>
-    <p>Game successfully recommended.</p></br>
-    <button id="recommendModalCloseBtn" class="redButton">Close</button>`;
-    document.getElementById("recommendedModal").onclick = closeRecommendedModal();
+    <div style="background: white; width: 90%; max-width: 600px; border-radius: 12px; padding: 20px; max-height: 400px;">
+      <h3>Game Successfully Recommended</h3>
+      <p>Recommending...</p></br>
+      <button id="recommendModalCloseBtn" class="redButton">Close</button>
+    </div>`;
+    document.getElementById("recommendedModal").onclick = () => closeRecommendedModal(); 
 
   } catch (err) {
-    console.error("Network error occured whilst recommending game:", err.message);
+    console.error("Network error occured whilst recommending a game:", err.message);
     throw err;
   }
 }
