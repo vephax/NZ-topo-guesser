@@ -116,6 +116,66 @@ const URBAN_TOWNS = [
   {lat: -43.952308, lng: -176.558232}
 ];
 
+// island bbox
+const ISLAND_REGIONS = [
+  { probability: 0.8, latMin: -47.299234, latMax: -46.675513, lngMin: 167.233887, lngMax: 168.272095 }, // Stewart
+  { probability: 0.1, latMin: -46.827524, latMax: -46.727611, lngMin: 168.380585, lngMax: 168.603745 }, // Ruapuke
+  { probability: 0.8, latMin: -44.381936, latMax: -43.627501, lngMin: 183.078918, lngMax: 184.158325 }, // Chathams
+  { probability: 0.6, latMin: -45.786405, latMax: -45.570783, lngMin: 166.441498, lngMax: 166.715469 }, // Resolution
+  { probability: 0.3, latMin: -45.769209, latMax: -45.713158, lngMin: 166.682030, lngMax: 166.899010 }, // Dusky Sound
+  { probability: 0.2, latMin: -40.945965, latMax: -40.639345, lngMin: 173.682587, lngMax: 174.025909 }, // Des urville
+  { probability: 0.4, latMin: -36.359252, latMax: -36.012427, lngMin: 175.271759, lngMax: 175.578003 }, // Great Barrier
+  { probability: 0.3, latMin: -36.855969, latMax: -36.667892, lngMin: 174.807312, lngMax: 175.234406 }, // Waiheke
+  { probability: 0.1, latMin: -36.930125, latMax: -36.825247, lngMin: 175.116302, lngMax: 175.226852 }, // Waiheke lower
+  { probability: 0.1, latMin: -36.522254, latMax: -36.383667, lngMin: 174.771194, lngMax: 174.909897 }, // Kawau
+  { probability: 0.1, latMin: -36.236490, latMax: -36.155611, lngMin: 175.023193, lngMax: 175.119324 }, // Little Barrier
+  { probability: 0.2, latMin: -35.238472, latMax: -35.176776, lngMin: 174.071297, lngMax: 174.254974 }, // Main Urapuapuka
+  { probability: 0.2, latMin: -40.907238, latMax: -40.810671, lngMin: 174.853592, lngMax: 174.979248 }, // Kapiti
+];
+
+//Islands
+const ISLANDS = [
+  {lat: -34.180796, lng: 172.05461},{lat: -34.165529, lng: 172.148294},{lat: -34.149355, lng: 172.153788},
+  {lat: -34.477376, lng: 172.617102},{lat: -34.41769, lng: 173.062048},{lat: -34.751505, lng: 173.167062},
+  {lat: -34.913506, lng: 173.297009},{lat: -34.774296, lng: 173.356276},{lat: -35.007343, lng: 173.551669},
+  {lat: -34.941514, lng: 173.655353},{lat: -34.954234, lng: 173.791952},{lat: -34.977917, lng: 173.880701},
+  {lat: -34.985038, lng: 173.95752},{lat: -35.020473, lng: 173.992882},{lat: -35.152179, lng: 174.160123},
+  {lat: -35.309083, lng: 174.175057},{lat: -35.164043, lng: 174.351096},{lat: -35.428695, lng: 174.461818},
+  {lat: -35.467346, lng: 174.750423},{lat: -35.557886, lng: 174.728537},{lat: -35.890754, lng: 174.738579},
+  {lat: -35.964704, lng: 174.717636}, {lat: -35.917239, lng: 175.112286}, {lat: -36.123282, lng: 175.509167},
+  {lat: -36.029357, lng: 175.419216},{lat: -36.602282, lng: 174.897623},{lat: -36.964174, lng: 174.740682},
+  {lat: -37.97602, lng: 174.57005}, {lat: -36.673344, lng: 175.377159}, {lat: -36.755609, lng: 175.403991},
+  {lat: -36.781486, lng: 175.439816},{lat: -36.835648, lng: 175.408659},{lat: -36.436631, lng: 175.774255},
+  {lat: -36.609534, lng: 175.845451},{lat: -36.627548, lng: 175.904589},{lat: -36.71952, lng: 175.877895},
+  {lat: -36.820124, lng: 175.825796},{lat: -36.964672, lng: 176.082344},{lat: -36.995748, lng: 175.912828},
+  {lat: -37.062609, lng: 175.95849},{lat: -37.285834, lng: 176.257868},{lat: -37.588631, lng: 176.076679},
+  {lat: -37.627725, lng: 176.43425}, {lat: -37.626232, lng: 176.107664}, {lat: -37.514253, lng: 176.111544},
+  {lat: -37.521316, lng: 177.185183}, {lat: -37.854221, lng: 176.973524}, {lat: -37.830158, lng: 176.882029},
+  {lat: -37.788642, lng: 177.647595},{lat: -37.689849, lng: 178.579803}, {lat: -38.246387, lng: 178.350935},
+  {lat: -38.383096, lng: 178.353939},  {lat: -39.295357, lng: 177.870798},  {lat: -39.833273, lng: 177.027469},
+  {lat: -39.944078, lng: 176.944728},  {lat: -41.257756, lng: 174.867368},  {lat: -41.224154, lng: 174.216728},
+  {lat: -41.19898, lng: 174.276123},  {lat: -41.182949, lng: 174.333115},  {lat: -41.155756, lng: 174.322901},
+  {lat: -41.131446, lng: 174.316978}, {lat: -41.101895, lng: 174.420319},  {lat: -41.088975, lng: 174.276962},
+  {lat: -41.168684, lng: 174.22512},  {lat: -40.89389, lng: 174.091158},  {lat: -40.967548, lng: 174.077082},
+  {lat: -40.95109, lng: 174.141798}, {lat: -41.026292, lng: 173.894863}, {lat: -41.045423, lng: 173.640804},
+  {lat: -41.14838, lng: 173.432579}, {lat: -41.277772, lng: 173.155775}, {lat: -41.147104, lng: 173.035955},
+  {lat: -40.981925, lng: 173.061447}, {lat: -41.724133, lng: 171.475811}, {lat: -45.289728, lng: 166.914425},
+  {lat: -45.270281, lng: 166.892838},  {lat: -45.153928, lng: 166.947985},  {lat: -45.189793, lng: 166.927388},
+  {lat: -45.232138, lng: 166.925583},  {lat: -45.256311, lng: 166.947641},  {lat: -45.284002, lng: 166.97338},
+  {lat: -45.308504, lng: 167.003818},  {lat: -45.991386, lng: 166.568871},  {lat: -46.027321, lng: 166.535832}, 
+  {lat: -46.051225, lng: 166.538229}, {lat: -46.031699, lng: 166.591401}, {lat: -46.11558, lng: 166.623888},
+  {lat: -46.083025, lng: 166.691866}, {lat: -45.984723, lng: 167.327228}, {lat: -46.568905, lng: 166.864208},
+  {lat: -46.573657, lng: 166.901507}, {lat: -46.459531, lng: 167.837191}, {lat: -46.405718, lng: 167.992029}, 
+  {lat: -46.65004, lng: 168.406463}, {lat: -46.584024, lng: 168.407965},  {lat: -46.571974, lng: 168.324623}, 
+  {lat: -45.732508, lng: 170.591111},  {lat: -43.689088, lng: 173.091445},  {lat: -43.627176, lng: 172.69289},
+  {lat: -43.056673, lng: 173.077094},  {lat: -41.530202, lng: 174.094763},  {lat: -41.086487, lng: 174.783297},
+  {lat: -35.350569, lng: 173.579865},  {lat: -35.789046, lng: 174.370065},  {lat: -38.081895, lng: 176.273446},
+  {lat: -38.265731, lng: 176.44691},  {lat: -38.85286, lng: 175.941882},  {lat: -38.710747, lng: 177.171836},
+  {lat: -41.25108, lng: 175.209274},  {lat: -43.939021, lng: 170.527167},  {lat: -44.102392, lng: 170.192342},
+  {lat: -44.934575, lng: 168.405647},  {lat: -45.196464, lng: 167.695055},  {lat: -45.508888, lng: 167.478375},
+  {lat: -45.497188, lng: 167.551074},  {lat: -45.420956, lng: 167.12883},  {lat: -34.167322, lng: 172.099543}
+];
+
 // === FAMOUS LOCATIONS DATA ===
 const FAMOUS_LOCATIONS = [
   { name: "Sutherland Falls", description: "At 580m, Sutherland Falls is New Zealand’s tallest waterfall and one of the tallest in the world.", lat: -44.80037, lng: 167.728701 },
@@ -512,10 +572,15 @@ async function getValidLocation() {
 
   if (_game.gameType === "Urban"){
     return await getValidUrbanLocation();
+    
   } else if (_game.gameType === "Famous Locations"){
     return getValidFamousLocation();
+   }
+  
+  else if (_game.gameType === "Island"){
+    return await getValidIslandLocation();
   }
-
+  
   for (let i = 0; i < 500; i++) {
     const loc = getRandomNZRegion();
     console.log("Checking location " + loc);
@@ -654,6 +719,53 @@ async function getValidUrbanLocation(){
     town.lng += -0.015 * seededRandom();
   }
   return town;
+}
+
+async function getValidIslandLocation() {
+  // 50/50: either pick from bbox OR from town list
+  if (seededRandom() < 0.5) { //chance of getting bbox or island
+    // BBOX flow
+    let region = null;
+    let iterations = 0;
+    while (region === null) {
+      iterations++;
+      let index = Math.floor(seededRandom() * ISLAND_REGIONS.length);
+      let random = seededRandom();
+      if (random <= ISLAND_REGIONS[index].probability) {
+        region = ISLAND_REGIONS[index];
+        console.log("Island region index:", index);
+      }
+      if (iterations === 20) {
+        region = ISLAND_REGIONS[1]; // fallback: Chathams
+      }
+    }
+
+    // Try finding land inside region
+    for (let i = 0; i < 30; i++) {
+      let lat = seededRandomInRange(region.latMin, region.latMax);
+      let lng = seededRandomInRange(region.lngMin, region.lngMax);
+      console.log("Checking island bbox location", i);
+      if (await tileHasLand(lat, lng)) {
+        return { lat, lng };
+      }
+    }
+  }
+
+  // Town fallback (or 50% chosen path)
+  console.log("Random island selecting");
+  let town = ISLANDS[Math.floor(seededRandom() * ISLANDS.length)];
+  let jitterLat = (seededRandom() - 0.5) * 0.03; // ±0.015
+  let jitterLng = (seededRandom() - 0.5) * 0.03;
+  town.lat += jitterLat;
+  town.lng += jitterLng;
+
+  // validate on land
+  if (await tileHasLand(town.lat, town.lng)) {
+    return town;
+  } else {
+    return town; // fallback if check fails
+    console.log("can't find town with land )=");
+  }
 }
 
 function getValidFamousLocation(){
@@ -1137,7 +1249,10 @@ function createGameList(games) {
         div.style.backgroundColor = "#f1b78aff";
         break;
       case "Famous Locations":
-        div.style.backgroundColor = "#FF9AC1";
+        div.style.backgroundColor = "#F78BD5";
+        break;
+      case "Island":
+        div.style.backgroundColor = "#D6F1EC";
         break;
     }
 
@@ -1362,6 +1477,7 @@ function showNewGamePanel(){
           <option value="State Highway">State Highway</option>
           <option value="Bush">Bush</option>
           <option value="Famous Locations">Famous Locations</option>
+          <option value="Island">Island</option>
         </select></br>
     </div>
     <div class="newGameSetting">
@@ -1591,4 +1707,3 @@ function playRandomSound(soundList) {
   const audio = document.getElementById(id);
   if (audio) audio.play().catch(e => console.warn("Playback blocked:", e));
 }
-
