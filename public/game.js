@@ -574,7 +574,8 @@ async function getValidLocation() {
     return await getValidUrbanLocation();
   } else if (_game.gameType === "Famous Locations"){
     return getValidFamousLocation();
-  }
+  } else if (_game.gameType === "Island"){
+    return getValidIslandLocation();
 
   for (let i = 0; i < 500; i++) {
     const loc = getRandomNZRegion();
@@ -1199,6 +1200,9 @@ function createGameList(games) {
       case "Famous Locations":
         div.style.backgroundColor = "#F78BD5";
         break;
+      case "Island":
+        div.style.backgroundColor = "#eab676";
+        break;
     }
 
     let html = ``;
@@ -1422,6 +1426,7 @@ function showNewGamePanel(){
           <option value="State Highway">State Highway</option>
           <option value="Bush">Bush</option>
           <option value="Famous Locations">Famous Locations</option>
+          <option value="Island">Island</option>
         </select></br>
     </div>
     <div class="newGameSetting">
