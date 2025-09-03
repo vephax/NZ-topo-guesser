@@ -8,7 +8,7 @@ const currentVersion = "10.1";
 
 const versions = [
   { version: "10.1", changelog: `3/9/2025 \n\n - Added the ability to recommend games and play said games. \n - Added a famous locations game type. There are some hard locations and there is Auckland CBD. Since this is quite easy, it may be made harder in the future (e.g. always hard mode.). There are over 150, quite unique famous locations. \n - Reworked 'played' seeds to no longer be 'purple' and now appear on their own tab similar to now recent and recommended. \n - Custom Settings are now purple to make it easier to understand what is custom in the 'Game Info' panel. \n - A few interface and text changes that I did not like regarding the new 10.0 interfaces \n - Fixed a bug where the leaderboard would only show 4 rounds on game completion.` },
-  { version: "10.2", changelog: `3/9/2025 \n\n - Added Island Mode \n - Fixed a bug where recommended games with have a charecter space missing`};
+  { version: "10.2", changelog: `3/9/2025 \n\n - Added Island Mode \n - Fixed a bug where recommended games with have a charecter space missing`}
 ];
 
 // === REGION DATA ===
