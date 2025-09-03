@@ -574,9 +574,11 @@ async function getValidLocation() {
     return await getValidUrbanLocation();
   } else if (_game.gameType === "Famous Locations"){
     return getValidFamousLocation();
-  } else if (_game.gameType === "Island"){
+   }
+  
+  else if (_game.gameType === "Island"){
     return getValidIslandLocation();
-
+  }
   for (let i = 0; i < 500; i++) {
     const loc = getRandomNZRegion();
     console.log("Checking location " + loc);
@@ -716,6 +718,39 @@ async function getValidUrbanLocation(){
   }
   return town;
 }
+
+async function getValidIslandLocation(){
+  // Get an urban dense region
+  let region = null;
+  let iterations = 0;
+  while (region === null){
+    iterations++;
+    index = Math.floor(seededRandom() * ISLAND_REGIONS.length)
+    random = seededRandom();
+    // Only get this region depending on its probability
+    if (random <= ISLAND_REGIONS[index].probability){
+      region = ISLAND_REGIONS[index]
+      console.log(index);
+    }
+    // If too many iterations, default to Auckland
+    if (iterations === 20){
+      region = ISLAND_REGIONS[1];
+    }
+  }
+  console.log("Took " + iterations + " iterations to find a region");
+
+  // Get a valid set of coordinates
+  let lat;
+  let lng;
+  for (let i = 0; i <= 30; i += 1){
+    lat = seededRandomInRange(region.latMin, region.latMax);
+    lng = seededRandomInRange(region.lngMin, region.lngMax);
+    console.log("Checking for location in region " + i)
+    if (await tileHasLand(lat, lng)){
+      console.log(lat, lng);
+      return {lat: lat, lng: lng};
+    }
+  }
 
 function getValidFamousLocation(){
 
