@@ -751,6 +751,7 @@ async function getValidIslandLocation(){
       return {lat: lat, lng: lng};
     }
   }
+}
 
 function getValidFamousLocation(){
 
