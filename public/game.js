@@ -572,13 +572,15 @@ async function getValidLocation() {
 
   if (_game.gameType === "Urban"){
     return await getValidUrbanLocation();
+    
   } else if (_game.gameType === "Famous Locations"){
     return getValidFamousLocation();
    }
   
   else if (_game.gameType === "Island"){
-    return getValidIslandLocation();
+    return await getValidIslandLocation();
   }
+  
   for (let i = 0; i < 500; i++) {
     const loc = getRandomNZRegion();
     console.log("Checking location " + loc);
@@ -719,37 +721,50 @@ async function getValidUrbanLocation(){
   return town;
 }
 
-async function getValidIslandLocation(){
-  // Get an urban dense region
-  let region = null;
-  let iterations = 0;
-  while (region === null){
-    iterations++;
-    index = Math.floor(seededRandom() * ISLAND_REGIONS.length)
-    random = seededRandom();
-    // Only get this region depending on its probability
-    if (random <= ISLAND_REGIONS[index].probability){
-      region = ISLAND_REGIONS[index]
-      console.log(index);
+async function getValidIslandLocation() {
+  // 50/50: either pick from bbox OR from town list
+  if (seededRandom() < 0.5) { //chance of getting bbox or island
+    // BBOX flow
+    let region = null;
+    let iterations = 0;
+    while (region === null) {
+      iterations++;
+      let index = Math.floor(seededRandom() * ISLAND_REGIONS.length);
+      let random = seededRandom();
+      if (random <= ISLAND_REGIONS[index].probability) {
+        region = ISLAND_REGIONS[index];
+        console.log("Island region index:", index);
+      }
+      if (iterations === 20) {
+        region = ISLAND_REGIONS[1]; // fallback: Chathams
+      }
     }
-    // If too many iterations, default to Auckland
-    if (iterations === 20){
-      region = ISLAND_REGIONS[1];
+
+    // Try finding land inside region
+    for (let i = 0; i < 30; i++) {
+      let lat = seededRandomInRange(region.latMin, region.latMax);
+      let lng = seededRandomInRange(region.lngMin, region.lngMax);
+      console.log("Checking island bbox location", i);
+      if (await tileHasLand(lat, lng)) {
+        return { lat, lng };
+      }
     }
   }
-  console.log("Took " + iterations + " iterations to find a region");
 
-  // Get a valid set of coordinates
-  let lat;
-  let lng;
-  for (let i = 0; i <= 30; i += 1){
-    lat = seededRandomInRange(region.latMin, region.latMax);
-    lng = seededRandomInRange(region.lngMin, region.lngMax);
-    console.log("Checking for location in region " + i)
-    if (await tileHasLand(lat, lng)){
-      console.log(lat, lng);
-      return {lat: lat, lng: lng};
-    }
+  // Town fallback (or 50% chosen path)
+  console.log("Random island selecting");
+  let town = ISLANDS[Math.floor(seededRandom() * ISLANDS.length)];
+  let jitterLat = (seededRandom() - 0.5) * 0.03; // ±0.015
+  let jitterLng = (seededRandom() - 0.5) * 0.03;
+  town.lat += jitterLat;
+  town.lng += jitterLng;
+
+  // validate on land
+  if (await tileHasLand(town.lat, town.lng)) {
+    return town;
+  } else {
+    return town; // fallback if check fails
+    console.log("can't find town with land )=");
   }
 }
 
@@ -1237,7 +1252,7 @@ function createGameList(games) {
         div.style.backgroundColor = "#F78BD5";
         break;
       case "Island":
-        div.style.backgroundColor = "#eab676";
+        div.style.backgroundColor = "#D6F1EC";
         break;
     }
 
