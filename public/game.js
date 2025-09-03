@@ -1137,7 +1137,7 @@ function createGameList(games) {
         div.style.backgroundColor = "#f1b78aff";
         break;
       case "Famous Locations":
-        div.style.backgroundColor = "#F78BD5";
+        div.style.backgroundColor = "#FF9AC1";
         break;
     }
 
