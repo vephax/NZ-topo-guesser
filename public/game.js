@@ -1255,9 +1255,6 @@ function createGameList(games) {
       case "Island":
         div.style.backgroundColor = "#FBE8A2";
         break;
-      case "Island":
-        div.style.backgroundColor = "#D6F1EC";
-        break;
     }
 
     let html = ``;
